@@ -194,7 +194,7 @@
       "placement": "video",
       "order": 0,
       "featured": false,
-      "src": "./assets/uploads/8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb.mp4"
+      "src": "https://raw.githubusercontent.com/ZBFlips/ZBCaptures/main/assets/uploads/8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb.mp4"
     },
     {
       "id": "952028f8-6a70-400c-b4d0-6b1ef94ac6e1",
@@ -389,7 +389,7 @@
       "placement": "gallery",
       "order": 0,
       "featured": false,
-      "src": "./assets/uploads/64401869-af1a-4199-880f-244fd744b7ab.jpg"
+      "src": "./assets/uploads/64401869-af1a-4199-880f-244fd744b7ab-web.jpg"
     },
     {
       "id": "0782c117-ba6c-4b14-9f4e-e721d7dedd8f",

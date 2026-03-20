@@ -1,8 +1,9 @@
-import { cp, mkdir, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const projectRoot = process.cwd();
 const distDir = path.join(projectRoot, "dist");
+const maxPagesFileSizeBytes = 25 * 1024 * 1024;
 
 const requiredFiles = [
   "index.html",
@@ -37,10 +38,30 @@ async function ensureEntryExists(relativePath) {
 async function copyEntry(relativePath) {
   const source = path.join(projectRoot, relativePath);
   const target = path.join(distDir, relativePath);
-  const targetParent = path.dirname(target);
+  const sourceStat = await stat(source);
 
-  await mkdir(targetParent, { recursive: true });
-  await cp(source, target, { recursive: true, force: true });
+  if (sourceStat.isDirectory()) {
+    await mkdir(target, { recursive: true });
+    const children = await readdir(source);
+
+    for (const child of children) {
+      await copyEntry(path.join(relativePath, child));
+    }
+
+    return;
+  }
+
+  if (sourceStat.size > maxPagesFileSizeBytes) {
+    console.warn(
+      `Skipping ${relativePath} (${(sourceStat.size / (1024 * 1024)).toFixed(
+        2
+      )} MiB) because Cloudflare Pages only supports files up to 25 MiB.`
+    );
+    return;
+  }
+
+  await mkdir(path.dirname(target), { recursive: true });
+  await copyFile(source, target);
 }
 
 async function copyOptionalEntry(relativePath) {
