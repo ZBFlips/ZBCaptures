@@ -351,8 +351,8 @@ function galleryMarkup() {
     <section class="section">
       <div class="section__eyebrow">Selected work</div>
       <div class="gallery-copy">
-        <h2 class="section__title">What your clients can expect to receive</h2>
-        <p class="section__lead">${safeText(state.settings.servicesLead)}</p>
+        <h2 class="section__title">What you can expect to receive</h2>
+        <p class="section__lead">Consistent quality across every property, no matter the size.</p>
       </div>
       <div class="gallery-stack">
         <div class="portfolio-grid gallery-grid">
@@ -595,7 +595,7 @@ function clientDeliveryTeaserMarkup() {
           <p class="section__lead">Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.</p>
           <div class="section__actions">
             <a class="button button--accent" href="./client-access.html">Open client access</a>
-            <a class="button" href="./contact.html">Book the next property</a>
+            <a class="button" href="./contact.html">Book your appointment</a>
           </div>
         </div>
         <div class="timeline">
