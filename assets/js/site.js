@@ -926,6 +926,188 @@ function portalSummary(items) {
   };
 }
 
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let index = 0; index < 256; index += 1) {
+    let value = index;
+    for (let bit = 0; bit < 8; bit += 1) {
+      value = (value & 1) ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1);
+    }
+    table[index] = value >>> 0;
+  }
+  return table;
+})();
+
+function crc32(bytes) {
+  let crc = 0xffffffff;
+  for (let index = 0; index < bytes.length; index += 1) {
+    crc = CRC_TABLE[(crc ^ bytes[index]) & 0xff] ^ (crc >>> 8);
+  }
+
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function sanitizeZipName(value, fallback = "file") {
+  const cleaned = String(value || "")
+    .replace(/[<>:"/\\|?*\u0000-\u001f]+/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned || fallback;
+}
+
+function makeZipFileName(baseName, items) {
+  const names = new Set();
+
+  return items.map((item, index) => {
+    const originalName = sanitizeZipName(item.name || item.title || `file-${index + 1}`);
+    const dotIndex = originalName.lastIndexOf(".");
+    const stem = dotIndex > 0 ? originalName.slice(0, dotIndex) : originalName;
+    const extension = dotIndex > 0 ? originalName.slice(dotIndex) : "";
+    let candidate = originalName;
+    let suffix = 2;
+
+    while (names.has(candidate.toLowerCase())) {
+      candidate = `${stem}-${suffix}${extension}`;
+      suffix += 1;
+    }
+
+    names.add(candidate.toLowerCase());
+    return {
+      ...item,
+      zipName: `${baseName}/${candidate}`,
+    };
+  });
+}
+
+function createStoredZip(entries) {
+  const chunks = [];
+  const centralDirectory = [];
+  let offset = 0;
+
+  for (const entry of entries) {
+    const nameBytes = new TextEncoder().encode(entry.name);
+    const data = entry.data;
+    const crc = crc32(data);
+    const date = entry.date instanceof Date && !Number.isNaN(entry.date.getTime()) ? entry.date : new Date();
+    const dosTime =
+      ((date.getHours() & 0x1f) << 11) |
+      ((date.getMinutes() & 0x3f) << 5) |
+      Math.floor((date.getSeconds() || 0) / 2);
+    const dosDate =
+      (((date.getFullYear() - 1980) & 0x7f) << 9) |
+      (((date.getMonth() + 1) & 0x0f) << 5) |
+      (date.getDate() & 0x1f);
+
+    const localHeader = new ArrayBuffer(30);
+    const localView = new DataView(localHeader);
+    localView.setUint32(0, 0x04034b50, true);
+    localView.setUint16(4, 20, true);
+    localView.setUint16(6, 0, true);
+    localView.setUint16(8, 0, true);
+    localView.setUint16(10, dosTime, true);
+    localView.setUint16(12, dosDate, true);
+    localView.setUint32(14, crc, true);
+    localView.setUint32(18, data.length, true);
+    localView.setUint32(22, data.length, true);
+    localView.setUint16(26, nameBytes.length, true);
+    localView.setUint16(28, 0, true);
+
+    chunks.push(new Uint8Array(localHeader), nameBytes, data);
+
+    const centralHeader = new ArrayBuffer(46);
+    const centralView = new DataView(centralHeader);
+    centralView.setUint32(0, 0x02014b50, true);
+    centralView.setUint16(4, 20, true);
+    centralView.setUint16(6, 20, true);
+    centralView.setUint16(8, 0, true);
+    centralView.setUint16(10, 0, true);
+    centralView.setUint16(12, dosTime, true);
+    centralView.setUint16(14, dosDate, true);
+    centralView.setUint32(16, crc, true);
+    centralView.setUint32(20, data.length, true);
+    centralView.setUint32(24, data.length, true);
+    centralView.setUint16(28, nameBytes.length, true);
+    centralView.setUint16(30, 0, true);
+    centralView.setUint16(32, 0, true);
+    centralView.setUint16(34, 0, true);
+    centralView.setUint16(36, 0, true);
+    centralView.setUint32(38, 0, true);
+    centralView.setUint32(42, offset, true);
+
+    centralDirectory.push(new Uint8Array(centralHeader), nameBytes);
+    offset += 30 + nameBytes.length + data.length;
+  }
+
+  const centralSize = centralDirectory.reduce((total, chunk) => total + chunk.length, 0);
+  const endHeader = new ArrayBuffer(22);
+  const endView = new DataView(endHeader);
+  endView.setUint32(0, 0x06054b50, true);
+  endView.setUint16(4, 0, true);
+  endView.setUint16(6, 0, true);
+  endView.setUint16(8, entries.length, true);
+  endView.setUint16(10, entries.length, true);
+  endView.setUint32(12, centralSize, true);
+  endView.setUint32(16, offset, true);
+  endView.setUint16(20, 0, true);
+
+  return new Blob([...chunks, ...centralDirectory, new Uint8Array(endHeader)], { type: "application/zip" });
+}
+
+function portalZipBaseName() {
+  const slug = sanitizeZipName(activePortalData?.slug || "client-delivery")
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+  return slug || "client-delivery";
+}
+
+async function downloadPortalAsZip(items, button) {
+  const zipItems = makeZipFileName(portalZipBaseName(), items);
+  const entries = [];
+  const originalLabel = button?.textContent || "Download full gallery (.zip)";
+
+  if (button) {
+    button.disabled = true;
+  }
+
+  try {
+    for (const [index, item] of zipItems.entries()) {
+      if (button) {
+        button.textContent = `Preparing ZIP ${index + 1} / ${zipItems.length}`;
+      }
+
+      const response = await fetch(portalDownloadUrl(item), {
+        credentials: "same-origin",
+      });
+      if (!response.ok) {
+        throw new Error(`Could not download ${item.name || item.title || "a file"} for the ZIP bundle.`);
+      }
+
+      const data = new Uint8Array(await response.arrayBuffer());
+      entries.push({
+        name: item.zipName,
+        data,
+        date: item.createdAt ? new Date(item.createdAt) : new Date(),
+      });
+    }
+
+    const zipBlob = createStoredZip(entries);
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(zipBlob);
+    link.href = url;
+    link.download = `${portalZipBaseName()}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
+  }
+}
+
 function clientAccessIntroMarkup(slug) {
   const portal = slug ? findPortalRecord(slug) : null;
   const title = slug && portal
@@ -981,7 +1163,7 @@ function clientAccessIntroMarkup(slug) {
             <div class="timeline__step">03</div>
             <div>
               <h3 class="timeline__title">Download the originals</h3>
-              <p class="timeline__text">Use the download buttons to save individual files or download the entire delivery set.</p>
+              <p class="timeline__text">Download the full gallery as one ZIP, or tap any file tile to save that original by itself.</p>
             </div>
           </div>
         </div>
@@ -1002,10 +1184,9 @@ function clientAccessGalleryMarkup() {
     <section class="section">
       <div class="section__eyebrow">Client delivery</div>
       <h1 class="section__title">${safeText(activePortalData.propertyTitle || "Your delivery portal")}</h1>
-      <p class="section__lead">${safeText(activePortalData.message || "Your finished media is ready below. Preview the files and use the download buttons to save the original versions.")}</p>
+      <p class="section__lead">${safeText(activePortalData.message || "Your finished media is ready below. Download the full gallery as a ZIP, or tap any file tile to save that original by itself.")}</p>
       <div class="hero__actions">
-        <button class="button button--accent" type="button" data-download-all>Download all originals</button>
-        <a class="button" href="./contact.html">Need anything adjusted?</a>
+        <button class="button button--accent" type="button" data-download-all>Download full gallery (.zip)</button>
       </div>
       <div class="hero__stats" style="margin-top: 24px;">
         <div class="stat">
@@ -1022,7 +1203,7 @@ function clientAccessGalleryMarkup() {
         </div>
       </div>
       ${activePortalData.propertyAddress ? `<p class="section__lead" style="margin-top: 18px;">Property: ${safeText(activePortalData.propertyAddress)}</p>` : ""}
-      ${activePortalData.deliveredAt ? `<p class="helper" style="margin-top: 10px;">Delivered ${safeText(activePortalData.deliveredAt)}. If your browser asks for permission to download multiple files, choose allow.</p>` : `<p class="helper" style="margin-top: 10px;">If your browser asks for permission to download multiple files, choose allow.</p>`}
+      ${activePortalData.deliveredAt ? `<p class="helper" style="margin-top: 10px;">Delivered ${safeText(activePortalData.deliveredAt)}. The ZIP includes the original delivered files.</p>` : `<p class="helper" style="margin-top: 10px;">The ZIP includes the original delivered files.</p>`}
     </section>
 
     <section class="section">
@@ -1036,6 +1217,7 @@ function clientAccessGalleryMarkup() {
                 ${isVideo
                   ? `
                     <div class="card__media">
+                      <a class="client-delivery-card__download" href="${portalDownloadUrl(item)}" download="${safeText(item.name || item.title || item.id)}">Download</a>
                       <video class="card__video" controls playsinline preload="metadata">
                         <source src="${mediaUrlFor(item)}" type="${safeText(item.type || "video/mp4")}" />
                       </video>
@@ -1043,6 +1225,7 @@ function clientAccessGalleryMarkup() {
                   `
                   : `
                     <div class="card__media">
+                      <a class="client-delivery-card__download" href="${portalDownloadUrl(item)}" download="${safeText(item.name || item.title || item.id)}">Download</a>
                       <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "photo")}">
                         <img class="card__image" src="${mediaUrlFor(item)}" alt="${safeText(item.alt || item.title || item.name || "Client delivery media")}" loading="lazy" decoding="async" />
                       </button>
@@ -1051,10 +1234,7 @@ function clientAccessGalleryMarkup() {
                 <div class="card__body">
                   <div class="card__eyebrow">${safeText(portalTypeLabel(item))}</div>
                   <h2 class="card__title">${safeText(item.title || item.name || "Delivered file")}</h2>
-                  <p class="card__text">${safeText(item.caption || item.name || "Original file ready to download.")}</p>
-                  <div class="section__actions">
-                    <a class="button button--accent" href="${portalDownloadUrl(item)}" download="${safeText(item.name || item.title || item.id)}">Download original</a>
-                  </div>
+                  <p class="card__text">${safeText(item.caption || item.name || "Tap the media tile or the download badge to save this original file.")}</p>
                 </div>
               </article>
             `;
@@ -1574,15 +1754,12 @@ function wireClientAccessPage() {
 
   downloadAllButton?.addEventListener("click", async () => {
     const items = sortedPortalMedia(activePortalMedia);
-    for (const [index, item] of items.entries()) {
-      window.setTimeout(() => {
-        const link = document.createElement("a");
-        link.href = portalDownloadUrl(item);
-        link.download = item.name || item.title || item.id;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }, index * 220);
+    try {
+      await downloadPortalAsZip(items, downloadAllButton);
+    } catch (error) {
+      console.error(error);
+      clientPortalError = error.message || "Unable to build the ZIP download right now.";
+      renderPage();
     }
   });
 

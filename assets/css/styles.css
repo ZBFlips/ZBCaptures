@@ -733,6 +733,26 @@ img {
   object-fit: cover;
 }
 
+.client-delivery-card__download {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(12, 14, 18, 0.72);
+  color: #fff7ee;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(14px);
+}
+
+.client-delivery-card__download:hover {
+  background: rgba(17, 20, 26, 0.92);
+}
+
 .card__body {
   padding: 18px;
 }
