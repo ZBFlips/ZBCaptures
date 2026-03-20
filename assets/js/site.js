@@ -354,6 +354,21 @@ function galleryMarkup() {
         <h2 class="section__title">What you can expect to receive</h2>
         <p class="section__lead">Consistent quality across every property, no matter the size.</p>
       </div>
+      <div class="gallery-mobile-strip" aria-label="Portfolio gallery">
+        <div class="gallery-mobile-strip__rail">
+          ${items
+            .map(
+              (item) => `
+                <article class="gallery-mobile-strip__item">
+                  <button class="gallery-mobile-strip__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
+                    <img class="gallery-mobile-strip__image" src="${mediaUrlFor(item)}" alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                  </button>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
+      </div>
       <div class="gallery-stack">
         <div class="portfolio-grid gallery-grid">
           ${topItems
