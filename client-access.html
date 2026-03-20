@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Client delivery portal for photo and video downloads." />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Portfolio | Client Access</title>
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body data-page="client-access">
+    <div class="page-shell">
+      <header id="site-header"></header>
+      <main id="site-main"></main>
+      <footer id="site-footer"></footer>
+    </div>
+    <div class="lightbox" id="lightbox" aria-hidden="true" hidden>
+      <button class="lightbox__backdrop" data-lightbox-close aria-label="Close image preview"></button>
+      <figure class="lightbox__dialog" role="dialog" aria-modal="true" aria-label="Image preview">
+        <button class="lightbox__close" data-lightbox-close aria-label="Close preview">Close</button>
+        <div class="lightbox__toolbar">
+          <button class="lightbox__nav" type="button" data-lightbox-prev aria-label="Previous image">Previous</button>
+          <span class="lightbox__count" id="lightbox-count"></span>
+          <button class="lightbox__nav" type="button" data-lightbox-next aria-label="Next image">Next</button>
+        </div>
+        <img class="lightbox__image" id="lightbox-image" alt="" />
+        <figcaption class="lightbox__caption" id="lightbox-caption"></figcaption>
+      </figure>
+    </div>
+    <script type="module" src="./assets/js/site.js"></script>
+  </body>
+</html>

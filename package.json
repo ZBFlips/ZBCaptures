@@ -1,0 +1,9 @@
+{
+  "name": "zb-captures-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:pages",
+    "build:pages": "node ./scripts/build-pages.mjs"
+  }
+}

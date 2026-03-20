@@ -1,11 +1,14 @@
 {
   "settings": {
     "brandName": "ZB Captures",
-    "brandTag": "Premium Real Estate Media in Pensacola.",
+    "brandTag": "",
     "location": "Serving luxury, commercial, and residential listings",
-    "heroKicker": "24-Hour Delivery. Guaranteed.",
+    "heroKicker": "Premium Real Estate Media, 24-Hour Turnaround, Guaranteed.",
     "heroHeadline": "Turn your listing into a sale.",
     "heroLead": "A custom-built portfolio that puts the work first, moves quickly, and makes every listing feel elevated before the client even scrolls.",
+    "featuredFrameTitle": "Highlighted Photo",
+    "featuredFrameLead": "A single image can carry the whole listing.",
+    "featuredFrameMediaId": "",
     "heroCtas": {
       "primaryLabel": "Explore services",
       "primaryHref": "./services.html",
@@ -26,107 +29,381 @@
         "value": "Designed to feel premium from the first second"
       }
     ],
-    "servicesLead": "Everything here is set up to feel fast on the front end, but still give you room to manage content yourself.",
+    "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
+    "proofEyebrow": "Why agents book this",
+    "proofTitle": "The Impact",
+    "proofLead": "According to eye-tracking data, buyers spend 60% of their time looking at listing photos (compared to 20% at the description). On average, professional photos drive 61% more views to a listing, and reduce time on the market by 32%. Better photos also improve the perceived value of a home, increasing the sale price by up to $11,200 on average.",
+    "proofCards": [
+      {
+        "eyebrow": "Faster launch",
+        "title": "Listings can move from shoot to market quickly.",
+        "text": "The turnaround and package structure make it easy for agents to keep momentum when a property is ready to go live."
+      },
+      {
+        "eyebrow": "Stronger first impression",
+        "title": "Premium presentation makes the work feel worth hiring.",
+        "text": "The visual hierarchy, pricing clarity, and gallery treatment all reinforce a higher-value service."
+      },
+      {
+        "eyebrow": "Simple handoff",
+        "title": "Media is easy to review, choose, and share.",
+        "text": "The site is set up so the process feels organized instead of technical, so you never have to ask any questions."
+      }
+    ],
     "contactLead": "Send a note with the property address, target timeline, and the kind of coverage you need.",
     "videoEmbedUrl": "",
-    "serviceArea": "Metro area / surrounding listings",
-    "email": "hello@example.com",
-    "phone": "(555) 123-4567",
-    "instagram": "@yourhandle",
+    "serviceArea": "Pensacola, FL",
+    "email": "zacbrannen@gmail.com",
+    "phone": "(850) 736-1946",
+    "instagram": "@zb.re.media",
     "responseTime": "Usually replies within 2 hours during business days.",
+    "contactNotificationEndpoint": "",
     "footerNote": "Custom-built and ready for your own domain."
   },
   "services": [
     {
       "id": "service-listing",
       "title": "The Starter",
-      "description": "Clean, color-true images that make MLS pages look sharp and immediate.",
+      "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
       "bullets": [
         "30 HDR Images",
-        "No Drone Photos",
-        "No Video",
-        "Delivered in 24 Hours or Less"
-      ]
+        "No Drone Images",
+        "No Videos",
+        "Delivered in 24 hours or Less"
+      ],
+      "price": "$150",
+      "featured": false
     },
     {
       "id": "service-luxury",
       "title": "The Standard",
-      "description": "Cinematic presentation for higher-end homes, builders, and standout properties.",
+      "description": "By adding dedicated drone photos to the interior set, this tier gives buyers a better sense of the property’s exterior layout and surrounding curb appeal.",
       "bullets": [
         "35 HDR Images",
-        "5 Drone Photos",
-        "No Video",
-        "Delivered in 24 Hours or Less"
-      ]
+        "5 Drone Images",
+        "No Videos",
+        "Delivered in 24 hours or Less"
+      ],
+      "price": "$250",
+      "featured": true
     },
     {
       "id": "service-media",
       "title": "The Works",
-      "description": "A flexible package for clients that want photography, reels, and website-ready assets.",
+      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social and drone video to create a high-energy, immersive experience that stops the scroll.",
       "bullets": [
         "45 HDR Images",
-        "10 Drone Photos",
+        "10 Drone Images",
         "30s Drone Video",
-        "Photos Delivered in 24 Hours or Less",
-        "Videos Delivered in 48 Hours or Less"
-      ]
+        "60s Social Video",
+        "Photos Delivered in 24 hours or Less",
+        "Videos Delivered in 48 hours or Less"
+      ],
+      "price": "$450",
+      "featured": false
     }
   ],
+  "clientPortals": [],
   "media": [
     {
-      "id": "cd877900-442c-42ae-bbed-60d462a72dc8",
-      "title": "15-14-print-396-revana-wy",
+      "id": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
+      "name": "RE-1-2.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1774032418805,
+      "title": "",
       "caption": "",
-      "alt": "15-14-print-396-revana-wy.jpg",
+      "alt": "",
       "placement": "gallery",
       "order": 0,
       "featured": false,
-      "type": "image/jpeg",
-      "src": "./assets/uploads/cd877900-442c-42ae-bbed-60d462a72dc8.jpg"
+      "src": "./assets/uploads/d83eac99-2e41-43e6-92d6-1b64428a0ca0.jpg"
     },
     {
-      "id": "c38c5376-9a75-4319-b2d3-225169ca4cc8",
-      "title": "port",
+      "id": "26e4d87b-f58a-4d45-9223-9a03ef37ce34",
+      "name": "7-007_ 1305 Sixth St Florala.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1774032362576,
+      "title": "",
       "caption": "",
-      "alt": "port.jpg",
+      "alt": "",
       "placement": "gallery",
       "order": 0,
       "featured": false,
-      "type": "image/jpeg",
-      "src": "./assets/uploads/c38c5376-9a75-4319-b2d3-225169ca4cc8.jpg"
+      "src": "./assets/uploads/26e4d87b-f58a-4d45-9223-9a03ef37ce34.jpg"
     },
     {
-      "id": "302fa87d-3104-4729-b49e-b45d2581d07a",
-      "title": "c10226c9afc0bd9dcf11399c01e065bd",
+      "id": "5aba2a36-cba4-4621-b698-c4fc630c06d3",
+      "name": "8-010_f8_100 Hidden.JPG",
+      "type": "image/jpeg",
+      "createdAt": 1774032312968,
+      "title": "",
       "caption": "",
-      "alt": "c10226c9afc0bd9dcf11399c01e065bd.jpg",
+      "alt": "",
       "placement": "gallery",
       "order": 0,
       "featured": false,
-      "type": "image/jpeg",
-      "src": "./assets/uploads/302fa87d-3104-4729-b49e-b45d2581d07a.jpg"
+      "src": "./assets/uploads/5aba2a36-cba4-4621-b698-c4fc630c06d3.jpg"
     },
     {
-      "id": "6a25db3c-effe-45aa-9847-cf55c157d1ec",
-      "title": "Gemini_Generated_Image_e4siwne4siwne4si",
+      "id": "514a50d3-dde9-4b32-95fd-5b32a5cf24d6",
+      "name": "Interior (2).jpg",
+      "type": "image/jpeg",
+      "createdAt": 1774032289488,
+      "title": "",
       "caption": "",
-      "alt": "Twilight Real Estate Photography",
-      "placement": "hero",
+      "alt": "",
+      "placement": "gallery",
       "order": 0,
       "featured": false,
-      "type": "image/png",
-      "src": "./assets/uploads/6a25db3c-effe-45aa-9847-cf55c157d1ec.png"
+      "src": "./assets/uploads/514a50d3-dde9-4b32-95fd-5b32a5cf24d6.jpg"
+    },
+    {
+      "id": "a6dc9347-8bb1-45d2-a9ef-7e20d2b70538",
+      "name": "re.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1774032223230,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/a6dc9347-8bb1-45d2-a9ef-7e20d2b70538.jpg"
+    },
+    {
+      "id": "7ee20adb-6cb8-4141-a5a3-5f2252556dbd",
+      "name": "46-004_F8_AERIAL_15817 Front Beach.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1774032182524,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/7ee20adb-6cb8-4141-a5a3-5f2252556dbd.jpg"
+    },
+    {
+      "id": "8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb",
+      "name": "drone portfolio video_thf4.mp4",
+      "type": "video/mp4",
+      "createdAt": 1774027805363,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "video",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb.mp4"
     },
     {
       "id": "952028f8-6a70-400c-b4d0-6b1ef94ac6e1",
+      "name": "2-1-print-396-revana-wy",
+      "type": "image/png",
+      "createdAt": 1774026977938,
       "title": "2-1-print-396-revana-wy",
       "caption": "",
       "alt": "2-1-print-396-revana-wy.png",
       "placement": "hero",
       "order": 0,
       "featured": false,
-      "type": "image/png",
       "src": "./assets/uploads/952028f8-6a70-400c-b4d0-6b1ef94ac6e1.png"
+    },
+    {
+      "id": "6a25db3c-effe-45aa-9847-cf55c157d1ec",
+      "name": "Gemini_Generated_Image_e4siwne4siwne4si",
+      "type": "image/png",
+      "createdAt": 1774026977929,
+      "title": "Gemini_Generated_Image_e4siwne4siwne4si",
+      "caption": "",
+      "alt": "Twilight Real Estate Photography",
+      "placement": "reveal",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/6a25db3c-effe-45aa-9847-cf55c157d1ec.png"
+    },
+    {
+      "id": "e1e80edd-db68-4267-9e62-3ad353f6a3c7",
+      "name": "2024.png",
+      "type": "image/png",
+      "createdAt": 1774026941081,
+      "title": "Header logo",
+      "caption": "",
+      "alt": "Header logo",
+      "placement": "logo",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/e1e80edd-db68-4267-9e62-3ad353f6a3c7.png"
+    },
+    {
+      "id": "bfdee870-6786-432d-9ef1-3c57c04b80a0",
+      "name": "Gemini_Generated_Image_e4siwne4siwne4si.png",
+      "type": "image/png",
+      "createdAt": 1774026933850,
+      "title": "Night reveal",
+      "caption": "",
+      "alt": "Night reveal",
+      "placement": "reveal",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/bfdee870-6786-432d-9ef1-3c57c04b80a0.png"
+    },
+    {
+      "id": "14a63367-726d-4164-9527-4404ec649cb8",
+      "name": "2-1-print-396-revana-wy.png",
+      "type": "image/png",
+      "createdAt": 1774026930034,
+      "title": "Daytime background",
+      "caption": "",
+      "alt": "Daytime background",
+      "placement": "hero",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/14a63367-726d-4164-9527-4404ec649cb8.png"
+    },
+    {
+      "id": "302fa87d-3104-4729-b49e-b45d2581d07a",
+      "name": "c10226c9afc0bd9dcf11399c01e065bd",
+      "type": "image/jpeg",
+      "createdAt": 1774026900451,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/302fa87d-3104-4729-b49e-b45d2581d07a.jpg"
+    },
+    {
+      "id": "c38c5376-9a75-4319-b2d3-225169ca4cc8",
+      "name": "port",
+      "type": "image/jpeg",
+      "createdAt": 1774026900451,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/c38c5376-9a75-4319-b2d3-225169ca4cc8.jpg"
+    },
+    {
+      "id": "cd877900-442c-42ae-bbed-60d462a72dc8",
+      "name": "15-14-print-396-revana-wy",
+      "type": "image/jpeg",
+      "createdAt": 1774026900432,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/cd877900-442c-42ae-bbed-60d462a72dc8.jpg"
+    },
+    {
+      "id": "43148f0d-4461-413f-8a97-06eaea1eb60c",
+      "name": "25639402985d9f218da3552fe3cd6a56.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1773979595906,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/43148f0d-4461-413f-8a97-06eaea1eb60c.jpg"
+    },
+    {
+      "id": "9e0c87d5-1b2a-487e-aa43-e45e3b00a0f0",
+      "name": "47-46-print-396-revana-wy.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1773979313994,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/9e0c87d5-1b2a-487e-aa43-e45e3b00a0f0.jpg"
+    },
+    {
+      "id": "040927aa-81b6-4c81-bd9b-ed1cdcc9a87d",
+      "name": "35-F8_5817 Front Beach Rd unit 1907_0034.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1773979304903,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/040927aa-81b6-4c81-bd9b-ed1cdcc9a87d.jpg"
+    },
+    {
+      "id": "c1295aee-fbba-4a63-b620-fa0354cce484",
+      "name": "8-006_7604 Dewey Jernigan Rd.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1773979295631,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484.jpg"
+    },
+    {
+      "id": "36a0b4cf-f03d-4031-b4d9-8660ef8fd6e0",
+      "name": "re-2.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1773979271562,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/36a0b4cf-f03d-4031-b4d9-8660ef8fd6e0.jpg"
+    },
+    {
+      "id": "255fe567-d6e7-4cb7-8e43-753fbd125eb6",
+      "name": "Interior (9).jpg",
+      "type": "image/jpeg",
+      "createdAt": 1773979261991,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/255fe567-d6e7-4cb7-8e43-753fbd125eb6.jpg"
+    },
+    {
+      "id": "64401869-af1a-4199-880f-244fd744b7ab",
+      "name": "lost key-4.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1773979252009,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/64401869-af1a-4199-880f-244fd744b7ab.jpg"
+    },
+    {
+      "id": "0782c117-ba6c-4b14-9f4e-e721d7dedd8f",
+      "name": "d9abb3200d9175b30197696ccfcd7058.jpg",
+      "type": "image/jpeg",
+      "createdAt": 1773979231570,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "src": "./assets/uploads/0782c117-ba6c-4b14-9f4e-e721d7dedd8f.jpg"
     }
-  ]
+  ],
+  "savedAt": "2026-03-20T18:50:20.426Z"
 }

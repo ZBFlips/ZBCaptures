@@ -1,0 +1,20 @@
+{
+	"name": "zb-captures-contact-backend",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-03-20",
+	"r2_buckets": [
+		{
+			"binding": "CONTACT_SUBMISSIONS",
+			"bucket_name": "zb-captures-contact-submissions"
+		}
+	],
+	"send_email": [
+		{
+			"name": "EMAIL"
+		}
+	],
+	"vars": {
+		"NOTIFICATION_FROM": "ZB Captures <noreply@zbcaptures.com>",
+		"NOTIFICATION_TO": "zacbrannen@gmail.com"
+	}
+}
