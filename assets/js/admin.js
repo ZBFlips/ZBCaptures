@@ -23,6 +23,8 @@ const headerEl = document.getElementById("site-header");
 const mainEl = document.getElementById("site-main");
 const footerEl = document.getElementById("site-footer");
 const PUBLISH_CONFIG_KEY = "portfolio-site-publish-config-v1";
+const ADMIN_SESSION_KEY = "portfolio-admin-session-v1";
+const ADMIN_PASSWORD_HASH = "38093ac6c3cc62c23555e732c9f361f170f75995bca045e5625a3d11b1de66eb";
 
 let state = loadState();
 let media = [];
@@ -61,6 +63,33 @@ function savePublishConfig(config) {
 }
 
 let publishConfig = loadPublishConfig();
+
+function isAdminUnlocked() {
+  try {
+    return sessionStorage.getItem(ADMIN_SESSION_KEY) === "granted";
+  } catch {
+    return false;
+  }
+}
+
+function setAdminUnlocked(value) {
+  try {
+    if (value) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, "granted");
+      return;
+    }
+
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  } catch {
+    // Ignore session storage issues and fall back to per-load unlock checks.
+  }
+}
+
+async function sha256Hex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
 
 async function loadPublishedSiteData() {
   try {
@@ -205,6 +234,7 @@ function renderHeader() {
           <a href="./index.html">Preview site</a>
           <a href="./services.html">Services page</a>
           <a href="./client-access.html">Client access</a>
+          ${isAdminUnlocked() ? `<button type="button" data-lock-admin>Lock admin</button>` : ""}
           <a href="./contact.html" class="nav__cta">Contact page</a>
         </nav>
       </div>
@@ -225,6 +255,63 @@ function renderFooter() {
       </div>
     </div>
   `;
+}
+
+function renderLockedAdmin(message = "") {
+  renderHeader();
+  renderFooter();
+  mainEl.innerHTML = `
+    <section class="admin-panel" style="max-width: 560px; margin: 48px auto 0;">
+      <h1 class="admin-panel__title">Unlock Admin</h1>
+      <p class="admin-panel__text">Enter the admin password to access the dashboard.</p>
+      <form class="form" id="admin-password-form">
+        <div class="field">
+          <label for="admin-password">Password</label>
+          <input id="admin-password" name="password" type="password" autocomplete="current-password" placeholder="Enter admin password" />
+        </div>
+        <button class="button button--accent" type="submit">Unlock admin</button>
+        <div class="helper">${safeText(message || "This browser session stays unlocked until you close the tab or use Lock admin.")}</div>
+      </form>
+    </section>
+  `;
+}
+
+function wireHeaderActions() {
+  headerEl.querySelector("[data-lock-admin]")?.addEventListener("click", () => {
+    setAdminUnlocked(false);
+    renderLockedAdmin("Admin locked.");
+    wireAdminUnlockForm();
+  });
+}
+
+function wireAdminUnlockForm() {
+  const form = document.getElementById("admin-password-form");
+  const input = document.getElementById("admin-password");
+  if (!form || !(input instanceof HTMLInputElement)) {
+    return;
+  }
+
+  window.setTimeout(() => input.focus(), 0);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const password = input.value.trim();
+    if (!password) {
+      renderLockedAdmin("Enter the admin password to continue.");
+      wireAdminUnlockForm();
+      return;
+    }
+
+    const digest = await sha256Hex(password);
+    if (digest !== ADMIN_PASSWORD_HASH) {
+      renderLockedAdmin("That password was not correct.");
+      wireAdminUnlockForm();
+      return;
+    }
+
+    setAdminUnlocked(true);
+    await bootstrap();
+  });
 }
 
 function adminMarkup() {
@@ -2152,6 +2239,12 @@ async function publishToGitHub(portalPayload = {}) {
 }
 
 async function bootstrap() {
+  if (!isAdminUnlocked()) {
+    renderLockedAdmin();
+    wireAdminUnlockForm();
+    return;
+  }
+
   const published = await loadPublishedSiteData();
   if (published && !hasSavedState()) {
     state = mergePublishedState(published);
@@ -2167,6 +2260,7 @@ async function bootstrap() {
   }
 
   mainEl.innerHTML = adminMarkup();
+  wireHeaderActions();
   wireHeaderLogoUpload();
   wireBrandForm();
   wireFeaturedFrameForm();
