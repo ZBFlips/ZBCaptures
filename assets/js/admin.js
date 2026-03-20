@@ -2205,6 +2205,7 @@ async function syncAndRender() {
   await refreshMedia();
   renderHeader();
   renderFooter();
+  wireHeaderActions();
   renderFeaturedFrameOptions();
   renderGalleryOrderEditor();
   renderClientPortalsEditor();
