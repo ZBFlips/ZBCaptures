@@ -1,0 +1,2 @@
+access key id: 0ecf766816ac0760ee2fabdfdbde358b
+secret access key: d3dd2d2246b3cd305cc272fce987cba3a90ccd4aa5c7017f39cfcc47c271feb3

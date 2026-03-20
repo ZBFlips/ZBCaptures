@@ -1,0 +1,15 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "https://zbcaptures.pages.dev"
+        ],
+        "methods": ["GET", "PUT", "HEAD"],
+        "headers": ["Content-Type"]
+      },
+      "exposeHeaders": ["ETag", "Content-Length"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}

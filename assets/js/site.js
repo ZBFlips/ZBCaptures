@@ -1,5 +1,6 @@
 import { decryptPortalPayload } from "./portal-utils.js";
 import { DEFAULT_STATE, hasSavedState, loadState, listMedia } from "./storage.js";
+import { loadUnlockedCloudPortal, unlockCloudPortal } from "./client-delivery-api.js";
 
 const page = document.body.dataset.page;
 const headerEl = document.getElementById("site-header");
@@ -315,12 +316,20 @@ function lightboxRecords() {
 }
 
 function mediaUrlFor(record) {
+  if (record?.previewUrl) {
+    return record.previewUrl;
+  }
+
   if (record?.src) {
     return record.src;
   }
 
   const match = objectUrls.find((entry) => entry.id === record?.id);
   return match ? match.url : "";
+}
+
+function portalDownloadUrl(record) {
+  return record?.downloadUrl || mediaUrlFor(record);
 }
 
 function findRecordById(recordId) {
@@ -855,6 +864,10 @@ function portalCodeFromLocation() {
   return new URLSearchParams(window.location.search).get("code")?.trim() || "";
 }
 
+function portalTokenFromLocation() {
+  return new URLSearchParams(window.location.search).get("token")?.trim() || "";
+}
+
 function findPortalRecord(slug) {
   if (!slug) {
     return null;
@@ -872,7 +885,10 @@ function sortedPortalMedia(items) {
 }
 
 function buildLocalPortalPayload(portal) {
-  const items = sortedPortalMedia(mediaCache.filter((item) => item.portalId === portal.id)).map((item, index) => ({
+  const sourceItems = Array.isArray(portal.files) && portal.files.length
+    ? portal.files
+    : mediaCache.filter((item) => item.portalId === portal.id);
+  const items = sortedPortalMedia(sourceItems).map((item, index) => ({
     id: item.id,
     name: item.name || item.title || `asset-${index + 1}`,
     type: item.type || "image/jpeg",
@@ -880,7 +896,8 @@ function buildLocalPortalPayload(portal) {
     caption: item.caption || "",
     alt: item.alt || item.title || item.name || "Client delivery media",
     order: Number.isFinite(Number(item.order)) ? Number(item.order) : index,
-    src: mediaUrlFor(item),
+    src: item.previewUrl || mediaUrlFor(item),
+    downloadUrl: item.downloadUrl || mediaUrlFor(item),
   }));
 
   return {
@@ -1036,7 +1053,7 @@ function clientAccessGalleryMarkup() {
                   <h2 class="card__title">${safeText(item.title || item.name || "Delivered file")}</h2>
                   <p class="card__text">${safeText(item.caption || item.name || "Original file ready to download.")}</p>
                   <div class="section__actions">
-                    <a class="button button--accent" href="${mediaUrlFor(item)}" download="${safeText(item.name || item.title || item.id)}">Download original</a>
+                    <a class="button button--accent" href="${portalDownloadUrl(item)}" download="${safeText(item.name || item.title || item.id)}">Download original</a>
                   </div>
                 </div>
               </article>
@@ -1471,18 +1488,11 @@ function removeCodeFromUrl(slug) {
 }
 
 async function unlockPortal(slug, accessCode, options = {}) {
-  const portal = findPortalRecord(slug);
   const code = String(accessCode || "").trim();
+  const token = String(options.token || "").trim();
   const shouldRemember = options.remember !== false;
 
-  if (!portal || portal.isActive === false) {
-    clientPortalError = "That delivery portal is not available. Double-check the portal ID or contact me for a fresh link.";
-    clearClientPortalState();
-    renderPage();
-    return;
-  }
-
-  if (!code) {
+  if (!code && !token) {
     clientPortalError = "Enter the access code that came with your delivery link.";
     clearClientPortalState();
     renderPage();
@@ -1490,29 +1500,57 @@ async function unlockPortal(slug, accessCode, options = {}) {
   }
 
   try {
-    const payload = portal.accessCode && portal.accessCode === code
-      ? buildLocalPortalPayload(portal)
-      : await decryptPortalPayload(portal, code);
-
-    activePortalData = {
-      ...portal,
-      ...payload,
-      slug: portal.slug,
-    };
-    activePortalMedia = sortedPortalMedia(payload.media || []);
+    const cloudPortal = await unlockCloudPortal({
+      slug,
+      accessCode: code,
+      token,
+    });
+    activePortalData = cloudPortal;
+    activePortalMedia = sortedPortalMedia(cloudPortal.files || []);
     clientPortalError = "";
-    if (shouldRemember) {
+    if (code && shouldRemember) {
       rememberPortalCode(slug, code);
     }
     renderPage();
     if (options.removeCodeFromUrl) {
       removeCodeFromUrl(slug);
     }
-  } catch (error) {
-    console.error(error);
-    clientPortalError = "That access code did not match this portal. Try again or reach out for a fresh delivery link.";
-    clearClientPortalState();
-    renderPage();
+    return;
+  } catch (cloudError) {
+    const portal = findPortalRecord(slug);
+    if (!portal || portal.isActive === false) {
+      clientPortalError = cloudError.message || "That delivery portal is not available. Double-check the portal ID or contact me for a fresh link.";
+      clearClientPortalState();
+      renderPage();
+      return;
+    }
+
+    try {
+      const payload = portal.accessCode && portal.accessCode === code
+        ? buildLocalPortalPayload(portal)
+        : await decryptPortalPayload(portal, code);
+
+      activePortalData = {
+        ...portal,
+        ...payload,
+        slug: portal.slug,
+      };
+      activePortalMedia = sortedPortalMedia(payload.media || []);
+      clientPortalError = "";
+      if (code && shouldRemember) {
+        rememberPortalCode(slug, code);
+      }
+      renderPage();
+      if (options.removeCodeFromUrl) {
+        removeCodeFromUrl(slug);
+      }
+    } catch (localError) {
+      console.error(cloudError);
+      console.error(localError);
+      clientPortalError = "That access code did not match this portal. Try again or reach out for a fresh delivery link.";
+      clearClientPortalState();
+      renderPage();
+    }
   }
 }
 
@@ -1539,7 +1577,7 @@ function wireClientAccessPage() {
     for (const [index, item] of items.entries()) {
       window.setTimeout(() => {
         const link = document.createElement("a");
-        link.href = mediaUrlFor(item);
+        link.href = portalDownloadUrl(item);
         link.download = item.name || item.title || item.id;
         document.body.appendChild(link);
         link.click();
@@ -1553,16 +1591,31 @@ function wireClientAccessPage() {
     return;
   }
 
+  const queryToken = portalTokenFromLocation();
   const queryCode = portalCodeFromLocation();
   const rememberedCode = getRememberedPortalCode(slug);
+  if (queryToken) {
+    unlockPortal(slug, "", { token: queryToken, removeCodeFromUrl: true });
+    return;
+  }
+
   if (queryCode) {
     unlockPortal(slug, queryCode, { removeCodeFromUrl: true });
     return;
   }
 
-  if (rememberedCode) {
-    unlockPortal(slug, rememberedCode, { remember: false });
-  }
+  loadUnlockedCloudPortal(slug)
+    .then((portal) => {
+      activePortalData = portal;
+      activePortalMedia = sortedPortalMedia(portal.files || []);
+      clientPortalError = "";
+      renderPage();
+    })
+    .catch(() => {
+      if (rememberedCode) {
+        unlockPortal(slug, rememberedCode, { remember: false });
+      }
+    });
 }
 
 function renderPage() {

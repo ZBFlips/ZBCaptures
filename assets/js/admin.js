@@ -16,20 +16,32 @@ import {
   createAccessCode,
   createPortalId,
   ensureUniqueSlug,
-  encryptPortalPayload,
 } from "./portal-utils.js";
+import {
+  adminLogin,
+  adminLogout,
+  createCloudUploadTarget,
+  deleteCloudPortal,
+  deleteCloudPortalFile,
+  finalizeCloudPortalFile,
+  getAdminSession,
+  listCloudPortals,
+  saveCloudPortal,
+  uploadFileToR2,
+} from "./client-delivery-api.js";
 
 const headerEl = document.getElementById("site-header");
 const mainEl = document.getElementById("site-main");
 const footerEl = document.getElementById("site-footer");
 const PUBLISH_CONFIG_KEY = "portfolio-site-publish-config-v1";
 const ADMIN_SESSION_KEY = "portfolio-admin-session-v1";
-const ADMIN_PASSWORD_HASH = "38093ac6c3cc62c23555e732c9f361f170f75995bca045e5625a3d11b1de66eb";
+const LOCAL_ADMIN_PASSWORD_HASH = "38093ac6c3cc62c23555e732c9f361f170f75995bca045e5625a3d11b1de66eb";
 
 let state = loadState();
 let media = [];
 const rowUrls = new Map();
 let workspaceDirectoryHandle = null;
+let cloudPortalBackendConfigured = false;
 
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
@@ -152,6 +164,18 @@ function mergeClientPortals(localPortals = [], publishedPortals = []) {
   return Array.from(byKey.values());
 }
 
+function sortPortalFiles(items = []) {
+  return [...items].sort((left, right) => {
+    const leftOrder = Number.isFinite(Number(left.order)) ? Number(left.order) : 9999;
+    const rightOrder = Number.isFinite(Number(right.order)) ? Number(right.order) : 9999;
+    return leftOrder - rightOrder || String(left.name || left.title || "").localeCompare(String(right.name || right.title || ""));
+  });
+}
+
+function portalRecordById(portalId) {
+  return (state.clientPortals || []).find((portal) => portal.id === portalId) || null;
+}
+
 function mediaPreviewUrl(item) {
   let url = rowUrls.get(item.id);
   if (!url) {
@@ -165,13 +189,7 @@ function mediaPreviewUrl(item) {
 }
 
 function portalMediaItems(portalId) {
-  return media
-    .filter((item) => item.portalId === portalId)
-    .sort((a, b) => {
-      const left = Number.isFinite(Number(a.order)) ? Number(a.order) : 9999;
-      const right = Number.isFinite(Number(b.order)) ? Number(b.order) : 9999;
-      return left - right || String(a.name || a.title || "").localeCompare(String(b.name || b.title || ""));
-    });
+  return sortPortalFiles(portalRecordById(portalId)?.files || []);
 }
 
 function clientAccessBaseUrl() {
@@ -187,8 +205,8 @@ function portalUrl(portal) {
 function portalOneClickUrl(portal) {
   const url = clientAccessBaseUrl();
   url.searchParams.set("portal", portal.slug || "");
-  if (portal.accessCode) {
-    url.searchParams.set("code", portal.accessCode);
+  if (portal.directToken) {
+    url.searchParams.set("token", portal.directToken);
   }
   return url.toString();
 }
@@ -219,7 +237,116 @@ function createClientPortalDraft() {
       "Your finished media is ready below. Preview the files and use the download buttons to save the original versions.",
     accessCode: createAccessCode(),
     isActive: true,
+    files: [],
+    hasAccessCode: false,
+    directToken: "",
+    portalUrl: "",
+    privateUrl: "",
+    cloudSynced: false,
   };
+}
+
+function mergePortalRecord(existingPortal, cloudPortal) {
+  return {
+    ...(existingPortal || {}),
+    ...(cloudPortal || {}),
+    accessCode: existingPortal?.accessCode || "",
+    files: sortPortalFiles(cloudPortal?.files || existingPortal?.files || []),
+    cloudSynced: true,
+  };
+}
+
+function upsertPortalState(nextPortal) {
+  const currentPortals = Array.isArray(state.clientPortals) ? state.clientPortals : [];
+  const index = currentPortals.findIndex((portal) => portal.id === nextPortal.id);
+  if (index < 0) {
+    const mergedPortal = mergePortalRecord(null, nextPortal);
+    state.clientPortals = [...currentPortals, mergedPortal];
+    return mergedPortal;
+  }
+
+  const merged = mergePortalRecord(currentPortals[index], nextPortal);
+  const updated = [...currentPortals];
+  updated[index] = merged;
+  state.clientPortals = updated;
+  return merged;
+}
+
+function portalStatusMessage() {
+  return cloudPortalBackendConfigured
+    ? "Save a portal once to make it live instantly on Cloudflare, then upload files straight into private storage."
+    : "Client delivery is still waiting for the Cloudflare R2/D1 bindings. Finish the setup steps before sharing portals.";
+}
+
+async function refreshCloudPortals() {
+  try {
+    const cloudPortals = await listCloudPortals();
+    cloudPortalBackendConfigured = true;
+    const merged = mergeClientPortals(state.clientPortals || [], cloudPortals).map((portal) =>
+      mergePortalRecord((state.clientPortals || []).find((current) => current.id === portal.id), portal)
+    );
+    state.clientPortals = merged;
+    saveState(state);
+  } catch (error) {
+    cloudPortalBackendConfigured = false;
+    console.warn("Cloud portal backend unavailable", error);
+  }
+}
+
+async function syncPortalToCloud(portalId, options = {}) {
+  const portal = portalRecordById(portalId);
+  if (!portal) {
+    throw new Error("That client portal could not be found.");
+  }
+
+  const savedPortal = await saveCloudPortal(
+    {
+      id: portal.id,
+      slug: portal.slug,
+      propertyTitle: portal.propertyTitle,
+      clientLabel: portal.clientLabel,
+      propertyAddress: portal.propertyAddress,
+      deliveredAt: portal.deliveredAt,
+      message: portal.message,
+      accessCode: String(portal.accessCode || "").trim(),
+      isActive: portal.isActive !== false,
+    },
+    options
+  );
+
+  const merged = upsertPortalState(savedPortal);
+  saveState(state);
+  return merged;
+}
+
+async function uploadPortalFilesToCloud(portalId, files) {
+  const portal = await syncPortalToCloud(portalId);
+  const existingItems = portalMediaItems(portal.id);
+  let nextOrder = existingItems.length
+    ? Math.max(...existingItems.map((item) => Number(item.order) || 0)) + 1
+    : 0;
+
+  let latestPortal = portal;
+  for (const file of files) {
+    const uploadTarget = await createCloudUploadTarget(portal.id, file);
+    await uploadFileToR2(uploadTarget, file);
+    latestPortal = await finalizeCloudPortalFile(portal.id, {
+      fileId: uploadTarget.fileId,
+      objectKey: uploadTarget.objectKey,
+      name: file.name,
+      title: file.name.replace(/\.[^.]+$/, ""),
+      alt: file.name.replace(/\.[^.]+$/, ""),
+      caption: "",
+      type: file.type || "application/octet-stream",
+      sizeBytes: file.size,
+      order: nextOrder,
+    });
+    upsertPortalState(latestPortal);
+    nextOrder += 1;
+  }
+
+  saveState(state);
+  return latestPortal;
 }
 
 function renderHeader() {
@@ -270,15 +397,20 @@ function renderLockedAdmin(message = "") {
           <input id="admin-password" name="password" type="password" autocomplete="current-password" placeholder="Enter admin password" />
         </div>
         <button class="button button--accent" type="submit">Unlock admin</button>
-        <div class="helper">${safeText(message || "This browser session stays unlocked until you close the tab or use Lock admin.")}</div>
+        <div class="helper">${safeText(message || "This admin session stays unlocked on this device until you use Lock admin or the Cloudflare session expires.")}</div>
       </form>
     </section>
   `;
 }
 
 function wireHeaderActions() {
-  headerEl.querySelector("[data-lock-admin]")?.addEventListener("click", () => {
+  headerEl.querySelector("[data-lock-admin]")?.addEventListener("click", async () => {
     setAdminUnlocked(false);
+    try {
+      await adminLogout();
+    } catch (error) {
+      console.warn("Could not clear the cloud admin session.", error);
+    }
     renderLockedAdmin("Admin locked.");
     wireAdminUnlockForm();
   });
@@ -302,15 +434,21 @@ function wireAdminUnlockForm() {
       return;
     }
 
-    const digest = await sha256Hex(password);
-    if (digest !== ADMIN_PASSWORD_HASH) {
-      renderLockedAdmin("That password was not correct.");
-      wireAdminUnlockForm();
-      return;
-    }
+    try {
+      await adminLogin(password);
+      setAdminUnlocked(true);
+      await bootstrap();
+    } catch (error) {
+      const digest = await sha256Hex(password);
+      if (window.location.hostname === "localhost" && digest === LOCAL_ADMIN_PASSWORD_HASH) {
+        setAdminUnlocked(true);
+        await bootstrap();
+        return;
+      }
 
-    setAdminUnlocked(true);
-    await bootstrap();
+      renderLockedAdmin(error.message || "That password was not correct.");
+      wireAdminUnlockForm();
+    }
   });
 }
 
@@ -465,13 +603,13 @@ function adminMarkup() {
 
         <section class="admin-panel" id="client-delivery">
           <h2 class="admin-panel__title">Client delivery</h2>
-          <p class="admin-panel__text">Create private-ish client portals that still work on GitHub Pages. Each portal gets its own access code, encrypted delivery data, and downloadable originals.</p>
+          <p class="admin-panel__text">Create private client portals backed by Cloudflare R2. Save the portal, upload the finished shoot, then copy either the portal link or the one-click private link.</p>
           <div class="admin-toolbar">
             <button class="button button--accent" type="button" id="add-client-portal">Create client portal</button>
-            <span class="admin-note" id="client-portal-status">Share either the portal URL plus access code, or the one-click private link.</span>
+            <span class="admin-note" id="client-portal-status">${safeText(portalStatusMessage())}</span>
           </div>
           <div class="admin-note" style="margin-bottom: 18px;">
-            GitHub Pages is static hosting, so this uses encrypted portal data and unlisted media file paths rather than true server-side authentication.
+            These portals no longer publish client media into GitHub. Once a portal is saved here, it can go live immediately without a site redeploy.
           </div>
           <div class="portal-admin-list" id="client-portals-list"></div>
         </section>
@@ -623,7 +761,7 @@ function adminMarkup() {
                 <button class="button ghost danger" type="button" id="clear-media">Clear media library</button>
               </div>
               <div class="admin-note">
-                For a production launch, the next step is to swap this browser storage layer for a real database and file bucket so uploads sync across devices.
+                Public portfolio media still stays in this browser until you save or publish it. Client delivery now uses Cloudflare storage instead of GitHub once the backend bindings are configured.
               </div>
             </section>
 
@@ -653,7 +791,7 @@ function adminMarkup() {
                 <button class="button ghost" type="button" id="save-publish-config">Save publish settings</button>
                 <button class="button ghost" type="button" id="load-live-state">Load live state</button>
               </div>
-              <div class="admin-note" id="publish-status">Publishing updates <code>content/site-data.json</code> plus any uploaded media files into the repo.</div>
+              <div class="admin-note" id="publish-status">Publishing updates <code>content/site-data.json</code> and the public portfolio media only. Client delivery portals now live outside the repo.</div>
             </section>
           </details>
         </section>
@@ -783,11 +921,16 @@ function renderGalleryOrderEditor() {
 
 function clientPortalCard(portal) {
   const items = portalMediaItems(portal.id);
-  const shareUrl = portal.slug ? portalUrl(portal) : "";
-  const privateUrl = portal.slug && portal.accessCode ? portalOneClickUrl(portal) : "";
+  const shareUrl = portal.portalUrl || (portal.slug ? portalUrl(portal) : "");
+  const privateUrl = portal.privateUrl || (portal.slug && portal.directToken ? portalOneClickUrl(portal) : "");
   const accessNote = portal.accessCode
-    ? "This access code is stored in this browser and is used to encrypt the portal when you save."
-    : "Published portal codes are not recoverable from GitHub Pages. Set a new code if you need to share this portal again.";
+    ? "This access code will replace the current code the next time you save this portal."
+    : portal.hasAccessCode
+      ? "The current access code is already saved in Cloudflare. Enter a new one only if you want to rotate it."
+      : "Add an access code, then save this portal before sharing it.";
+  const cloudStatus = portal.cloudSynced
+    ? "Live in Cloudflare"
+    : "Saved only in this browser until you click Save portal";
 
   return `
     <article class="portal-admin-card" data-portal-card="${portal.id}">
@@ -795,6 +938,7 @@ function clientPortalCard(portal) {
         <div>
           <div class="section__eyebrow">Client portal</div>
           <h3 class="card__title">${safeText(portal.propertyTitle || portal.clientLabel || "Untitled delivery")}</h3>
+          <div class="admin-note">${safeText(cloudStatus)}</div>
         </div>
         <label class="field field--checkbox">
           <span class="field__label">Portal active</span>
@@ -841,18 +985,20 @@ function clientPortalCard(portal) {
       <div class="portal-admin-share">
         <div class="portal-admin-share__row">
           <strong>Portal URL</strong>
-          <code>${safeText(shareUrl || "Save to generate the final portal URL.")}</code>
+          <code>${safeText(shareUrl || "Save this portal to generate the final portal URL.")}</code>
         </div>
         <div class="portal-admin-share__row">
           <strong>One-click private link</strong>
-          <code>${safeText(privateUrl || "Add an access code to generate a one-click link.")}</code>
+          <code>${safeText(privateUrl || "Save this portal to generate the one-click private link.")}</code>
         </div>
       </div>
 
       <div class="admin-toolbar">
+        <button class="button button--accent" type="button" data-save-portal="${portal.id}">Save portal</button>
         <button class="button ghost" type="button" data-copy-portal-url="${portal.id}" ${shareUrl ? "" : "disabled"}>Copy portal URL</button>
         <button class="button ghost" type="button" data-copy-portal-link="${portal.id}" ${privateUrl ? "" : "disabled"}>Copy private link</button>
         <button class="button ghost" type="button" data-generate-portal-code="${portal.id}">Generate code</button>
+        <button class="button ghost" type="button" data-rotate-portal-link="${portal.id}" ${portal.cloudSynced ? "" : "disabled"}>Refresh private link</button>
         <button class="button ghost danger" type="button" data-delete-portal="${portal.id}">Delete portal</button>
       </div>
 
@@ -861,7 +1007,7 @@ function clientPortalCard(portal) {
           <label>Upload images or video for this portal</label>
           <input type="file" accept="image/*,video/*" multiple data-portal-upload-input="${portal.id}" />
         </div>
-        <button class="button button--accent" type="submit">Upload to portal</button>
+        <button class="button button--accent" type="submit">Upload to private storage</button>
       </form>
 
       <div class="portal-asset-grid">
@@ -871,7 +1017,7 @@ function clientPortalCard(portal) {
                 (item) => `
                   <article class="portal-asset-card">
                     ${String(item.type || "").startsWith("image/")
-                      ? `<img class="portal-asset-card__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || item.name || "Portal asset")}" />`
+                      ? `<img class="portal-asset-card__thumb" src="${safeText(item.previewUrl || mediaPreviewUrl(item))}" alt="${safeText(item.alt || item.title || item.name || "Portal asset")}" />`
                       : `<div class="portal-asset-card__thumb portal-asset-card__thumb--video">Video</div>`}
                     <div class="portal-asset-card__body">
                       <strong>${safeText(item.title || item.name || "Portal asset")}</strong>
@@ -882,7 +1028,7 @@ function clientPortalCard(portal) {
                 `
               )
               .join("")
-          : `<div class="admin-note">No files in this portal yet. Upload the finished media above.</div>`}
+          : `<div class="admin-note">No files in this portal yet. Save the portal, then upload the finished media above.</div>`}
       </div>
     </article>
   `;
@@ -897,7 +1043,7 @@ function renderClientPortalsEditor() {
   const portals = Array.isArray(state.clientPortals) ? state.clientPortals : [];
   target.innerHTML = portals.length
     ? portals.map((portal) => clientPortalCard(portal)).join("")
-    : `<div class="admin-note">No client portals yet. Create one above, upload the finished media, and then save or publish to share it.</div>`;
+    : `<div class="admin-note">No client portals yet. Create one above, save it to Cloudflare, then upload the finished media and copy the delivery link.</div>`;
 }
 
 function mediaEditorRow(item) {
@@ -1171,77 +1317,22 @@ function buildPublicMediaRecord(item) {
 async function buildPublishedClientPortals(mediaDrafts) {
   const usedSlugs = new Set();
   const localPortals = (Array.isArray(state.clientPortals) ? state.clientPortals : []).map((portal) => ({ ...portal }));
-  const publishedPortals = [];
 
   for (const portal of localPortals) {
     const label = portal.propertyTitle || portal.clientLabel || "client portal";
     portal.slug = ensureUniqueSlug(portal.slug || label, usedSlugs);
     portal.isActive = portal.isActive !== false;
     portal.accessCode = String(portal.accessCode || "").trim();
-
-    if (!portal.accessCode) {
-      throw new Error(`Add an access code for ${label} before saving.`);
-    }
-
-    const encryptedMedia = mediaDrafts
-      .filter((item) => item.portalId === portal.id)
-      .sort((a, b) => {
-        const left = Number.isFinite(Number(a.order)) ? Number(a.order) : 9999;
-        const right = Number.isFinite(Number(b.order)) ? Number(b.order) : 9999;
-        return left - right || String(a.name || a.title || "").localeCompare(String(b.name || b.title || ""));
-      })
-      .map((item, index) => {
-        const record = buildMediaSaveRecord({
-          ...item,
-          placement: "client",
-          portalId: portal.id,
-          order: Number.isFinite(Number(item.order)) ? Number(item.order) : index,
-        });
-
-        return {
-          id: record.id,
-          name: record.name,
-          type: record.type,
-          createdAt: record.createdAt,
-          title: record.title,
-          caption: record.caption,
-          alt: record.alt,
-          order: record.order,
-          src: record.src,
-        };
-      });
-
-    const encryptedPayload = await encryptPortalPayload(
-      {
-        propertyTitle: portal.propertyTitle || "",
-        clientLabel: portal.clientLabel || "",
-        propertyAddress: portal.propertyAddress || "",
-        deliveredAt: portal.deliveredAt || "",
-        message: portal.message || "",
-        media: encryptedMedia,
-      },
-      portal.accessCode
-    );
-
-    publishedPortals.push({
-      id: portal.id,
-      slug: portal.slug,
-      propertyTitle: portal.propertyTitle || "",
-      clientLabel: portal.clientLabel || "",
-      deliveredAt: portal.deliveredAt || "",
-      isActive: portal.isActive !== false,
-      ...encryptedPayload,
-    });
   }
 
-  return { localPortals, publishedPortals };
+  return { localPortals, publishedPortals: [] };
 }
 
 async function buildSavePayload() {
   syncSettingsFromForms();
   syncServicesFromEditor();
 
-  const mediaDrafts = collectAllMediaDrafts();
+  const mediaDrafts = collectAllMediaDrafts().filter((item) => !item.portalId);
   const { localPortals, publishedPortals } = await buildPublishedClientPortals(mediaDrafts);
   const payloadMedia = await Promise.all(
     mediaDrafts.map(async (item) => {
@@ -1655,7 +1746,7 @@ function wireClientPortalsEditor() {
       return;
     }
 
-    const portal = (state.clientPortals || []).find((item) => item.id === field.dataset.portalId);
+    const portal = portalRecordById(field.dataset.portalId);
     if (!portal) {
       return;
     }
@@ -1666,60 +1757,90 @@ function wireClientPortalsEditor() {
     }
 
     portal[key] = field.type === "checkbox" ? field.checked : field.value;
-    persist("Client portal autosaved in this browser.");
+    portal.cloudSynced = false;
+    persist("Client portal saved in this browser. Click Save portal to make the cloud version live.");
   });
 
   target?.addEventListener("click", async (event) => {
+    const savePortalButton = event.target.closest("[data-save-portal]");
+    if (savePortalButton) {
+      const portalId = savePortalButton.dataset.savePortal;
+      try {
+        savePortalButton.disabled = true;
+        const portal = await syncPortalToCloud(portalId);
+        upsertPortalState(portal);
+        persist(`Portal saved. ${portal.propertyTitle || portal.clientLabel || "Client delivery"} is now live in Cloudflare.`);
+        await syncAndRender();
+      } catch (error) {
+        alert(error.message || "Unable to save this client portal.");
+        if (status) {
+          status.textContent = error.message || "Unable to save this client portal.";
+        }
+      } finally {
+        savePortalButton.disabled = false;
+      }
+      return;
+    }
+
     const copyPortalUrlButton = event.target.closest("[data-copy-portal-url]");
     if (copyPortalUrlButton) {
-      const portal = (state.clientPortals || []).find((item) => item.id === copyPortalUrlButton.dataset.copyPortalUrl);
+      const portal = portalRecordById(copyPortalUrlButton.dataset.copyPortalUrl);
       if (portal?.slug) {
-        await copyToClipboard(portalUrl(portal), "Portal URL copied.");
+        await copyToClipboard(portal.portalUrl || portalUrl(portal), "Portal URL copied.");
       }
       return;
     }
 
     const copyPortalLinkButton = event.target.closest("[data-copy-portal-link]");
     if (copyPortalLinkButton) {
-      const portal = (state.clientPortals || []).find((item) => item.id === copyPortalLinkButton.dataset.copyPortalLink);
-      if (portal?.slug && portal?.accessCode) {
-        await copyToClipboard(portalOneClickUrl(portal), "Private link copied.");
+      const portal = portalRecordById(copyPortalLinkButton.dataset.copyPortalLink);
+      if (portal?.slug && (portal?.directToken || portal?.privateUrl)) {
+        await copyToClipboard(portal.privateUrl || portalOneClickUrl(portal), "Private link copied.");
       }
       return;
     }
 
     const generateCodeButton = event.target.closest("[data-generate-portal-code]");
     if (generateCodeButton) {
-      const portal = (state.clientPortals || []).find((item) => item.id === generateCodeButton.dataset.generatePortalCode);
+      const portal = portalRecordById(generateCodeButton.dataset.generatePortalCode);
       if (!portal) {
         return;
       }
 
       portal.accessCode = createAccessCode();
-      persist("A new access code was generated.");
+      portal.cloudSynced = false;
+      persist("A new access code was generated. Save the portal to make it live.");
       await syncAndRender();
+      return;
+    }
+
+    const rotatePortalLinkButton = event.target.closest("[data-rotate-portal-link]");
+    if (rotatePortalLinkButton) {
+      try {
+        const portal = await syncPortalToCloud(rotatePortalLinkButton.dataset.rotatePortalLink, { rotateDirectLink: true });
+        upsertPortalState(portal);
+        persist("The one-click private link was refreshed.");
+        await syncAndRender();
+      } catch (error) {
+        alert(error.message || "Unable to refresh the private link.");
+      }
       return;
     }
 
     const deletePortalButton = event.target.closest("[data-delete-portal]");
     if (deletePortalButton) {
       const portalId = deletePortalButton.dataset.deletePortal;
-      const portal = (state.clientPortals || []).find((item) => item.id === portalId);
+      const portal = portalRecordById(portalId);
       if (!portal) {
         return;
       }
 
-      if (!confirm(`Delete the portal "${portal.propertyTitle || portal.clientLabel || "Untitled delivery"}" and remove its uploaded files from the local library?`)) {
+      if (!confirm(`Delete the portal "${portal.propertyTitle || portal.clientLabel || "Untitled delivery"}" and remove its uploaded files from private storage?`)) {
         return;
       }
 
-      for (const item of portalMediaItems(portalId)) {
-        const url = rowUrls.get(item.id);
-        if (url) {
-          URL.revokeObjectURL(url);
-          rowUrls.delete(item.id);
-        }
-        await deleteMedia(item.id);
+      if (portal.cloudSynced) {
+        await deleteCloudPortal(portalId);
       }
 
       state.clientPortals = (state.clientPortals || []).filter((item) => item.id !== portalId);
@@ -1735,16 +1856,15 @@ function wireClientPortalsEditor() {
         return;
       }
 
-      const url = rowUrls.get(mediaId);
-      if (url) {
-        URL.revokeObjectURL(url);
-        rowUrls.delete(mediaId);
+      const portalCard = deletePortalMediaButton.closest("[data-portal-card]");
+      const portalId = portalCard?.dataset.portalCard;
+      if (!portalId) {
+        return;
       }
 
-      await deleteMedia(mediaId);
-      if (status) {
-        status.textContent = "Portal file deleted.";
-      }
+      const updatedPortal = await deleteCloudPortalFile(portalId, mediaId);
+      upsertPortalState(updatedPortal);
+      persist("Portal file deleted.");
       await syncAndRender();
     }
   });
@@ -1764,24 +1884,20 @@ function wireClientPortalsEditor() {
       return;
     }
 
-    const currentItems = portalMediaItems(portalId);
-    const nextOrder = currentItems.length
-      ? Math.max(...currentItems.map((item) => Number(item.order) || 0)) + 1
-      : 0;
-
     try {
-      await uploadMediaFiles(files, {
-        placement: "client",
-        portalId,
-        order: nextOrder,
-      });
-      form.reset();
       if (status) {
-        status.textContent = "Portal media uploaded.";
+        status.textContent = "Uploading portal files to private storage...";
       }
+      const updatedPortal = await uploadPortalFilesToCloud(portalId, files);
+      upsertPortalState(updatedPortal);
+      form.reset();
+      persist("Portal media uploaded to Cloudflare.");
       await syncAndRender();
     } catch (error) {
       alert(error.message || "Unable to upload the selected portal files.");
+      if (status) {
+        status.textContent = error.message || "Unable to upload the selected portal files.";
+      }
     }
   });
 }
@@ -2187,6 +2303,10 @@ async function putRepoFile(path, content, message) {
 async function publishToGitHub(portalPayload = {}) {
   const uploadedMedia = [];
   for (const item of media) {
+    if (item.portalId) {
+      continue;
+    }
+
     if (!item.blob) {
       uploadedMedia.push(item);
       continue;
@@ -2215,7 +2335,7 @@ async function publishToGitHub(portalPayload = {}) {
   const publishPayload = {
     settings: portalPayload.settings || state.settings,
     services: portalPayload.services || state.services,
-    clientPortals: portalPayload.clientPortals || [],
+    clientPortals: [],
     media: uploadedMedia
       .filter((item) => !item.portalId)
       .map((item) => ({
@@ -2240,9 +2360,20 @@ async function publishToGitHub(portalPayload = {}) {
 
 async function bootstrap() {
   if (!isAdminUnlocked()) {
-    renderLockedAdmin();
-    wireAdminUnlockForm();
-    return;
+    try {
+      const session = await getAdminSession();
+      if (session?.authenticated) {
+        setAdminUnlocked(true);
+      } else {
+        renderLockedAdmin();
+        wireAdminUnlockForm();
+        return;
+      }
+    } catch {
+      renderLockedAdmin();
+      wireAdminUnlockForm();
+      return;
+    }
   }
 
   const published = await loadPublishedSiteData();
@@ -2258,6 +2389,8 @@ async function bootstrap() {
   if (Array.isArray(published?.media)) {
     await seedMediaFromPublished(published.media);
   }
+
+  await refreshCloudPortals();
 
   mainEl.innerHTML = adminMarkup();
   wireHeaderActions();

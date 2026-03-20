@@ -8,6 +8,7 @@ This workspace contains a custom, static-first photography portfolio with:
 - A browsable lightbox with next and previous controls for image sets
 - A client delivery portal for sharing finished shoots
 - Local draft storage plus a GitHub Pages publish flow
+- A Cloudflare Pages Functions backend for private client delivery with R2 + D1
 - A local save endpoint so the admin panel can write `content/site-data.json` and uploaded files directly into the repo when served through `serve.ps1`
 - A local folder link workflow so the admin panel can write directly to your project files from the browser
 
@@ -24,7 +25,8 @@ This workspace contains a custom, static-first photography portfolio with:
 - For the hero effect, use `hero` for the daytime background image and `reveal` for the night reveal image
 - The `Client delivery` section lets you create a realtor portal, upload finished files into it, and copy a shareable link
 - The public site uses your local browser draft and uploads first when they exist, then falls back to `content/site-data.json`
-- The admin can also publish the current state to GitHub by writing `content/site-data.json` and uploaded files into the repo
+- The admin can also publish the current public site state to GitHub by writing `content/site-data.json` and uploaded portfolio media into the repo
+- Client delivery portals now live outside the repo once the Cloudflare backend is configured
 
 ## Contact submissions
 
@@ -43,8 +45,8 @@ This is a strong frontend prototype, but the editing flow is still intentionally
 - Content persists on the same browser profile
 - It does not need a multi-device CMS
 - Publishing live requires a GitHub token with repository contents write access
-- For very large video files, a real file host will eventually be better than storing media in the repo
-- GitHub Pages is static hosting, so client portals use encrypted delivery data and access codes instead of true server-side authentication
+- Public portfolio videos larger than Cloudflare Pages' asset limits should still be hosted somewhere better than the repo
+- Client delivery is now designed for private R2 storage instead of publishing originals into GitHub
 
 ## Publish flow
 
@@ -61,10 +63,31 @@ This is a strong frontend prototype, but the editing flow is still intentionally
 1. Open `admin.html`.
 2. Go to `Client delivery`.
 3. Create a portal for the property or realtor.
-4. Upload the finished images and videos into that portal.
-5. Save locally or publish live.
+4. Click `Save portal` so the portal record is written to Cloudflare D1.
+5. Upload the finished images and videos. They go straight into private R2 storage instead of GitHub.
 6. Copy either the portal URL plus access code, or the one-click private link, and send it to the client.
 7. The client opens `client-access.html`, previews the files, and downloads the originals.
+
+## Cloudflare client delivery setup
+
+Create and bind the private storage pieces before using the live client portal:
+
+1. Create an R2 bucket, keep it private, and note its bucket name.
+2. Create a D1 database and run [`cloudflare/d1/schema.sql`](/C:/Users/Zac/Desktop/photography%20portfolio%20website/cloudflare/d1/schema.sql) against it.
+3. In Cloudflare Pages, add these bindings for your project:
+   - `DB` -> your D1 database
+   - `MEDIA_BUCKET` -> your private R2 bucket
+4. Add these Pages environment variables / secrets:
+   - `ADMIN_PASSWORD`
+   - `SESSION_SECRET`
+   - `R2_BUCKET_NAME`
+   - `R2_ACCOUNT_ID`
+   - `R2_ACCESS_KEY_ID`
+   - `R2_SECRET_ACCESS_KEY`
+5. Set R2 CORS so your Pages origin can `PUT` uploads from the admin browser.
+6. Redeploy the Pages project so the new `/functions/api/*` routes come online.
+
+For local development, copy [`.dev.vars.example`](/C:/Users/Zac/Desktop/photography%20portfolio%20website/.dev.vars.example) to `.dev.vars` and fill in the real values.
 
 ## Local preview
 
