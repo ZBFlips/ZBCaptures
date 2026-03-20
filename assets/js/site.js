@@ -9,6 +9,7 @@ const lightboxEl = document.getElementById("lightbox");
 const lightboxImage = document.getElementById("lightbox-image");
 const lightboxCaption = document.getElementById("lightbox-caption");
 const lightboxCount = document.getElementById("lightbox-count");
+let headerMenuController = null;
 const lightboxPrev = document.querySelector("[data-lightbox-prev]");
 const lightboxNext = document.querySelector("[data-lightbox-next]");
 
@@ -150,13 +151,108 @@ function renderHeader() {
           ${logoMarkup}
           <span class="brand__tag">${safeText(state.settings.brandTag)}</span>
         </a>
-        <nav class="nav" aria-label="Primary navigation">
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation menu">
+          <span class="nav-toggle__line"></span>
+          <span class="nav-toggle__line"></span>
+          <span class="nav-toggle__line"></span>
+        </button>
+        <nav class="nav" id="site-nav" data-site-nav aria-label="Primary navigation">
           ${links}
           <a class="nav__cta" href="./contact.html">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
         </nav>
       </div>
     </div>
   `;
+}
+
+function wireHeaderMenu() {
+  headerMenuController?.abort();
+  headerMenuController = new AbortController();
+
+  const toggle = headerEl.querySelector("[data-nav-toggle]");
+  const nav = headerEl.querySelector("[data-site-nav]");
+  const headerFrame = headerEl.querySelector(".site-header");
+  if (!toggle || !nav || !headerFrame) {
+    return;
+  }
+
+  const { signal } = headerMenuController;
+  const mobileQuery = window.matchMedia("(max-width: 720px)");
+
+  const closeMenu = () => {
+    nav.classList.remove("is-open");
+    headerFrame.classList.remove("site-header--menu-open");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-label", "Open navigation menu");
+  };
+
+  const openMenu = () => {
+    nav.classList.add("is-open");
+    headerFrame.classList.add("site-header--menu-open");
+    toggle.setAttribute("aria-expanded", "true");
+    toggle.setAttribute("aria-label", "Close navigation menu");
+  };
+
+  toggle.addEventListener(
+    "click",
+    () => {
+      if (!mobileQuery.matches) {
+        return;
+      }
+
+      if (nav.classList.contains("is-open")) {
+        closeMenu();
+        return;
+      }
+
+      openMenu();
+    },
+    { signal }
+  );
+
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener(
+      "click",
+      () => {
+        closeMenu();
+      },
+      { signal }
+    );
+  });
+
+  window.addEventListener(
+    "resize",
+    () => {
+      if (!mobileQuery.matches) {
+        closeMenu();
+      }
+    },
+    { signal }
+  );
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (!mobileQuery.matches || !nav.classList.contains("is-open")) {
+        return;
+      }
+
+      if (!headerFrame.contains(event.target)) {
+        closeMenu();
+      }
+    },
+    { signal }
+  );
+
+  window.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    },
+    { signal }
+  );
 }
 
 function renderFooter() {
@@ -1414,6 +1510,7 @@ function wireClientAccessPage() {
 function renderPage() {
   renderHeader();
   renderFooter();
+  wireHeaderMenu();
 
   if (page === "home") {
     clearClientPortalState();

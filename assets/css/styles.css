@@ -103,7 +103,8 @@ img {
 }
 
 .site-header__inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, auto) 1fr auto;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -143,6 +144,7 @@ img {
   gap: 10px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  grid-column: 3;
 }
 
 .nav a,
@@ -168,6 +170,29 @@ img {
   background: linear-gradient(135deg, var(--accent), #f7d09e) !important;
   border-color: transparent !important;
   box-shadow: 0 10px 30px rgba(240, 184, 127, 0.28);
+}
+
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.nav-toggle__line {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .site-main {
@@ -1947,48 +1972,71 @@ img {
   .site-header {
     top: 12px;
     margin-top: 12px;
-    padding: 14px 16px;
+    padding: 14px 16px 12px;
     border-radius: 24px;
   }
 
   .site-header__inner {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    grid-template-areas:
+      ". brand toggle"
+      "nav nav nav";
+    gap: 12px 0;
+    align-items: center;
   }
 
   .brand {
-    width: 100%;
+    grid-area: brand;
+    width: auto;
+    justify-self: center;
+    align-items: center;
+    text-align: center;
   }
 
   .brand__logo {
+    margin-inline: auto;
     max-width: 150px;
     max-height: 38px;
   }
 
   .brand__tag {
-    font-size: 0.72rem;
+    display: none;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    grid-area: toggle;
+    justify-self: end;
+    flex-direction: column;
   }
 
   .nav {
+    display: none;
+    grid-area: nav;
+    grid-column: auto;
     width: 100%;
+    margin-top: 2px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    flex-direction: column;
+    align-items: stretch;
     gap: 8px;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: none;
   }
 
-  .nav::-webkit-scrollbar {
-    display: none;
+  .site-header--menu-open {
+    padding-bottom: 16px;
+  }
+
+  .nav.is-open {
+    display: flex;
   }
 
   .nav a,
   .nav button {
-    flex: 0 0 auto;
-    padding: 0.62rem 0.82rem;
-    font-size: 0.88rem;
+    width: 100%;
+    padding: 0.74rem 0.9rem;
+    font-size: 0.92rem;
+    text-align: center;
     white-space: nowrap;
   }
 
