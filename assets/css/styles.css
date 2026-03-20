@@ -149,6 +149,9 @@ img {
 
 .nav a,
 .nav button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid transparent;
   padding: 0.8rem 1rem;
   border-radius: 999px;
@@ -502,6 +505,14 @@ img {
   mask-size: 100% 100%;
   -webkit-mask-mode: alpha;
   mask-mode: alpha;
+}
+
+.hero--scroll-reveal .hero__revealImage {
+  opacity: var(--hero-scroll-progress, 0);
+  -webkit-mask-image: none;
+  mask-image: none;
+  transition: opacity 180ms linear;
+  will-change: opacity;
 }
 
 .hero__inner {
@@ -1972,29 +1983,29 @@ img {
   .site-header {
     top: 12px;
     margin-top: 12px;
-    padding: 14px 16px 12px;
+    padding: 12px 16px 10px;
     border-radius: 24px;
   }
 
   .site-header__inner {
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    grid-template-columns: minmax(0, 1fr) 44px;
     grid-template-areas:
-      ". brand toggle"
-      "nav nav nav";
-    gap: 12px 0;
+      "brand toggle"
+      "nav nav";
+    gap: 12px;
     align-items: center;
   }
 
   .brand {
     grid-area: brand;
     width: auto;
-    justify-self: center;
-    align-items: center;
-    text-align: center;
+    justify-self: start;
+    align-items: flex-start;
+    text-align: left;
   }
 
   .brand__logo {
-    margin-inline: auto;
+    margin-inline: 0;
     max-width: 150px;
     max-height: 38px;
   }
@@ -2036,7 +2047,8 @@ img {
     width: 100%;
     padding: 0.74rem 0.9rem;
     font-size: 0.92rem;
-    text-align: center;
+    justify-content: flex-start;
+    text-align: left;
     white-space: nowrap;
   }
 

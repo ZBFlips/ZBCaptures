@@ -10,6 +10,7 @@ const lightboxImage = document.getElementById("lightbox-image");
 const lightboxCaption = document.getElementById("lightbox-caption");
 const lightboxCount = document.getElementById("lightbox-count");
 let headerMenuController = null;
+let heroEffectController = null;
 const lightboxPrev = document.querySelector("[data-lightbox-prev]");
 const lightboxNext = document.querySelector("[data-lightbox-next]");
 
@@ -1108,28 +1109,85 @@ function closeLightbox() {
 }
 
 function wireHeroParallax() {
+  heroEffectController?.abort();
+  heroEffectController = new AbortController();
+
   const hero = document.getElementById("hero");
   if (!hero) {
     return;
   }
+
+  const { signal } = heroEffectController;
+  const mobileQuery = window.matchMedia("(max-width: 720px)");
+  const clamp = (value, min = 0, max = 1) => Math.min(Math.max(value, min), max);
 
   const setHeroPoint = (x, y) => {
     hero.style.setProperty("--hero-x", `${x}%`);
     hero.style.setProperty("--hero-y", `${y}%`);
   };
 
-  setHeroPoint(50, 50);
+  const setScrollReveal = () => {
+    const progress = clamp(window.scrollY / Math.max(hero.offsetHeight * 0.82, 1));
+    hero.style.setProperty("--hero-scroll-progress", progress.toFixed(3));
+  };
 
-  hero.addEventListener("pointermove", (event) => {
-    const bounds = hero.getBoundingClientRect();
-    const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-    const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-    setHeroPoint(x, y);
-  });
+  const syncHeroMode = () => {
+    if (mobileQuery.matches) {
+      hero.classList.add("hero--scroll-reveal");
+      setScrollReveal();
+      return;
+    }
 
-  hero.addEventListener("pointerleave", () => {
+    hero.classList.remove("hero--scroll-reveal");
+    hero.style.removeProperty("--hero-scroll-progress");
     setHeroPoint(50, 50);
-  });
+  };
+
+  setHeroPoint(50, 50);
+  syncHeroMode();
+
+  hero.addEventListener(
+    "pointermove",
+    (event) => {
+      if (mobileQuery.matches) {
+        return;
+      }
+
+      const bounds = hero.getBoundingClientRect();
+      const x = ((event.clientX - bounds.left) / bounds.width) * 100;
+      const y = ((event.clientY - bounds.top) / bounds.height) * 100;
+      setHeroPoint(x, y);
+    },
+    { signal }
+  );
+
+  hero.addEventListener(
+    "pointerleave",
+    () => {
+      if (!mobileQuery.matches) {
+        setHeroPoint(50, 50);
+      }
+    },
+    { signal }
+  );
+
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (mobileQuery.matches) {
+        setScrollReveal();
+      }
+    },
+    { signal, passive: true }
+  );
+
+  window.addEventListener(
+    "resize",
+    () => {
+      syncHeroMode();
+    },
+    { signal }
+  );
 }
 
 function wireLightbox() {
