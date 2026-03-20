@@ -1,0 +1,132 @@
+{
+  "settings": {
+    "brandName": "ZB Captures",
+    "brandTag": "Premium Real Estate Media in Pensacola.",
+    "location": "Serving luxury, commercial, and residential listings",
+    "heroKicker": "24-Hour Delivery. Guaranteed.",
+    "heroHeadline": "Turn your listing into a sale.",
+    "heroLead": "A custom-built portfolio that puts the work first, moves quickly, and makes every listing feel elevated before the client even scrolls.",
+    "heroCtas": {
+      "primaryLabel": "Explore services",
+      "primaryHref": "./services.html",
+      "secondaryLabel": "Start a project",
+      "secondaryHref": "./contact.html"
+    },
+    "heroStats": [
+      {
+        "label": "Turnaround",
+        "value": "Same-day or next-day delivery"
+      },
+      {
+        "label": "Coverage",
+        "value": "Interior, exterior, twilight, drone-ready"
+      },
+      {
+        "label": "Experience",
+        "value": "Designed to feel premium from the first second"
+      }
+    ],
+    "servicesLead": "Everything here is set up to feel fast on the front end, but still give you room to manage content yourself.",
+    "contactLead": "Send a note with the property address, target timeline, and the kind of coverage you need.",
+    "videoEmbedUrl": "",
+    "serviceArea": "Metro area / surrounding listings",
+    "email": "hello@example.com",
+    "phone": "(555) 123-4567",
+    "instagram": "@yourhandle",
+    "responseTime": "Usually replies within 2 hours during business days.",
+    "footerNote": "Custom-built and ready for your own domain."
+  },
+  "services": [
+    {
+      "id": "service-listing",
+      "title": "The Starter",
+      "description": "Clean, color-true images that make MLS pages look sharp and immediate.",
+      "bullets": [
+        "30 HDR Images",
+        "No Drone Photos",
+        "No Video",
+        "Delivered in 24 Hours or Less"
+      ]
+    },
+    {
+      "id": "service-luxury",
+      "title": "The Standard",
+      "description": "Cinematic presentation for higher-end homes, builders, and standout properties.",
+      "bullets": [
+        "35 HDR Images",
+        "5 Drone Photos",
+        "No Video",
+        "Delivered in 24 Hours or Less"
+      ]
+    },
+    {
+      "id": "service-media",
+      "title": "The Works",
+      "description": "A flexible package for clients that want photography, reels, and website-ready assets.",
+      "bullets": [
+        "45 HDR Images",
+        "10 Drone Photos",
+        "30s Drone Video",
+        "Photos Delivered in 24 Hours or Less",
+        "Videos Delivered in 48 Hours or Less"
+      ]
+    }
+  ],
+  "media": [
+    {
+      "id": "cd877900-442c-42ae-bbed-60d462a72dc8",
+      "title": "15-14-print-396-revana-wy",
+      "caption": "",
+      "alt": "15-14-print-396-revana-wy.jpg",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "type": "image/jpeg",
+      "src": "./assets/uploads/cd877900-442c-42ae-bbed-60d462a72dc8.jpg"
+    },
+    {
+      "id": "c38c5376-9a75-4319-b2d3-225169ca4cc8",
+      "title": "port",
+      "caption": "",
+      "alt": "port.jpg",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "type": "image/jpeg",
+      "src": "./assets/uploads/c38c5376-9a75-4319-b2d3-225169ca4cc8.jpg"
+    },
+    {
+      "id": "302fa87d-3104-4729-b49e-b45d2581d07a",
+      "title": "c10226c9afc0bd9dcf11399c01e065bd",
+      "caption": "",
+      "alt": "c10226c9afc0bd9dcf11399c01e065bd.jpg",
+      "placement": "gallery",
+      "order": 0,
+      "featured": false,
+      "type": "image/jpeg",
+      "src": "./assets/uploads/302fa87d-3104-4729-b49e-b45d2581d07a.jpg"
+    },
+    {
+      "id": "6a25db3c-effe-45aa-9847-cf55c157d1ec",
+      "title": "Gemini_Generated_Image_e4siwne4siwne4si",
+      "caption": "",
+      "alt": "Twilight Real Estate Photography",
+      "placement": "hero",
+      "order": 0,
+      "featured": false,
+      "type": "image/png",
+      "src": "./assets/uploads/6a25db3c-effe-45aa-9847-cf55c157d1ec.png"
+    },
+    {
+      "id": "952028f8-6a70-400c-b4d0-6b1ef94ac6e1",
+      "title": "2-1-print-396-revana-wy",
+      "caption": "",
+      "alt": "2-1-print-396-revana-wy.png",
+      "placement": "hero",
+      "order": 0,
+      "featured": false,
+      "type": "image/png",
+      "src": "./assets/uploads/952028f8-6a70-400c-b4d0-6b1ef94ac6e1.png"
+    }
+  ]
+}
