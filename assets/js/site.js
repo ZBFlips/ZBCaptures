@@ -142,16 +142,18 @@ function renderHeader() {
     )
     .join("");
   const logo = headerLogoMedia();
+  const tagText = String(state.settings.brandTag || "").trim();
   const logoMarkup = logo
     ? `<img class="brand__logo" src="${mediaUrlFor(logo)}" alt="${safeText(logo.alt || logo.title || state.settings.brandName)}" />`
     : `<span class="brand__name">${safeText(state.settings.brandName)}</span>`;
+  const tagMarkup = !logo && tagText ? `<span class="brand__tag">${safeText(tagText)}</span>` : "";
 
   headerEl.innerHTML = `
     <div class="site-header">
       <div class="site-header__inner">
-        <a class="brand" href="./index.html" aria-label="Go to home page">
+        <a class="brand ${logo ? "brand--logo-only" : ""}" href="./index.html" aria-label="Go to home page">
           ${logoMarkup}
-          <span class="brand__tag">${safeText(state.settings.brandTag)}</span>
+          ${tagMarkup}
         </a>
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation menu">
           <span class="nav-toggle__line"></span>
@@ -457,7 +459,7 @@ function galleryMarkup() {
     <section class="section">
       <div class="section__eyebrow">Selected work</div>
       <div class="gallery-copy">
-        <h2 class="section__title">What you'll receive</h2>
+        <h2 class="section__title">What to expect after the shoot.</h2>
         <p class="section__lead">Consistent quality across every property, no matter the size.</p>
       </div>
       <div class="gallery-mobile-strip" aria-label="Portfolio gallery">
@@ -1208,7 +1210,7 @@ function clientAccessGalleryMarkup() {
 
     <section class="section">
       <div class="section__eyebrow">Delivered files</div>
-      <div class="section-grid grid--cards">
+      <div class="section-grid grid--cards client-delivery-grid">
         ${items
           .map((item) => {
             const isVideo = String(item.type || "").startsWith("video/");
