@@ -1154,7 +1154,7 @@ function pageSeoConfig() {
       };
     default:
       return {
-        title: "Pensacola Real Estate Photography | MLS & Zillow-Ready Media | ZB Captures",
+        title: "ZB Captures | Real Estate Photography",
         description:
           "ZB Captures provides Pensacola real estate photography with MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video for Zillow, Homes.com, Redfin, Airbnb, and VRBO listings across the Gulf Coast.",
         path: "./index.html",
