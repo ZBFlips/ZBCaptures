@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ZB Captures favicon">
+  <rect width="64" height="64" rx="14" fill="#11284a"/>
+  <path
+    fill="#ffffff"
+    d="M10 14h22v5.4L20.5 34H33v6H10.2v-5L21.8 20H10z"
+  />
+  <path
+    fill="#ffffff"
+    d="M36 14h9.6c6.7 0 11.2 3.8 11.2 9.5 0 3.5-1.8 6.3-4.8 7.8 3.7 1.4 6 4.5 6 8.6 0 6.2-4.9 10.1-12.8 10.1H36zm8.6 20.8c3.7 0 5.8-1.6 5.8-4.4 0-2.8-2.1-4.4-5.8-4.4h-2.3v8.8zm.6 17.2c4.1 0 6.5-1.8 6.5-4.8s-2.4-4.8-6.5-4.8h-2.9V52z"
+  />
+  <path
+    fill="#11284a"
+    d="M23 39.8 31.5 31l9.1 8.8v9.7H23z"
+  />
+  <path
+    fill="none"
+    stroke="#ffffff"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2.8"
+    d="M21.6 40.2 31.5 30.4l10 9.8"
+  />
+  <circle cx="31.5" cy="44.2" r="4.8" fill="#ffffff"/>
+  <circle cx="31.5" cy="44.2" r="2.1" fill="#11284a"/>
+</svg>
