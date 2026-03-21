@@ -46,6 +46,13 @@ const SEO_SERVICE_AREAS = [
 ];
 const SEO_PLATFORMS = ["MLS", "Zillow", "Homes.com", "Redfin", "Airbnb", "VRBO"];
 const SEO_DELIVERABLES = ["MLS-ready photos", "Zillow-ready images", "HDR photography", "drone photos", "social video"];
+const BUSINESS_HOURS = {
+  opens: "08:00",
+  closes: "18:00",
+  days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+  label: "Open daily from 8:00 AM to 6:00 PM",
+};
+const GOOGLE_BUSINESS_PROFILE_URL = "https://share.google/aDc3usKYdvNCryRrN";
 
 let state = loadState();
 let mediaCache = [];
@@ -306,6 +313,7 @@ function renderFooter() {
           <p class="footer__headline">Pensacola real estate photography for ${safeText(SEO_PLATFORMS.join(", "))}-ready listings.</p>
           <p class="footer__copy">${safeText(state.settings.footerNote)}</p>
           <p class="footer__copy">${safeText(SEO_DELIVERABLES.join(", "))}, with same-day availability when possible for Gulf Coast agents who need media that works fast across industry-standard platforms.</p>
+          <p class="footer__copy">${safeText(BUSINESS_HOURS.label)}</p>
           <a class="footer__contact" href="mailto:${safeText(state.settings.email)}">Primary contact: ${safeText(state.settings.email)}</a>
         </div>
         <div class="footer__stack">
@@ -723,6 +731,47 @@ const testimonials = [
   },
 ];
 
+const trustPillars = [
+  {
+    eyebrow: "Speed agents care about",
+    title: "Same-day availability when possible.",
+    text: "When a property is ready to launch, the workflow is built to move quickly so you can keep the listing schedule on track.",
+  },
+  {
+    eyebrow: "Industry-ready deliverables",
+    title: "Built for MLS, Zillow, Homes.com, and Redfin.",
+    text: "The media packages are shaped around the formats and expectations agents already work with every day.",
+  },
+  {
+    eyebrow: "Easy handoff",
+    title: "A client portal that feels polished and simple.",
+    text: "Finished shoots can be delivered through a clean download portal so agents are not chasing files across email threads.",
+  },
+];
+
+const faqItems = [
+  {
+    question: "How fast is delivery?",
+    answer: "Same-day availability is offered when the schedule allows, and most standard photo deliveries are turned around within 24 hours.",
+  },
+  {
+    question: "Are the photos MLS-ready?",
+    answer: "Yes. The workflow is built around MLS-ready photos and listing-platform compatibility, including Zillow-ready images and clean delivery for agent marketing use.",
+  },
+  {
+    question: "What areas do you serve?",
+    answer: "ZB Captures is based in Pensacola, Florida and serves agents across Pensacola, Gulf Breeze, Pace, Milton, Navarre, Perdido Key, Foley, Orange Beach, Fairhope, and surrounding Gulf Coast markets.",
+  },
+  {
+    question: "Do you offer drone photos and video?",
+    answer: "Yes. Depending on the package, coverage can include HDR photography, drone photos, social video, and larger listing marketing deliverables.",
+  },
+  {
+    question: "How do clients receive the finished files?",
+    answer: "Each finished shoot can be delivered through a private client portal where the gallery can be reviewed and the original files can be downloaded without confusion.",
+  },
+];
+
 function testimonialsMarkup() {
   return `
     <section class="section testimonials-strip">
@@ -862,6 +911,77 @@ function contactMarkup() {
   `;
 }
 
+function trustSectionMarkup() {
+  return `
+    <section class="section trust-section">
+      <div class="section__eyebrow">Why Agents Trust ZB Captures</div>
+      <div class="trust-layout">
+        <div class="trust-layout__copy">
+          <h2 class="section__title">Built around the pace and standards of real estate marketing.</h2>
+          <p class="section__lead">This is not generic photography packaging. The workflow is tuned for agents who care about speed, listing-platform compatibility, consistent visual quality, and a handoff process that feels easy for clients.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="./contact.html">Book a session</a>
+            <a class="button" href="${safeText(GOOGLE_BUSINESS_PROFILE_URL)}" target="_blank" rel="noreferrer">View Google Business Profile</a>
+          </div>
+        </div>
+        <div class="trust-grid">
+          ${trustPillars
+            .map(
+              (pillar, index) => `
+                <article class="trust-card ${index === 1 ? "trust-card--accent" : ""}">
+                  <div class="trust-card__eyebrow">${safeText(pillar.eyebrow)}</div>
+                  <h3 class="trust-card__title">${safeText(pillar.title)}</h3>
+                  <p class="trust-card__text">${safeText(pillar.text)}</p>
+                </article>
+              `
+            )
+            .join("")}
+          <article class="trust-card trust-card--meta">
+            <div class="trust-meta">
+              <span class="trust-meta__label">Based in</span>
+              <strong class="trust-meta__value">Pensacola, Florida</strong>
+            </div>
+            <div class="trust-meta">
+              <span class="trust-meta__label">Hours</span>
+              <strong class="trust-meta__value">${safeText(BUSINESS_HOURS.label)}</strong>
+            </div>
+            <div class="trust-meta">
+              <span class="trust-meta__label">Coverage</span>
+              <strong class="trust-meta__value">Gulf Coast service area within roughly 120 miles</strong>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function faqMarkup() {
+  return `
+    <section class="section faq-section">
+      <div class="section__eyebrow">FAQ</div>
+      <div class="faq-layout">
+        <div class="faq-layout__copy">
+          <h2 class="section__title">Questions agents usually ask before booking.</h2>
+          <p class="section__lead">The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.</p>
+        </div>
+        <div class="faq-list">
+          ${faqItems
+            .map(
+              (item) => `
+                <details class="faq-item">
+                  <summary class="faq-item__question">${safeText(item.question)}</summary>
+                  <p class="faq-item__answer">${safeText(item.answer)}</p>
+                </details>
+              `
+            )
+            .join("")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 function servicesPageMarkup() {
   return `
     <section class="section services-page__intro">
@@ -909,11 +1029,13 @@ function servicesPageMarkup() {
     ${agentProofMarkup()}
 
     ${videoMarkup()}
+
+    ${faqMarkup()}
   `;
 }
 
 function homePageMarkup() {
-  return [heroMarkup(), galleryMarkup(), servicesMarkup(), testimonialsMarkup(), clientDeliveryTeaserMarkup(), contactMarkup()].join("");
+  return [heroMarkup(), galleryMarkup(), servicesMarkup(), testimonialsMarkup(), trustSectionMarkup(), clientDeliveryTeaserMarkup(), faqMarkup(), contactMarkup()].join("");
 }
 
 function serviceSignalsMarkup() {
@@ -999,8 +1121,7 @@ function absolutePageUrl(relativePath = ".") {
 }
 
 function seoImageUrl() {
-  const image = heroMedia() || headerLogoMedia();
-  return image ? new URL(mediaUrlFor(image), window.location.href).toString() : absolutePageUrl("./assets/brand/favicon.svg");
+  return absolutePageUrl("./assets/brand/social-share.png");
 }
 
 function pageSeoConfig() {
@@ -1083,13 +1204,21 @@ function applyStructuredData(seo) {
     email: state.settings.email,
     telephone: state.settings.phone,
     priceRange: "$$",
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: BUSINESS_HOURS.days,
+        opens: BUSINESS_HOURS.opens,
+        closes: BUSINESS_HOURS.closes,
+      },
+    ],
     address: {
       "@type": "PostalAddress",
       addressLocality: "Pensacola",
       addressRegion: "FL",
       addressCountry: "US",
     },
-    sameAs: ["https://www.instagram.com/zb.re.media/"],
+    sameAs: ["https://www.instagram.com/zb.re.media/", GOOGLE_BUSINESS_PROFILE_URL],
     knowsAbout: [...SEO_DELIVERABLES, ...SEO_PLATFORMS],
   };
 
@@ -1112,6 +1241,20 @@ function applyStructuredData(seo) {
       areaServed: SEO_SERVICE_AREAS,
       url: canonicalUrl,
       description: seo.description,
+    });
+  }
+
+  if (page === "home" || page === "services") {
+    graph.push({
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer,
+        },
+      })),
     });
   }
 
