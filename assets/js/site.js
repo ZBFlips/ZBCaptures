@@ -42,7 +42,7 @@ const SEO_SERVICE_AREAS = [
   "Fairhope, AL",
   "Daphne, AL",
   "Mobile, AL",
-  "Enterprise, AL",
+  "Enterprise, FL",
 ];
 const SEO_PLATFORMS = ["MLS", "Zillow", "Homes.com", "Redfin", "Airbnb", "VRBO"];
 const SEO_DELIVERABLES = ["MLS-ready photos", "Zillow-ready images", "HDR photography", "drone photos", "social video"];
