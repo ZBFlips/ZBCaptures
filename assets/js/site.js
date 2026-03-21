@@ -53,6 +53,11 @@ const BUSINESS_HOURS = {
   label: "Open daily from 8:00 AM to 6:00 PM",
 };
 const GOOGLE_BUSINESS_PROFILE_URL = "https://share.google/aDc3usKYdvNCryRrN";
+const PENSACOLA_CENTER = { lat: 30.4213, lon: -87.2169, label: "Pensacola, FL" };
+const SERVICE_RADIUS_MILES = 120;
+const SERVICE_RADIUS_METERS = SERVICE_RADIUS_MILES * 1609.344;
+const LEAFLET_CSS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+const LEAFLET_JS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
 let state = loadState();
 let mediaCache = [];
@@ -62,6 +67,12 @@ let activePortalMedia = [];
 let clientPortalError = "";
 let lightboxItems = [];
 let lightboxIndex = -1;
+let leafletAssetsPromise = null;
+let serviceAreaMap = null;
+let serviceAreaCircle = null;
+let serviceAreaMarker = null;
+let serviceAreaSearchCache = new Map();
+let nominatimLastRequestAt = 0;
 
 if (mainEl) {
   mainEl.innerHTML = loadingShellMarkup(page);
@@ -760,7 +771,7 @@ const faqItems = [
   },
   {
     question: "What areas do you serve?",
-    answer: "ZB Captures is based in Pensacola, Florida and serves agents across Pensacola, Gulf Breeze, Pace, Milton, Navarre, Perdido Key, Foley, Orange Beach, Fairhope, and surrounding Gulf Coast markets.",
+    answer: "ZB Captures is based in Pensacola, Florida and generally serves addresses within roughly 120 miles of Pensacola, including Gulf Breeze, Pace, Milton, Navarre, Perdido Key, Foley, Orange Beach, Fairhope, and surrounding Gulf Coast markets.",
   },
   {
     question: "Do you offer drone photos and video?",
@@ -959,27 +970,244 @@ function trustSectionMarkup() {
 function faqMarkup() {
   return `
     <section class="section faq-section">
-      <div class="section__eyebrow">FAQ</div>
+      <div class="section__eyebrow">FAQ &amp; SERVICE AREA</div>
       <div class="faq-layout">
-        <div class="faq-layout__copy">
-          <h2 class="section__title">Questions agents usually ask before booking.</h2>
-          <p class="section__lead">The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.</p>
+        <div class="faq-layout__content">
+          <div class="faq-layout__copy">
+            <h2 class="section__title">Questions agents usually ask before booking.</h2>
+            <p class="section__lead">The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.</p>
+          </div>
+          <div class="faq-list">
+            ${faqItems
+              .map(
+                (item) => `
+                  <details class="faq-item">
+                    <summary class="faq-item__question">${safeText(item.question)}</summary>
+                    <p class="faq-item__answer">${safeText(item.answer)}</p>
+                  </details>
+                `
+              )
+              .join("")}
+          </div>
         </div>
-        <div class="faq-list">
-          ${faqItems
-            .map(
-              (item) => `
-                <details class="faq-item">
-                  <summary class="faq-item__question">${safeText(item.question)}</summary>
-                  <p class="faq-item__answer">${safeText(item.answer)}</p>
-                </details>
-              `
-            )
-            .join("")}
-        </div>
+        <aside class="service-area-tool">
+          <div class="service-area-tool__copy">
+            <h3 class="service-area-tool__title">Check whether a property falls inside the 120-mile radius.</h3>
+            <p class="service-area-tool__text">Enter an address and the map will show whether it sits inside the service radius centered on Pensacola, Florida.</p>
+          </div>
+          <form class="service-area-form" id="service-area-form">
+            <input class="service-area-form__input" name="address" placeholder="Enter a property address" autocomplete="street-address" />
+            <button class="button button--accent" type="submit">Check address</button>
+          </form>
+          <div class="helper" id="service-area-status">Search an address to see whether it falls inside the ${SERVICE_RADIUS_MILES}-mile service radius.</div>
+          <div class="service-area-map" id="service-area-map" aria-label="Interactive service area map"></div>
+          <div class="service-area-tool__legend">
+            <span class="service-area-tool__legendItem"><span class="service-area-tool__dot service-area-tool__dot--center"></span>Pensacola center point</span>
+            <span class="service-area-tool__legendItem"><span class="service-area-tool__dot service-area-tool__dot--radius"></span>${SERVICE_RADIUS_MILES}-mile service radius</span>
+          </div>
+        </aside>
       </div>
     </section>
   `;
+}
+
+function haversineMiles(start, end) {
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const earthRadiusMiles = 3958.7613;
+  const latDiff = toRadians(end.lat - start.lat);
+  const lonDiff = toRadians(end.lon - start.lon);
+  const lat1 = toRadians(start.lat);
+  const lat2 = toRadians(end.lat);
+
+  const a =
+    Math.sin(latDiff / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(lonDiff / 2) ** 2;
+
+  return 2 * earthRadiusMiles * Math.asin(Math.sqrt(a));
+}
+
+function updateServiceAreaStatus(message, tone = "neutral") {
+  const status = document.getElementById("service-area-status");
+  if (!status) {
+    return;
+  }
+
+  status.textContent = message;
+  status.classList.remove("helper--warn", "helper--success");
+  if (tone === "warn") {
+    status.classList.add("helper--warn");
+  }
+  if (tone === "success") {
+    status.classList.add("helper--success");
+  }
+}
+
+async function ensureLeafletAssets() {
+  if (window.L) {
+    return window.L;
+  }
+
+  if (leafletAssetsPromise) {
+    return leafletAssetsPromise;
+  }
+
+  leafletAssetsPromise = new Promise((resolve, reject) => {
+    if (!document.head.querySelector(`link[href="${LEAFLET_CSS_URL}"]`)) {
+      const css = document.createElement("link");
+      css.rel = "stylesheet";
+      css.href = LEAFLET_CSS_URL;
+      document.head.appendChild(css);
+    }
+
+    const existingScript = document.head.querySelector(`script[src="${LEAFLET_JS_URL}"]`);
+    if (existingScript && window.L) {
+      resolve(window.L);
+      return;
+    }
+
+    const script = existingScript || document.createElement("script");
+    script.src = LEAFLET_JS_URL;
+    script.async = true;
+    script.onload = () => resolve(window.L);
+    script.onerror = () => reject(new Error("The service-area map could not load right now."));
+    if (!existingScript) {
+      document.head.appendChild(script);
+    }
+  });
+
+  return leafletAssetsPromise;
+}
+
+async function lookupAddress(address) {
+  const query = String(address || "").trim();
+  if (!query) {
+    throw new Error("Enter an address to check the service radius.");
+  }
+
+  const cacheKey = query.toLowerCase();
+  if (serviceAreaSearchCache.has(cacheKey)) {
+    return serviceAreaSearchCache.get(cacheKey);
+  }
+
+  const elapsed = Date.now() - nominatimLastRequestAt;
+  if (elapsed < 1100) {
+    await new Promise((resolve) => window.setTimeout(resolve, 1100 - elapsed));
+  }
+
+  nominatimLastRequestAt = Date.now();
+
+  const url = new URL("https://nominatim.openstreetmap.org/search");
+  url.searchParams.set("format", "jsonv2");
+  url.searchParams.set("limit", "1");
+  url.searchParams.set("countrycodes", "us");
+  url.searchParams.set("q", query);
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("The address lookup service is unavailable right now.");
+  }
+
+  const results = await response.json();
+  if (!Array.isArray(results) || !results.length) {
+    throw new Error("That address could not be located. Try a fuller property address.");
+  }
+
+  const match = {
+    lat: Number(results[0].lat),
+    lon: Number(results[0].lon),
+    label: results[0].display_name || query,
+  };
+  serviceAreaSearchCache.set(cacheKey, match);
+  return match;
+}
+
+async function wireServiceAreaMap() {
+  const mapEl = document.getElementById("service-area-map");
+  const form = document.getElementById("service-area-form");
+  if (!mapEl || !form) {
+    return;
+  }
+
+  try {
+    const L = await ensureLeafletAssets();
+    if (!mapEl || serviceAreaMap) {
+      return;
+    }
+
+    serviceAreaMap = L.map(mapEl, {
+      scrollWheelZoom: false,
+    }).setView([PENSACOLA_CENTER.lat, PENSACOLA_CENTER.lon], 8);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(serviceAreaMap);
+
+    L.marker([PENSACOLA_CENTER.lat, PENSACOLA_CENTER.lon])
+      .addTo(serviceAreaMap)
+      .bindPopup("Pensacola, FL");
+
+    serviceAreaCircle = L.circle([PENSACOLA_CENTER.lat, PENSACOLA_CENTER.lon], {
+      radius: SERVICE_RADIUS_METERS,
+      color: "#f0b87f",
+      weight: 2,
+      fillColor: "#6d86b3",
+      fillOpacity: 0.18,
+    }).addTo(serviceAreaMap);
+
+    serviceAreaMap.fitBounds(serviceAreaCircle.getBounds(), {
+      padding: [18, 18],
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const address = formData.get("address")?.toString().trim() || "";
+      if (!address) {
+        updateServiceAreaStatus("Enter an address to check the service radius.", "warn");
+        return;
+      }
+
+      updateServiceAreaStatus("Checking that address against the Pensacola service radius...");
+
+      try {
+        const match = await lookupAddress(address);
+        const distance = haversineMiles(PENSACOLA_CENTER, match);
+        const inside = distance <= SERVICE_RADIUS_MILES;
+
+        serviceAreaMarker?.remove();
+        serviceAreaMarker = L.marker([match.lat, match.lon]).addTo(serviceAreaMap);
+        serviceAreaMarker.bindPopup(match.label).openPopup();
+
+        serviceAreaMap.fitBounds(
+          L.latLngBounds(
+            [
+              [PENSACOLA_CENTER.lat, PENSACOLA_CENTER.lon],
+              [match.lat, match.lon],
+            ]
+          ),
+          { padding: [34, 34] }
+        );
+
+        updateServiceAreaStatus(
+          inside
+            ? `${match.label} is inside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola.`
+            : `${match.label} is outside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola.`,
+          inside ? "success" : "warn"
+        );
+      } catch (error) {
+        updateServiceAreaStatus(error.message || "Unable to check that address right now.", "warn");
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    updateServiceAreaStatus("The interactive map could not load right now, but the service radius is still centered on Pensacola with a 120-mile range.", "warn");
+  }
 }
 
 function servicesPageMarkup() {
@@ -2293,6 +2521,7 @@ function renderPage() {
     wireHeroParallax();
     wireTestimonialsCarousel();
     wireGalleryReel();
+    wireServiceAreaMap();
     wirePreviewButtons();
     wireLightbox();
     return;
@@ -2303,6 +2532,7 @@ function renderPage() {
     mainEl.innerHTML = servicesPageMarkup();
     wireSectionReveal();
     wireTestimonialsCarousel();
+    wireServiceAreaMap();
     wirePreviewButtons();
     wireLightbox();
     return;

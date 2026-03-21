@@ -1093,9 +1093,15 @@ img {
 .trust-layout,
 .faq-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+  grid-template-columns: minmax(360px, 0.82fr) minmax(420px, 1.18fr);
   gap: 28px;
   align-items: start;
+}
+
+.faq-layout__content {
+  display: grid;
+  gap: 20px;
+  align-content: start;
 }
 
 .trust-grid {
@@ -1168,6 +1174,7 @@ img {
 .faq-list {
   display: grid;
   gap: 14px;
+  max-width: 620px;
 }
 
 .faq-item {
@@ -1198,6 +1205,91 @@ img {
   margin: 14px 0 0;
   color: var(--muted);
   line-height: 1.75;
+}
+
+.service-area-tool {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid rgba(109, 134, 179, 0.24);
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(12, 16, 24, 0.9), rgba(17, 22, 31, 0.82)),
+    linear-gradient(135deg, rgba(109, 134, 179, 0.08), transparent 70%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.service-area-tool__copy {
+  display: grid;
+  gap: 10px;
+}
+
+.service-area-tool__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 2vw, 2rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+
+.service-area-tool__text {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.service-area-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.service-area-form__input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(4, 6, 9, 0.46);
+  color: var(--text);
+}
+
+.service-area-map {
+  width: 100%;
+  min-height: 420px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(109, 134, 179, 0.18), transparent 55%),
+    rgba(10, 12, 16, 0.9);
+}
+
+.service-area-tool__legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.service-area-tool__legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.service-area-tool__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.service-area-tool__dot--center {
+  background: #f0b87f;
+}
+
+.service-area-tool__dot--radius {
+  background: #6d86b3;
 }
 
 .testimonial-card {
@@ -1548,6 +1640,10 @@ img {
 
 .helper--warn {
   color: var(--warn);
+}
+
+.helper--success {
+  color: #9be4c8;
 }
 
 .section--loading {
@@ -2378,6 +2474,10 @@ img {
     flex-basis: min(72vw, 320px);
   }
 
+  .service-area-form {
+    grid-template-columns: 1fr;
+  }
+
   .gallery-order-item {
     grid-template-columns: 1fr;
     justify-items: start;
@@ -2504,6 +2604,10 @@ img {
 
   .field textarea {
     min-height: 144px;
+  }
+
+  .service-area-map {
+    min-height: 340px;
   }
 
   .nav-toggle {
