@@ -288,6 +288,176 @@ function mediaPreviewUrl(item) {
   return url;
 }
 
+function mediaDraftFromRow(row) {
+  const id = row?.dataset.mediaRow;
+  const current = media.find((item) => item.id === id) || { id };
+  return {
+    ...current,
+    title: row?.querySelector('[data-media-field="title"]')?.value || "",
+    caption: row?.querySelector('[data-media-field="caption"]')?.value || "",
+    alt: row?.querySelector('[data-media-field="alt"]')?.value || "",
+    placement: row?.querySelector('[data-media-field="placement"]')?.value || "gallery",
+    order: Number(row?.querySelector('[data-media-field="order"]')?.value || 0),
+  };
+}
+
+function mediaVariantCoverage(item) {
+  const present = [];
+  const missing = [];
+
+  for (const variant of PUBLIC_IMAGE_VARIANTS) {
+    if (item?.variants?.[variant.name]?.src) {
+      present.push(variant.name);
+      continue;
+    }
+
+    missing.push(variant.name);
+  }
+
+  return { present, missing };
+}
+
+function mediaOptimizationSourceLabel(item) {
+  if (item?.blob && !item?.src) {
+    return "Local original upload";
+  }
+
+  if (item?.blob && item?.src) {
+    return "Cached saved source";
+  }
+
+  if (item?.variants?.full?.src && item?.src === item.variants.full.src) {
+    return "Published full WebP";
+  }
+
+  if (item?.src) {
+    return "Saved source";
+  }
+
+  return "No source cached";
+}
+
+function mediaWorkflowState(item) {
+  const eligible = isOptimizablePublicImage(item);
+  const hasSource = Boolean(item?.blob || item?.src);
+  const sourceLabel = mediaOptimizationSourceLabel(item);
+  const { present, missing } = mediaVariantCoverage(item);
+  const hasAllVariants = !missing.length;
+
+  if (!eligible) {
+    const isImage = String(item?.type || "").startsWith("image/");
+    return {
+      eligible,
+      canOptimize: false,
+      tone: "muted",
+      label: "Variants not used",
+      sourceLabel,
+      present,
+      missing,
+      detail: isImage
+        ? "Responsive WebP sizes are only used for public hero, reveal, gallery, featured, services, and contact images."
+        : "Videos and non-image assets stay in their original format.",
+      actionLabel: "",
+    };
+  }
+
+  if (!hasSource) {
+    return {
+      eligible,
+      canOptimize: false,
+      tone: "warn",
+      label: "Source needed",
+      sourceLabel,
+      present,
+      missing,
+      detail: "Upload or reload this image before generating responsive WebP sizes.",
+      actionLabel: "Source required",
+    };
+  }
+
+  if (hasAllVariants) {
+    return {
+      eligible,
+      canOptimize: true,
+      tone: "ready",
+      label: "Variants ready",
+      sourceLabel,
+      present,
+      missing,
+      detail: item?.blob
+        ? "Save changes or publish live will rebuild thumb, medium, and full WebP files from the source cached in this browser."
+        : "Refresh variants if you want to cache the current saved image in this browser before the next save or publish.",
+      actionLabel: "Refresh variants",
+    };
+  }
+
+  return {
+    eligible,
+    canOptimize: true,
+    tone: "warn",
+    label: "Variants missing",
+    sourceLabel,
+    present,
+    missing,
+    detail: item?.blob
+      ? "Save changes or publish live will generate the missing WebP sizes from the source cached in this browser."
+      : "Queue a refresh to cache the current saved image, then save or publish to write the missing sizes.",
+    actionLabel: "Generate variants",
+  };
+}
+
+function mediaWorkflowMarkup(item) {
+  const workflow = mediaWorkflowState(item);
+  const pills = workflow.eligible
+    ? PUBLIC_IMAGE_VARIANTS.map((variant) => {
+        const ready = workflow.present.includes(variant.name);
+        return `<span class="media-workflow__pill ${ready ? "is-ready" : "is-missing"}">${safeText(variant.name)}</span>`;
+      }).join("")
+    : `<span class="media-workflow__pill is-muted">${safeText(String(item?.placement || "hidden"))}</span>`;
+
+  return `
+    <div class="media-workflow media-workflow--${workflow.tone}">
+      <div class="media-workflow__header">
+        <strong>${safeText(workflow.label)}</strong>
+        <span class="media-workflow__source">${safeText(workflow.sourceLabel)}</span>
+      </div>
+      <div class="media-workflow__pills">${pills}</div>
+      <p class="media-workflow__detail">${safeText(workflow.detail)}</p>
+    </div>
+  `;
+}
+
+function mediaActionsMarkup(item) {
+  const workflow = mediaWorkflowState(item);
+  return `
+    ${
+      workflow.eligible
+        ? `<button class="button ghost" type="button" data-media-optimize="${item.id}" ${workflow.canOptimize ? "" : "disabled"}>${safeText(
+            workflow.actionLabel
+          )}</button>`
+        : ""
+    }
+    <button class="button ghost" type="button" data-media-save="${item.id}">Save</button>
+    <button class="button ghost danger" type="button" data-media-delete="${item.id}">Delete</button>
+  `;
+}
+
+function updateMediaWorkflowRow(row) {
+  if (!row) {
+    return;
+  }
+
+  const draft = mediaDraftFromRow(row);
+  const workflowTarget = row.querySelector("[data-media-workflow]");
+  const actionsTarget = row.querySelector("[data-media-actions]");
+  if (workflowTarget) {
+    workflowTarget.innerHTML = mediaWorkflowMarkup(draft);
+  }
+  if (actionsTarget) {
+    actionsTarget.innerHTML = mediaActionsMarkup(draft);
+  }
+}
+
 function portalMediaItems(portalId) {
   return sortPortalFiles(portalRecordById(portalId)?.files || []);
 }
@@ -1199,6 +1369,8 @@ function updatePortalCardUi(portalId) {
 
 function mediaEditorRow(item) {
   const url = mediaPreviewUrl(item);
+  const workflow = mediaWorkflowMarkup(item);
+  const actions = mediaActionsMarkup(item);
 
   return `
     <article class="media-row" data-media-row="${item.id}">
@@ -1215,6 +1387,9 @@ function mediaEditorRow(item) {
         <div class="field">
           <label>Alt</label>
           <input data-media-field="alt" data-media-id="${item.id}" value="${safeText(item.alt || "")}" />
+        </div>
+        <div data-media-workflow="${item.id}">
+          ${workflow}
         </div>
       </div>
       <div class="field">
@@ -1239,9 +1414,8 @@ function mediaEditorRow(item) {
         <label>Order</label>
         <input data-media-field="order" data-media-id="${item.id}" type="number" value="${Number.isFinite(item.order) ? item.order : 0}" />
       </div>
-      <div class="media-actions">
-        <button class="button ghost" type="button" data-media-save="${item.id}">Save</button>
-        <button class="button ghost danger" type="button" data-media-delete="${item.id}">Delete</button>
+      <div class="media-actions" data-media-actions="${item.id}">
+        ${actions}
       </div>
     </article>
   `;
@@ -1252,7 +1426,9 @@ async function renderMediaList() {
   const publicItems = media.filter((item) => !item.portalId);
   const portalItemCount = media.length - publicItems.length;
   target.innerHTML = publicItems.length
-    ? `${portalItemCount ? `<div class="admin-note">Client delivery uploads are managed in the Client delivery section below. ${portalItemCount} portal file${portalItemCount === 1 ? "" : "s"} hidden from this library.</div>` : ""}${publicItems.map((item) => mediaEditorRow(item)).join("")}`
+    ? `${portalItemCount ? `<div class="admin-note">Client delivery uploads are managed in the Client delivery section below. ${portalItemCount} portal file${portalItemCount === 1 ? "" : "s"} hidden from this library.</div>` : ""}<div class="admin-note">Responsive WebP files are written when you click <strong>Save changes</strong> or <strong>Publish live</strong>. Use <strong>Refresh variants</strong> to cache a source file in this browser before the next export.</div>${publicItems
+        .map((item) => mediaEditorRow(item))
+        .join("")}`
     : `<div class="admin-note">${portalItemCount ? "Only client delivery uploads exist right now. Manage those in the Client delivery section." : "No uploads yet. Use the upload form above to add your first images."}</div>`;
 }
 
@@ -1548,21 +1724,7 @@ async function buildOptimizedImagePackage(item) {
 }
 
 function collectMediaDraftsFromDom() {
-  const draftById = new Map(media.map((item) => [item.id, item]));
-
-  return Array.from(document.querySelectorAll("[data-media-row]")).map((row) => {
-    const id = row.dataset.mediaRow;
-    const base = draftById.get(id) || { id };
-
-    return {
-      ...base,
-      title: row.querySelector('[data-media-field="title"]')?.value || "",
-      caption: row.querySelector('[data-media-field="caption"]')?.value || "",
-      alt: row.querySelector('[data-media-field="alt"]')?.value || "",
-      placement: row.querySelector('[data-media-field="placement"]')?.value || "gallery",
-      order: Number(row.querySelector('[data-media-field="order"]')?.value || 0),
-    };
-  });
+  return Array.from(document.querySelectorAll("[data-media-row]")).map((row) => mediaDraftFromRow(row));
 }
 
 function collectAllMediaDrafts() {
@@ -2289,20 +2451,50 @@ function wireClientPortalsEditor() {
 
 function wireMediaListEvents() {
   const target = document.getElementById("media-list");
+  target.addEventListener("change", (event) => {
+    const field = event.target.closest('[data-media-field="placement"]');
+    if (!field) {
+      return;
+    }
+
+    updateMediaWorkflowRow(field.closest("[data-media-row]"));
+  });
+
   target.addEventListener("click", async (event) => {
+    const optimizeButton = event.target.closest("[data-media-optimize]");
+    if (optimizeButton) {
+      const row = target.querySelector(`[data-media-row="${optimizeButton.dataset.mediaOptimize}"]`);
+      const draft = mediaDraftFromRow(row);
+      const workflow = mediaWorkflowState(draft);
+      if (!workflow.canOptimize) {
+        alert("This image needs a source file before responsive variants can be refreshed.");
+        return;
+      }
+
+      try {
+        optimizeButton.disabled = true;
+        optimizeButton.textContent = "Caching...";
+        const sourceBlob = await loadSourceBlobForVariants(draft);
+        await putMedia({
+          ...draft,
+          blob: sourceBlob,
+        });
+        await syncAndRender();
+        alert(
+          draft.blob
+            ? "This image already had a source file cached. Save changes or publish live to write refreshed WebP variants."
+            : "Cached the current saved image in this browser. Save changes or publish live to write refreshed WebP variants."
+        );
+      } catch (error) {
+        alert(error.message || "Unable to queue refreshed variants for this image.");
+      }
+      return;
+    }
+
     const saveButton = event.target.closest("[data-media-save]");
     if (saveButton) {
-      const id = saveButton.dataset.mediaSave;
-      const row = target.querySelector(`[data-media-row="${id}"]`);
-      const current = media.find((item) => item.id === id) || { id };
-      await putMedia({
-        ...current,
-        title: row.querySelector('[data-media-field="title"]').value,
-        caption: row.querySelector('[data-media-field="caption"]').value,
-        alt: row.querySelector('[data-media-field="alt"]').value,
-        placement: row.querySelector('[data-media-field="placement"]').value,
-        order: Number(row.querySelector('[data-media-field="order"]').value || 0),
-      });
+      const row = target.querySelector(`[data-media-row="${saveButton.dataset.mediaSave}"]`);
+      await putMedia(mediaDraftFromRow(row));
       await syncAndRender();
       return;
     }
