@@ -595,6 +595,12 @@ img {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.button:disabled {
+  opacity: 0.72;
+  cursor: wait;
+  transform: none;
+}
+
 .button--accent {
   color: #0b0d10;
   background: linear-gradient(135deg, var(--accent), #f7d09e);
@@ -834,6 +840,39 @@ img {
   font-weight: 600;
 }
 
+.signal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.signal-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border: 1px solid rgba(109, 134, 179, 0.24);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(12, 16, 24, 0.86), rgba(17, 22, 31, 0.76)),
+    linear-gradient(135deg, rgba(240, 184, 127, 0.08), transparent 70%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.signal-card__label {
+  color: var(--accent-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.signal-card__value {
+  font-size: 1rem;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+}
+
 .card--featured {
   border-color: rgba(240, 184, 127, 0.35);
   background: linear-gradient(180deg, rgba(240, 184, 127, 0.08), var(--surface));
@@ -891,6 +930,28 @@ img {
   color: var(--text);
   font-size: 0.96rem;
   font-weight: 600;
+}
+
+.card__footer {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card__footerLabel {
+  color: var(--accent-2);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.card__footerText {
+  color: rgba(243, 239, 231, 0.86);
+  font-size: 0.96rem;
+  line-height: 1.65;
 }
 
 .services-page__proof {
@@ -1367,6 +1428,101 @@ img {
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.6;
+}
+
+.helper--warn {
+  color: var(--warn);
+}
+
+.section--loading {
+  overflow: hidden;
+}
+
+.skeleton,
+.skeleton-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.14) 48%, rgba(255, 255, 255, 0.06) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.35s linear infinite;
+}
+
+.skeleton::after,
+.skeleton-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+}
+
+.skeleton--eyebrow {
+  width: 132px;
+  height: 18px;
+  border-radius: 999px;
+}
+
+.skeleton--title {
+  height: 60px;
+  margin-top: 18px;
+}
+
+.skeleton--hero-title {
+  height: 84px;
+  margin-top: 18px;
+}
+
+.skeleton--line {
+  height: 18px;
+  margin-top: 14px;
+}
+
+.skeleton--button {
+  width: 210px;
+  height: 54px;
+  border-radius: 999px;
+}
+
+.skeleton--button-alt {
+  width: 190px;
+}
+
+.skeleton--wide {
+  width: min(100%, 760px);
+}
+
+.skeleton--medium {
+  width: min(100%, 520px);
+}
+
+.skeleton-actions,
+.skeleton-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.skeleton-actions {
+  grid-template-columns: repeat(2, max-content);
+}
+
+.skeleton-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.skeleton-card {
+  min-height: 220px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
 }
 
 .footer {
@@ -1958,6 +2114,7 @@ img {
   .testimonials-strip__header,
   .proof-layout,
   .proof-grid,
+  .signal-grid,
   .portfolio-grid,
   .gallery-reel__head {
     grid-template-columns: 1fr;
@@ -2085,6 +2242,11 @@ img {
     gap: 10px;
   }
 
+  .skeleton-actions,
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+
   .hero__actions .button,
   .section__actions .button {
     width: 100%;
@@ -2103,6 +2265,10 @@ img {
   .services-packages .card__body,
   .contact-box {
     padding: 18px;
+  }
+
+  .signal-card {
+    padding: 15px 16px;
   }
 
   .services-home__cards .card__title,

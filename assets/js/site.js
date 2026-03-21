@@ -28,6 +28,10 @@ let clientPortalError = "";
 let lightboxItems = [];
 let lightboxIndex = -1;
 
+if (mainEl) {
+  mainEl.innerHTML = loadingShellMarkup(page);
+}
+
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
 }
@@ -577,6 +581,7 @@ function servicesMarkup() {
         <div class="services-home__intro">
           <h2 class="section__title">High-performance media for premium listings.</h2>
           <p class="section__lead">${safeText(state.settings.servicesLead)}</p>
+          ${serviceSignalsMarkup()}
           <div class="section__actions">
             <a class="button button--accent" href="./services.html">View the full services page</a>
             <a class="button" href="./contact.html">Book a session</a>
@@ -819,6 +824,11 @@ function servicesPageMarkup() {
       <div class="section__eyebrow">Services</div>
       <h1 class="section__title">Elevate Your Listing, Engage Your Buyers.</h1>
       <p class="section__lead">${safeText(state.settings.servicesLead)}</p>
+      ${serviceSignalsMarkup()}
+      <div class="section__actions">
+        <a class="button button--accent" href="./contact.html">Book a session</a>
+        <a class="button" href="./client-access.html">See the delivery experience</a>
+      </div>
     </section>
 
     <section class="section services-page__packages">
@@ -840,6 +850,10 @@ function servicesPageMarkup() {
                   <div class="card__meta">
                     ${(service.bullets || []).map((bullet) => `<span class="pill">${safeText(bullet)}</span>`).join("")}
                   </div>
+                  <div class="card__footer">
+                    <span class="card__footerLabel">Best fit</span>
+                    <div class="card__footerText">${safeText(serviceSummary(service, index))}</div>
+                  </div>
                 </div>
               </article>
             `
@@ -856,6 +870,84 @@ function servicesPageMarkup() {
 
 function homePageMarkup() {
   return [heroMarkup(), galleryMarkup(), servicesMarkup(), testimonialsMarkup(), clientDeliveryTeaserMarkup(), contactMarkup()].join("");
+}
+
+function serviceSignalsMarkup() {
+  const signals = [
+    { label: "Turnaround", value: "24-hour delivery windows" },
+    { label: "Coverage", value: "Photo, video, and drone-ready" },
+    { label: "Delivery", value: "Simple client portal handoff" },
+  ];
+
+  return `
+    <div class="signal-grid" aria-label="Service highlights">
+      ${signals
+        .map(
+          (signal) => `
+            <div class="signal-card">
+              <span class="signal-card__label">${safeText(signal.label)}</span>
+              <strong class="signal-card__value">${safeText(signal.value)}</strong>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function serviceSummary(service, index) {
+  const bullets = Array.isArray(service?.bullets) ? service.bullets.filter(Boolean) : [];
+  if (bullets.length >= 2) {
+    return `${bullets[0]} + ${bullets[1]}`;
+  }
+
+  if (bullets.length === 1) {
+    return bullets[0];
+  }
+
+  if (service?.featured) {
+    return "Full-property launches that need the most complete presentation.";
+  }
+
+  return index === 0
+    ? "Fast, polished coverage for standard listing launches."
+    : "Elevated media that helps the property feel more premium online.";
+}
+
+function loadingShellMarkup(currentPage) {
+  const generic = `
+    <section class="section section--loading" aria-hidden="true">
+      <div class="skeleton skeleton--eyebrow"></div>
+      <div class="skeleton skeleton--title skeleton--wide"></div>
+      <div class="skeleton skeleton--line skeleton--wide"></div>
+      <div class="skeleton skeleton--line skeleton--medium"></div>
+      <div class="skeleton-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </section>
+  `;
+
+  if (currentPage === "home") {
+    return `
+      <section class="section hero section--loading" aria-hidden="true">
+        <div class="hero__inner">
+          <div class="skeleton skeleton--eyebrow"></div>
+          <div class="skeleton skeleton--hero-title skeleton--wide"></div>
+          <div class="skeleton skeleton--hero-title skeleton--medium"></div>
+          <div class="skeleton skeleton--line skeleton--wide"></div>
+          <div class="skeleton skeleton--line skeleton--medium"></div>
+          <div class="skeleton-actions">
+            <div class="skeleton skeleton--button"></div>
+            <div class="skeleton skeleton--button skeleton--button-alt"></div>
+          </div>
+        </div>
+      </section>
+      ${generic}
+    `;
+  }
+
+  return generic;
 }
 
 function portalSessionKey(slug) {
@@ -1126,7 +1218,8 @@ function clientAccessIntroMarkup(slug) {
     : slug
       ? "Double-check the portal ID or contact me if you need a fresh delivery link."
       : "If you were sent a portal ID and access code, enter them below. If you received a one-click link, opening it will take you straight to the gallery.";
-  const statusMarkup = clientPortalError ? `<div class="helper" style="color: var(--warn);">${safeText(clientPortalError)}</div>` : "";
+  const statusText = clientPortalError || "Enter the details you were sent and the gallery will open right away.";
+  const statusClass = clientPortalError ? "helper helper--warn" : "helper";
 
   return `
     <section class="section">
@@ -1146,8 +1239,8 @@ function clientAccessIntroMarkup(slug) {
               <label for="accessCode">Access code</label>
               <input id="accessCode" name="accessCode" type="password" placeholder="Enter the code you were sent" />
             </div>
-            <button class="button button--accent" type="submit">Open delivery</button>
-            ${statusMarkup}
+            <button class="button button--accent" type="submit" data-client-access-submit>Open delivery</button>
+            <div class="${statusClass}" data-client-access-status>${safeText(statusText)}</div>
           </form>
         </div>
         <div class="timeline">
@@ -1767,19 +1860,39 @@ async function unlockPortal(slug, accessCode, options = {}) {
 function wireClientAccessPage() {
   const form = document.getElementById("client-portal-access-form");
   const downloadAllButton = document.querySelector("[data-download-all]");
+  const status = document.querySelector("[data-client-access-status]");
+  const submitButton = document.querySelector("[data-client-access-submit]");
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
     const slug = formData.get("portal")?.toString().trim() || "";
     const accessCode = formData.get("accessCode")?.toString().trim() || "";
+    const originalLabel = submitButton?.textContent || "Open delivery";
 
     const targetUrl = `./client-access.html?portal=${encodeURIComponent(slug)}`;
     if (!portalSlugFromLocation() && slug) {
       window.history.replaceState({}, "", targetUrl);
     }
 
-    await unlockPortal(slug, accessCode);
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Opening...";
+    }
+
+    if (status) {
+      status.textContent = "Checking your access and loading the delivered files...";
+      status.classList.remove("helper--warn");
+    }
+
+    try {
+      await unlockPortal(slug, accessCode);
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalLabel;
+      }
+    }
   });
 
   downloadAllButton?.addEventListener("click", async () => {
