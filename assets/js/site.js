@@ -429,9 +429,18 @@ function renderLightboxRecord(record) {
   }
 
   const url = mediaUrlFor(record);
+  const isPortalRecord = Boolean(record.portalId || record.downloadUrl || activePortalMedia.some((item) => item.id === record.id));
+  const safeTitle = isPortalRecord
+    ? String(record.title || "").trim()
+    : String(record.title || "").trim() && String(record.title || "").trim() !== String(record.name || "").trim()
+      ? String(record.title || "").trim()
+      : "";
+  const safeCaption = String(record.caption || "").trim();
+  const captionText = [safeTitle, safeCaption].filter(Boolean).join(" - ");
   lightboxImage.src = url;
   lightboxImage.alt = record.alt || record.title || record.name || "Portfolio image";
-  lightboxCaption.textContent = [record.title || record.name, record.caption].filter(Boolean).join(" - ");
+  lightboxCaption.textContent = captionText;
+  lightboxCaption.hidden = !captionText;
   updateLightboxMeta();
 }
 
