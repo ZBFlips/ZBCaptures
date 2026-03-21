@@ -789,18 +789,22 @@ function contactMarkup() {
             <form class="form" id="contact-form">
               <div class="field">
                 <label for="name">Name</label>
-                <input id="name" name="name" autocomplete="name" placeholder="Your name" />
+                <input id="name" name="name" autocomplete="name" placeholder="Your name" required />
               </div>
               <div class="field">
                 <label for="email">Email</label>
-                <input id="email" name="email" autocomplete="email" placeholder="you@example.com" />
+                <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
               </div>
               <div class="field">
                 <label for="message">Project details</label>
-                <textarea id="message" name="message" placeholder="Property address, desired turnaround, number of photos, video needs, anything else."></textarea>
+                <textarea id="message" name="message" placeholder="Property address, desired turnaround, number of photos, video needs, anything else." required></textarea>
               </div>
-              <button class="button button--accent" type="submit">Open email draft</button>
-              <div class="helper">If a notification endpoint is configured in the admin, this form saves the submission and emails you automatically. Otherwise it opens your email client.</div>
+              <div class="field field--honeypot" aria-hidden="true">
+                <label for="company">Company</label>
+                <input id="company" name="company" tabindex="-1" autocomplete="off" />
+              </div>
+              <button class="button button--accent" type="submit" data-contact-submit>Send inquiry</button>
+              <div class="helper" data-contact-status>The built-in contact form sends directly from this site. If that service is unavailable, your email app will open as a fallback.</div>
             </form>
           </div>
         </div>
@@ -1585,7 +1589,8 @@ function wireContactForm() {
     return;
   }
 
-  const status = form.querySelector(".helper");
+  const status = form.querySelector("[data-contact-status]");
+  const submitButton = form.querySelector("[data-contact-submit]");
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1594,37 +1599,56 @@ function wireContactForm() {
     const name = formData.get("name")?.toString().trim() || "";
     const email = formData.get("email")?.toString().trim() || "";
     const message = formData.get("message")?.toString().trim() || "";
-    const endpoint = state.settings.contactNotificationEndpoint?.trim() || "";
+    const company = formData.get("company")?.toString().trim() || "";
+    const endpoint = state.settings.contactNotificationEndpoint?.trim() || defaultContactEndpoint();
+    const originalLabel = submitButton?.textContent || "Send inquiry";
 
-    const submission = new FormData(form);
-    submission.set("source", `${state.settings.brandName} website`);
-    submission.set("page", window.location.href);
-    submission.set("submittedAt", new Date().toISOString());
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending...";
+    }
 
-    if (endpoint) {
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-          },
-          body: submission,
-        });
+    if (status) {
+      status.textContent = "Sending your inquiry...";
+    }
 
-        if (!response.ok) {
-          throw new Error("Notification endpoint returned an error.");
-        }
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+          company,
+          source: `${state.settings.brandName} website`,
+          page: window.location.href,
+          submittedAt: new Date().toISOString(),
+        }),
+      });
 
-        form.reset();
-        if (status) {
-          status.textContent = "Sent. Your inquiry was delivered and a notification can be sent from the configured endpoint.";
-        }
-        return;
-      } catch (error) {
-        console.error(error);
-        if (status) {
-          status.textContent = "The notification endpoint could not be reached, so the email draft is opening instead.";
-        }
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload?.ok === false) {
+        throw new Error(payload?.error || "The contact form service returned an error.");
+      }
+
+      form.reset();
+      if (status) {
+        status.textContent = payload?.message || "Thanks. Your inquiry was sent successfully.";
+      }
+      return;
+    } catch (error) {
+      console.error(error);
+      if (status) {
+        status.textContent = "The form backend could not be reached, so your email app will open as a fallback.";
+      }
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalLabel;
       }
     }
 
@@ -1646,6 +1670,10 @@ async function loadMedia() {
 function clearClientPortalState() {
   activePortalData = null;
   activePortalMedia = [];
+}
+
+function defaultContactEndpoint() {
+  return new URL("./api/contact", window.location.href).toString();
 }
 
 function rememberPortalCode(slug, accessCode) {

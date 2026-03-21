@@ -1312,6 +1312,16 @@ img {
   gap: 8px;
 }
 
+.field--honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .field label {
   font-size: 0.85rem;
   color: var(--muted);
@@ -2050,6 +2060,75 @@ img {
 
   .brand__tag {
     display: none;
+  }
+
+  .section,
+  .hero__inner,
+  .admin-panel,
+  .admin-banner {
+    padding: 18px;
+  }
+
+  .section__lead,
+  .hero__lead,
+  .gallery-copy .section__lead,
+  .timeline__text,
+  .card__text,
+  .helper {
+    font-size: 0.98rem;
+    line-height: 1.7;
+  }
+
+  .hero__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .hero__actions .button,
+  .section__actions .button {
+    width: 100%;
+  }
+
+  .hero__stats {
+    gap: 10px;
+  }
+
+  .stat {
+    padding: 14px 16px;
+    border-radius: 18px;
+  }
+
+  .services-home__cards .card__body,
+  .services-packages .card__body,
+  .contact-box {
+    padding: 18px;
+  }
+
+  .services-home__cards .card__title,
+  .services-packages .card__title {
+    font-size: clamp(1.3rem, 6vw, 1.8rem);
+  }
+
+  .contact-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .contact-value {
+    text-align: left;
+  }
+
+  .field input,
+  .field textarea,
+  .field select {
+    padding: 0.9rem 0.95rem;
+    border-radius: 16px;
+  }
+
+  .field textarea {
+    min-height: 144px;
   }
 
   .nav-toggle {

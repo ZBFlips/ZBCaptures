@@ -724,7 +724,7 @@ function adminMarkup() {
             <div class="field">
               <label for="contactNotificationEndpoint">Contact notification endpoint</label>
               <input id="contactNotificationEndpoint" name="contactNotificationEndpoint" value="${safeText(state.settings.contactNotificationEndpoint || "")}" placeholder="https://..." />
-              <div class="admin-note">Paste the Cloudflare Worker URL or any webhook endpoint that stores submissions and forwards them to your inbox. Leave blank to keep the default email draft flow.</div>
+              <div class="admin-note">Leave this blank to use the built-in <code>/api/contact</code> endpoint on your Cloudflare Pages site. Paste a custom webhook only if you want to override it.</div>
             </div>
             <div class="field">
               <label for="phone">Phone</label>

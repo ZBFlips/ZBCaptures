@@ -30,13 +30,27 @@ This workspace contains a custom, static-first photography portfolio with:
 
 ## Contact submissions
 
-If you want form submissions saved and emailed automatically, use the Cloudflare Worker in [`contact-backend/`](./contact-backend).
+The live site can now post directly to the built-in Pages Function at [`functions/api/contact.js`](/C:/Users/Zac/Desktop/photography%20portfolio%20website/functions/api/contact.js).
 
 That backend:
 
 - Stores each submission as a JSON file in R2
 - Sends a notification email to your inbox
-- Works with the contact notification endpoint field in the admin panel
+- Works automatically when the admin's contact notification endpoint field is left blank
+- Still lets you override the endpoint in the admin panel if you want a different webhook later
+
+To finish the live contact form on Cloudflare Pages:
+
+1. Create a private R2 bucket for contact submissions, for example `zb-captures-contact-submissions`.
+2. In Pages `Settings > Bindings`, add:
+   - `CONTACT_SUBMISSIONS` -> your contact submissions R2 bucket
+   - `EMAIL` -> Send Email binding
+3. In Pages `Settings > Variables and Secrets`, add:
+   - `NOTIFICATION_FROM`
+   - `NOTIFICATION_TO`
+4. Redeploy the Pages project.
+
+The standalone Worker in [`contact-backend/`](/C:/Users/Zac/Desktop/photography%20portfolio%20website/contact-backend) can still be used as a reference or separate deployment if you ever want the contact flow split out again.
 
 ## Important note
 

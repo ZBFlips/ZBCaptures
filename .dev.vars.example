@@ -4,3 +4,5 @@ R2_BUCKET_NAME=zb-captures-client-media-prod
 R2_ACCOUNT_ID=your-cloudflare-account-id
 R2_ACCESS_KEY_ID=your-r2-access-key-id
 R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+NOTIFICATION_FROM=ZB Captures <noreply@yourdomain.com>
+NOTIFICATION_TO=your@email.com
