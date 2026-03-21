@@ -2029,6 +2029,33 @@ img {
   justify-self: start;
 }
 
+.portal-upload-meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.portal-admin-feedback {
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.portal-admin-feedback--success {
+  border-color: rgba(131, 209, 187, 0.28);
+  background: rgba(131, 209, 187, 0.08);
+  color: #e9fff7;
+}
+
+.portal-admin-feedback--warn {
+  border-color: rgba(255, 138, 107, 0.28);
+  background: rgba(255, 138, 107, 0.08);
+  color: #ffe2d8;
+}
+
 .portal-asset-grid {
   display: grid;
   gap: 12px;

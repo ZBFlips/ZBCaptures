@@ -42,9 +42,101 @@ let media = [];
 const rowUrls = new Map();
 let workspaceDirectoryHandle = null;
 let cloudPortalBackendConfigured = false;
+const portalUiState = new Map();
 
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
+}
+
+function formatBytes(bytes) {
+  const value = Number(bytes) || 0;
+  if (!value) {
+    return "0 B";
+  }
+
+  const units = ["B", "KB", "MB", "GB"];
+  let size = value;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${size.toFixed(size >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function portalUiSnapshot(portalId) {
+  return portalUiState.get(portalId) || {
+    message: "",
+    tone: "neutral",
+    selectedCount: 0,
+    selectedBytes: 0,
+    savePending: false,
+    uploadPending: false,
+    uploadStep: 0,
+    uploadTotal: 0,
+  };
+}
+
+function setPortalUiState(portalId, patch = {}) {
+  const current = portalUiSnapshot(portalId);
+  portalUiState.set(portalId, {
+    ...current,
+    ...patch,
+  });
+}
+
+function clearPortalUiState(portalId, keys = []) {
+  if (!portalUiState.has(portalId)) {
+    return;
+  }
+
+  if (!keys.length) {
+    portalUiState.delete(portalId);
+    return;
+  }
+
+  const next = { ...portalUiSnapshot(portalId) };
+  keys.forEach((key) => {
+    delete next[key];
+  });
+  portalUiState.set(portalId, next);
+}
+
+function portalUploadSummary(portalId) {
+  const snapshot = portalUiSnapshot(portalId);
+  if (snapshot.uploadPending && snapshot.uploadTotal) {
+    return `Uploading ${snapshot.uploadStep || 0} of ${snapshot.uploadTotal} files to private storage...`;
+  }
+
+  if (snapshot.selectedCount) {
+    return `${snapshot.selectedCount} file${snapshot.selectedCount === 1 ? "" : "s"} selected (${formatBytes(snapshot.selectedBytes)})`;
+  }
+
+  return "Choose the finished shoot files here. Images and video upload directly to private storage.";
+}
+
+function portalFeedbackClass(tone) {
+  return tone === "success"
+    ? "portal-admin-feedback portal-admin-feedback--success"
+    : tone === "warn"
+      ? "portal-admin-feedback portal-admin-feedback--warn"
+      : "portal-admin-feedback";
+}
+
+function flashButtonLabel(button, nextLabel, duration = 1600) {
+  if (!button) {
+    return;
+  }
+
+  const original = button.dataset.originalLabel || button.textContent;
+  button.dataset.originalLabel = original;
+  button.textContent = nextLabel;
+  window.setTimeout(() => {
+    if (button.isConnected) {
+      button.textContent = button.dataset.originalLabel || original;
+    }
+  }, duration);
 }
 
 function loadPublishConfig() {
@@ -218,9 +310,10 @@ async function copyToClipboard(text, fallbackMessage) {
 
   try {
     await navigator.clipboard.writeText(text);
-    alert(fallbackMessage);
+    return { ok: true, message: fallbackMessage };
   } catch {
     window.prompt("Copy this value:", text);
+    return { ok: false, message: fallbackMessage };
   }
 }
 
@@ -319,7 +412,7 @@ async function syncPortalToCloud(portalId, options = {}) {
   return merged;
 }
 
-async function uploadPortalFilesToCloud(portalId, files) {
+async function uploadPortalFilesToCloud(portalId, files, onProgress) {
   const portal = await syncPortalToCloud(portalId);
   const existingItems = portalMediaItems(portal.id);
   let nextOrder = existingItems.length
@@ -327,7 +420,8 @@ async function uploadPortalFilesToCloud(portalId, files) {
     : 0;
 
   let latestPortal = portal;
-  for (const file of files) {
+  for (const [index, file] of files.entries()) {
+    onProgress?.(index + 1, files.length, file);
     const uploadTarget = await createCloudUploadTarget(portal.id, file);
     await uploadFileToR2(uploadTarget, file);
     latestPortal = await finalizeCloudPortalFile(portal.id, {
@@ -921,6 +1015,7 @@ function renderGalleryOrderEditor() {
 
 function clientPortalCard(portal) {
   const items = portalMediaItems(portal.id);
+  const ui = portalUiSnapshot(portal.id);
   const shareUrl = portal.portalUrl || (portal.slug ? portalUrl(portal) : "");
   const privateUrl = portal.privateUrl || (portal.slug && portal.directToken ? portalOneClickUrl(portal) : "");
   const accessNote = portal.accessCode
@@ -931,6 +1026,11 @@ function clientPortalCard(portal) {
   const cloudStatus = portal.cloudSynced
     ? "Live in Cloudflare"
     : "Saved only in this browser until you click Save portal";
+  const feedback = ui.message || (portal.cloudSynced ? "Portal is ready to share. Upload more files or copy the link below." : "Make any edits you need, then click Save portal to make this delivery live.");
+  const saveLabel = ui.savePending ? "Saving..." : "Save portal";
+  const uploadLabel = ui.uploadPending
+    ? `Uploading ${Math.max(ui.uploadStep || 0, 1)} / ${Math.max(ui.uploadTotal || 1, 1)}...`
+    : "Upload to private storage";
 
   return `
     <article class="portal-admin-card" data-portal-card="${portal.id}">
@@ -994,7 +1094,7 @@ function clientPortalCard(portal) {
       </div>
 
       <div class="admin-toolbar">
-        <button class="button button--accent" type="button" data-save-portal="${portal.id}">Save portal</button>
+        <button class="button button--accent" type="button" data-save-portal="${portal.id}" ${ui.savePending ? "disabled" : ""}>${saveLabel}</button>
         <button class="button ghost" type="button" data-copy-portal-url="${portal.id}" ${shareUrl ? "" : "disabled"}>Copy portal URL</button>
         <button class="button ghost" type="button" data-copy-portal-link="${portal.id}" ${privateUrl ? "" : "disabled"}>Copy private link</button>
         <button class="button ghost" type="button" data-generate-portal-code="${portal.id}">Generate code</button>
@@ -1002,12 +1102,15 @@ function clientPortalCard(portal) {
         <button class="button ghost danger" type="button" data-delete-portal="${portal.id}">Delete portal</button>
       </div>
 
+      <div class="${portalFeedbackClass(ui.tone)}" data-portal-feedback>${safeText(feedback)}</div>
+
       <form class="portal-upload-form" data-portal-upload="${portal.id}">
         <div class="field" style="grid-column: 1 / -1;">
           <label>Upload images or video for this portal</label>
           <input type="file" accept="image/*,video/*" multiple data-portal-upload-input="${portal.id}" />
         </div>
-        <button class="button button--accent" type="submit">Upload to private storage</button>
+        <div class="portal-upload-meta" data-portal-upload-meta>${safeText(portalUploadSummary(portal.id))}</div>
+        <button class="button button--accent" type="submit" data-portal-upload-button ${ui.uploadPending ? "disabled" : ""}>${safeText(uploadLabel)}</button>
       </form>
 
       <div class="portal-asset-grid">
@@ -1044,6 +1147,46 @@ function renderClientPortalsEditor() {
   target.innerHTML = portals.length
     ? portals.map((portal) => clientPortalCard(portal)).join("")
     : `<div class="admin-note">No client portals yet. Create one above, save it to Cloudflare, then upload the finished media and copy the delivery link.</div>`;
+}
+
+function updatePortalCardUi(portalId) {
+  const card = document.querySelector(`[data-portal-card="${portalId}"]`);
+  if (!card) {
+    return;
+  }
+
+  const portal = portalRecordById(portalId);
+  if (!portal) {
+    return;
+  }
+
+  const ui = portalUiSnapshot(portalId);
+  const feedback = card.querySelector("[data-portal-feedback]");
+  const uploadMeta = card.querySelector("[data-portal-upload-meta]");
+  const uploadButton = card.querySelector("[data-portal-upload-button]");
+  const saveButton = card.querySelector(`[data-save-portal="${portalId}"]`);
+
+  if (feedback) {
+    const message = ui.message || (portal.cloudSynced ? "Portal is ready to share. Upload more files or copy the link below." : "Make any edits you need, then click Save portal to make this delivery live.");
+    feedback.textContent = message;
+    feedback.className = portalFeedbackClass(ui.tone);
+  }
+
+  if (uploadMeta) {
+    uploadMeta.textContent = portalUploadSummary(portalId);
+  }
+
+  if (uploadButton) {
+    uploadButton.disabled = Boolean(ui.uploadPending);
+    uploadButton.textContent = ui.uploadPending
+      ? `Uploading ${Math.max(ui.uploadStep || 0, 1)} / ${Math.max(ui.uploadTotal || 1, 1)}...`
+      : "Upload to private storage";
+  }
+
+  if (saveButton) {
+    saveButton.disabled = Boolean(ui.savePending);
+    saveButton.textContent = ui.savePending ? "Saving..." : "Save portal";
+  }
 }
 
 function mediaEditorRow(item) {
@@ -1758,7 +1901,28 @@ function wireClientPortalsEditor() {
 
     portal[key] = field.type === "checkbox" ? field.checked : field.value;
     portal.cloudSynced = false;
+    setPortalUiState(portal.id, {
+      message: "Unsaved changes. Click Save portal to update the live delivery.",
+      tone: "warn",
+    });
     persist("Client portal saved in this browser. Click Save portal to make the cloud version live.");
+  });
+
+  target?.addEventListener("change", (event) => {
+    const input = event.target.closest("[data-portal-upload-input]");
+    if (!input) {
+      return;
+    }
+
+    const portalId = input.dataset.portalUploadInput;
+    const files = Array.from(input.files || []);
+    setPortalUiState(portalId, {
+      selectedCount: files.length,
+      selectedBytes: files.reduce((total, file) => total + (file.size || 0), 0),
+      message: files.length ? "Files selected. Click upload when you're ready." : "",
+      tone: files.length ? "neutral" : "neutral",
+    });
+    updatePortalCardUi(portalId);
   });
 
   target?.addEventListener("click", async (event) => {
@@ -1766,18 +1930,31 @@ function wireClientPortalsEditor() {
     if (savePortalButton) {
       const portalId = savePortalButton.dataset.savePortal;
       try {
-        savePortalButton.disabled = true;
+        setPortalUiState(portalId, {
+          savePending: true,
+          message: "Saving portal details to Cloudflare...",
+          tone: "neutral",
+        });
+        updatePortalCardUi(portalId);
         const portal = await syncPortalToCloud(portalId);
         upsertPortalState(portal);
+        setPortalUiState(portalId, {
+          savePending: false,
+          message: `Saved. ${portal.propertyTitle || portal.clientLabel || "Client delivery"} is now live and ready to share.`,
+          tone: "success",
+        });
         persist(`Portal saved. ${portal.propertyTitle || portal.clientLabel || "Client delivery"} is now live in Cloudflare.`);
         await syncAndRender();
       } catch (error) {
+        setPortalUiState(portalId, {
+          savePending: false,
+          message: error.message || "Unable to save this client portal.",
+          tone: "warn",
+        });
         alert(error.message || "Unable to save this client portal.");
         if (status) {
           status.textContent = error.message || "Unable to save this client portal.";
         }
-      } finally {
-        savePortalButton.disabled = false;
       }
       return;
     }
@@ -1787,6 +1964,13 @@ function wireClientPortalsEditor() {
       const portal = portalRecordById(copyPortalUrlButton.dataset.copyPortalUrl);
       if (portal?.slug) {
         await copyToClipboard(portal.portalUrl || portalUrl(portal), "Portal URL copied.");
+        setPortalUiState(portal.id, {
+          message: "Portal URL copied. This is the standard link to send with the access code.",
+          tone: "success",
+        });
+        persist("Portal URL copied.");
+        flashButtonLabel(copyPortalUrlButton, "Copied");
+        updatePortalCardUi(portal.id);
       }
       return;
     }
@@ -1796,6 +1980,13 @@ function wireClientPortalsEditor() {
       const portal = portalRecordById(copyPortalLinkButton.dataset.copyPortalLink);
       if (portal?.slug && (portal?.directToken || portal?.privateUrl)) {
         await copyToClipboard(portal.privateUrl || portalOneClickUrl(portal), "Private link copied.");
+        setPortalUiState(portal.id, {
+          message: "Private link copied. This one opens the gallery without asking for the access code.",
+          tone: "success",
+        });
+        persist("Private link copied.");
+        flashButtonLabel(copyPortalLinkButton, "Copied");
+        updatePortalCardUi(portal.id);
       }
       return;
     }
@@ -1809,6 +2000,10 @@ function wireClientPortalsEditor() {
 
       portal.accessCode = createAccessCode();
       portal.cloudSynced = false;
+      setPortalUiState(portal.id, {
+        message: "A new access code was generated. Save the portal to make it live.",
+        tone: "warn",
+      });
       persist("A new access code was generated. Save the portal to make it live.");
       await syncAndRender();
       return;
@@ -1817,8 +2012,18 @@ function wireClientPortalsEditor() {
     const rotatePortalLinkButton = event.target.closest("[data-rotate-portal-link]");
     if (rotatePortalLinkButton) {
       try {
-        const portal = await syncPortalToCloud(rotatePortalLinkButton.dataset.rotatePortalLink, { rotateDirectLink: true });
+        const targetPortalId = rotatePortalLinkButton.dataset.rotatePortalLink;
+        setPortalUiState(targetPortalId, {
+          message: "Refreshing the one-click private link...",
+          tone: "neutral",
+        });
+        updatePortalCardUi(targetPortalId);
+        const portal = await syncPortalToCloud(targetPortalId, { rotateDirectLink: true });
         upsertPortalState(portal);
+        setPortalUiState(portal.id, {
+          message: "The one-click private link was refreshed.",
+          tone: "success",
+        });
         persist("The one-click private link was refreshed.");
         await syncAndRender();
       } catch (error) {
@@ -1843,6 +2048,7 @@ function wireClientPortalsEditor() {
         await deleteCloudPortal(portalId);
       }
 
+      clearPortalUiState(portalId);
       state.clientPortals = (state.clientPortals || []).filter((item) => item.id !== portalId);
       persist("Client portal deleted.");
       await syncAndRender();
@@ -1864,6 +2070,10 @@ function wireClientPortalsEditor() {
 
       const updatedPortal = await deleteCloudPortalFile(portalId, mediaId);
       upsertPortalState(updatedPortal);
+      setPortalUiState(portalId, {
+        message: "Portal file deleted.",
+        tone: "success",
+      });
       persist("Portal file deleted.");
       await syncAndRender();
     }
@@ -1885,15 +2095,46 @@ function wireClientPortalsEditor() {
     }
 
     try {
+      setPortalUiState(portalId, {
+        uploadPending: true,
+        uploadStep: 0,
+        uploadTotal: files.length,
+        message: `Preparing ${files.length} file${files.length === 1 ? "" : "s"} for upload...`,
+        tone: "neutral",
+      });
+      updatePortalCardUi(portalId);
       if (status) {
         status.textContent = "Uploading portal files to private storage...";
       }
-      const updatedPortal = await uploadPortalFilesToCloud(portalId, files);
+      const updatedPortal = await uploadPortalFilesToCloud(portalId, files, (current, total, file) => {
+        setPortalUiState(portalId, {
+          uploadPending: true,
+          uploadStep: current,
+          uploadTotal: total,
+          message: `Uploading ${current} of ${total}: ${file.name}`,
+          tone: "neutral",
+        });
+        updatePortalCardUi(portalId);
+      });
       upsertPortalState(updatedPortal);
       form.reset();
+      setPortalUiState(portalId, {
+        uploadPending: false,
+        uploadStep: 0,
+        uploadTotal: 0,
+        selectedCount: 0,
+        selectedBytes: 0,
+        message: `Upload complete. ${files.length} new file${files.length === 1 ? "" : "s"} added to this portal.`,
+        tone: "success",
+      });
       persist("Portal media uploaded to Cloudflare.");
       await syncAndRender();
     } catch (error) {
+      setPortalUiState(portalId, {
+        uploadPending: false,
+        message: error.message || "Unable to upload the selected portal files.",
+        tone: "warn",
+      });
       alert(error.message || "Unable to upload the selected portal files.");
       if (status) {
         status.textContent = error.message || "Unable to upload the selected portal files.";
