@@ -18,6 +18,34 @@ const lightboxNext = document.querySelector("[data-lightbox-next]");
 document.documentElement.classList.add("js");
 
 const CLIENT_PORTAL_SESSION_PREFIX = "portfolio-client-portal-access:";
+const SEO_SERVICE_AREAS = [
+  "Pensacola, FL",
+  "Gulf Breeze, FL",
+  "Pace, FL",
+  "Milton, FL",
+  "Navarre, FL",
+  "Perdido Key, FL",
+  "Ferry Pass, FL",
+  "Bellview, FL",
+  "Brent, FL",
+  "Ensley, FL",
+  "West Pensacola, FL",
+  "Crestview, FL",
+  "Niceville, FL",
+  "Destin, FL",
+  "Fort Walton Beach, FL",
+  "Miramar Beach, FL",
+  "Freeport, FL",
+  "Panama City Beach, FL",
+  "Orange Beach, AL",
+  "Foley, AL",
+  "Fairhope, AL",
+  "Daphne, AL",
+  "Mobile, AL",
+  "Enterprise, AL",
+];
+const SEO_PLATFORMS = ["MLS", "Zillow", "Homes.com", "Redfin", "Airbnb", "VRBO"];
+const SEO_DELIVERABLES = ["MLS-ready photos", "Zillow-ready images", "HDR photography", "drone photos", "social video"];
 
 let state = loadState();
 let mediaCache = [];
@@ -264,18 +292,34 @@ function wireHeaderMenu() {
 }
 
 function renderFooter() {
+  const marketsMarkup = SEO_SERVICE_AREAS.map((market) => `<span class="footer__chip">${safeText(market)}</span>`).join("");
+  const platformsMarkup = SEO_PLATFORMS.map((platform) => `<span class="footer__chip footer__chip--platform">${safeText(platform)}</span>`).join("");
+  const linksMarkup = navItems()
+    .map((item) => `<a href="${item.href}">${safeText(item.label)}</a>`)
+    .join("");
+
   footerEl.innerHTML = `
     <div class="footer">
       <div class="footer__inner">
-        <div>
+        <div class="footer__brand">
           <strong>${safeText(state.settings.brandName)}</strong>
-          <div>${safeText(state.settings.footerNote)}</div>
+          <p class="footer__headline">Pensacola real estate photography for ${safeText(SEO_PLATFORMS.join(", "))}-ready listings.</p>
+          <p class="footer__copy">${safeText(state.settings.footerNote)}</p>
+          <p class="footer__copy">${safeText(SEO_DELIVERABLES.join(", "))}, with same-day availability when possible for Gulf Coast agents who need media that works fast across industry-standard platforms.</p>
+          <a class="footer__contact" href="mailto:${safeText(state.settings.email)}">Primary contact: ${safeText(state.settings.email)}</a>
         </div>
-        <div class="footer__links">
-          <a href="./services.html">Services</a>
-          <a href="./contact.html">Contact</a>
-          <a href="./client-access.html">Client Access</a>
-          <a href="./admin.html">Admin</a>
+        <div class="footer__stack">
+          <div class="footer__heading">Service area</div>
+          <p class="footer__copy">${safeText(state.settings.serviceArea)}</p>
+          <div class="footer__chips">${marketsMarkup}</div>
+        </div>
+        <div class="footer__stack">
+          <div class="footer__heading">Platform compatibility</div>
+          <p class="footer__copy">Built for agents, brokers, and hosts who need media that fits the expectations of MLS listings, Zillow, Homes.com, Redfin, Airbnb, and VRBO.</p>
+          <div class="footer__chips">${platformsMarkup}</div>
+          <div class="footer__links">
+            ${linksMarkup}
+          </div>
         </div>
       </div>
     </div>
@@ -948,6 +992,161 @@ function loadingShellMarkup(currentPage) {
   }
 
   return generic;
+}
+
+function absolutePageUrl(relativePath = ".") {
+  return new URL(relativePath, window.location.href).toString();
+}
+
+function seoImageUrl() {
+  const image = heroMedia() || headerLogoMedia();
+  return image ? new URL(mediaUrlFor(image), window.location.href).toString() : absolutePageUrl("./assets/brand/favicon.svg");
+}
+
+function pageSeoConfig() {
+  switch (page) {
+    case "services":
+      return {
+        title: "Real Estate Photography Services in Pensacola, FL | ZB Captures",
+        description:
+          "Real estate photography services in Pensacola, Florida with MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video for Zillow, Homes.com, Redfin, Airbnb, and VRBO listings.",
+        path: "./services.html",
+      };
+    case "contact":
+      return {
+        title: "Contact ZB Captures | Pensacola Real Estate Photographer",
+        description:
+          "Contact ZB Captures for Pensacola real estate photography, MLS-ready photos, drone photos, and listing media with same-day availability when possible across the Gulf Coast.",
+        path: "./contact.html",
+      };
+    case "client-access":
+      return {
+        title: "Client Delivery Portal | ZB Captures",
+        description: "Client delivery portal for reviewing and downloading real estate photography and video files.",
+        path: "./client-access.html",
+      };
+    case "admin":
+      return {
+        title: "Admin Dashboard | ZB Captures",
+        description: "Admin dashboard for managing ZB Captures content, media uploads, and client delivery portals.",
+        path: "./admin.html",
+      };
+    default:
+      return {
+        title: "Pensacola Real Estate Photography | MLS & Zillow-Ready Media | ZB Captures",
+        description:
+          "ZB Captures provides Pensacola real estate photography with MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video for Zillow, Homes.com, Redfin, Airbnb, and VRBO listings across the Gulf Coast.",
+        path: "./index.html",
+      };
+  }
+}
+
+function upsertMetaTag(key, value, mode = "name") {
+  let tag = document.head.querySelector(`meta[${mode}="${key}"]`);
+  if (!tag) {
+    tag = document.createElement("meta");
+    tag.setAttribute(mode, key);
+    document.head.appendChild(tag);
+  }
+
+  tag.setAttribute("content", value);
+}
+
+function upsertLinkTag(rel, href) {
+  let tag = document.head.querySelector(`link[rel="${rel}"]`);
+  if (!tag) {
+    tag = document.createElement("link");
+    tag.setAttribute("rel", rel);
+    document.head.appendChild(tag);
+  }
+
+  tag.setAttribute("href", href);
+}
+
+function applyStructuredData(seo) {
+  document.querySelectorAll('script[data-seo-structured="true"]').forEach((node) => node.remove());
+
+  if (page === "admin" || page === "client-access") {
+    return;
+  }
+
+  const canonicalUrl = absolutePageUrl(seo.path);
+  const businessId = `${window.location.origin}/#business`;
+  const business = {
+    "@type": ["LocalBusiness", "ProfessionalService"],
+    "@id": businessId,
+    name: state.settings.brandName,
+    url: window.location.origin,
+    image: seoImageUrl(),
+    description: seo.description,
+    areaServed: SEO_SERVICE_AREAS,
+    email: state.settings.email,
+    telephone: state.settings.phone,
+    priceRange: "$$",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Pensacola",
+      addressRegion: "FL",
+      addressCountry: "US",
+    },
+    sameAs: ["https://www.instagram.com/zb.re.media/"],
+    knowsAbout: [...SEO_DELIVERABLES, ...SEO_PLATFORMS],
+  };
+
+  const graph = [
+    {
+      "@type": "WebSite",
+      "@id": `${window.location.origin}/#website`,
+      name: state.settings.brandName,
+      url: window.location.origin,
+    },
+    business,
+  ];
+
+  if (page === "services") {
+    graph.push({
+      "@type": "Service",
+      serviceType: "Real estate photography",
+      name: "Real estate photography, drone photography, and social video",
+      provider: { "@id": businessId },
+      areaServed: SEO_SERVICE_AREAS,
+      url: canonicalUrl,
+      description: seo.description,
+    });
+  }
+
+  const script = document.createElement("script");
+  script.type = "application/ld+json";
+  script.dataset.seoStructured = "true";
+  script.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": graph,
+  });
+  document.head.appendChild(script);
+}
+
+function applySeoMetadata() {
+  const seo = pageSeoConfig();
+  const canonicalUrl = absolutePageUrl(seo.path);
+  const imageUrl = seoImageUrl();
+
+  document.title = seo.title;
+  upsertMetaTag("description", seo.description);
+  upsertLinkTag("canonical", canonicalUrl);
+
+  upsertMetaTag("og:title", seo.title, "property");
+  upsertMetaTag("og:description", seo.description, "property");
+  upsertMetaTag("og:type", page === "home" ? "website" : "article", "property");
+  upsertMetaTag("og:url", canonicalUrl, "property");
+  upsertMetaTag("og:image", imageUrl, "property");
+  upsertMetaTag("og:site_name", state.settings.brandName, "property");
+
+  upsertMetaTag("twitter:card", "summary_large_image");
+  upsertMetaTag("twitter:title", seo.title);
+  upsertMetaTag("twitter:description", seo.description);
+  upsertMetaTag("twitter:image", imageUrl);
+
+  applyStructuredData(seo);
 }
 
 function portalSessionKey(slug) {
@@ -1941,6 +2140,7 @@ function wireClientAccessPage() {
 function renderPage() {
   renderHeader();
   renderFooter();
+  applySeoMetadata();
   wireHeaderMenu();
 
   if (page === "home") {

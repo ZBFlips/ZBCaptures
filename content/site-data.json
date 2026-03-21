@@ -2,8 +2,8 @@
   "settings": {
     "brandName": "ZB Captures",
     "brandTag": "",
-    "location": "Serving luxury, commercial, and residential listings",
-    "heroKicker": "Premium Real Estate Media, 24-Hour Turnaround, Guaranteed.",
+    "location": "Pensacola real estate photography for Gulf Coast listings",
+    "heroKicker": "Pensacola Real Estate Photography | MLS, Zillow & Airbnb-Ready Media",
     "heroHeadline": "Turn your listing into a sale.",
     "heroLead": "High-end media designed to capture attention, move quickly, and give your listings a competitive edge.",
     "featuredFrameTitle": "Highlighted Photo",
@@ -29,7 +29,7 @@
         "value": "Designed to feel premium from the first second"
       }
     ],
-    "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
+    "servicesLead": "ZB Captures provides Pensacola real estate photography for agents, brokers, and property marketers who need MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video that fit the expectations of Zillow, Homes.com, Redfin, Airbnb, and VRBO. Same-day availability is offered when the schedule allows.",
     "proofEyebrow": "Why agents book this",
     "proofTitle": "The Impact",
     "proofLead": "According to eye-tracking data, buyers spend 60% of their time looking at listing photos (compared to 20% at the description). On average, professional photos drive 61% more views to a listing, and reduce time on the market by 32%. Better photos also improve the perceived value of a home, increasing the sale price by up to $11,200 on average.",
@@ -37,34 +37,34 @@
       {
         "eyebrow": "Faster launch",
         "title": "Listings can move from shoot to market quickly.",
-        "text": "The turnaround and package structure make it easy for agents to keep momentum when a property is ready to go live."
+        "text": "Same-day availability when possible and next-day delivery keep agents moving when a property is ready to go live."
       },
       {
-        "eyebrow": "Stronger first impression",
-        "title": "Premium presentation makes the work feel worth hiring.",
-        "text": "The visual hierarchy, pricing clarity, and gallery treatment all reinforce a higher-value service."
+        "eyebrow": "Platform ready",
+        "title": "Media is built for the way agents actually market listings.",
+        "text": "The deliverables are positioned around MLS-ready photos, Zillow-ready images, HDR photography, drone work, and social-first video."
       },
       {
         "eyebrow": "Simple handoff",
-        "title": "Media is easy to review, choose, and share.",
-        "text": "The site is set up so the process feels organized instead of technical, so you never have to ask any questions."
+        "title": "Media is easy to review, download, and share.",
+        "text": "The client delivery portal is designed to feel organized instead of technical, so agents can open the gallery and get moving fast."
       }
     ],
-    "contactLead": "Send a note with the property address, target timeline, and the kind of coverage you need.",
+    "contactLead": "Send the property address, target timeline, and the kind of coverage you need. Same-day availability is offered when the schedule allows.",
     "videoEmbedUrl": "",
-    "serviceArea": "Pensacola, FL",
+    "serviceArea": "Serving Pensacola, Gulf Breeze, Pace, Milton, Navarre, Perdido Key, Foley, Orange Beach, Fairhope, and surrounding Gulf Coast markets.",
     "email": "zacbrannen@gmail.com",
     "phone": "(850) 736-1946",
     "instagram": "@zb.re.media",
     "responseTime": "Usually replies within 2 hours during business days.",
     "contactNotificationEndpoint": "",
-    "footerNote": "Custom-built and ready for your own domain."
+    "footerNote": "Based in Pensacola, Florida. Serving real estate agents across the Gulf Coast."
   },
   "services": [
     {
       "id": "service-listing",
       "title": "The Starter",
-      "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
+      "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional, MLS-ready look.",
       "bullets": [
         "30 HDR Images",
         "No Drone Images",
@@ -90,7 +90,7 @@
     {
       "id": "service-media",
       "title": "The Works",
-      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social and drone video to create a high-energy, immersive experience that stops the scroll.",
+      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social video and drone coverage to create a high-energy, immersive experience that stops the scroll across listing and social platforms.",
       "bullets": [
         "45 HDR Images",
         "10 Drone Images",
