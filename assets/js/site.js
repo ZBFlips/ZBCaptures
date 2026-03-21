@@ -859,9 +859,9 @@ const contactPropertyTypeOptions = [
 ];
 
 const contactPackageOptions = [
-  { value: "Starter photo package", label: "Starter photo package" },
-  { value: "Standard photo + drone", label: "Standard photo + drone" },
-  { value: "Full photo + video package", label: "Full photo + video package" },
+  { value: "The Starter", label: "The Starter" },
+  { value: "The Standard", label: "The Standard" },
+  { value: "The Works", label: "The Works" },
   { value: "Custom quote", label: "Custom quote" },
 ];
 
@@ -876,7 +876,6 @@ const contactAddOnOptions = [
   { value: "Drone video", label: "Drone video" },
   { value: "Social reel", label: "Social reel" },
   { value: "Twilight images", label: "Twilight images" },
-  { value: "Rush delivery", label: "Rush delivery" },
 ];
 
 function testimonialsMarkup() {
