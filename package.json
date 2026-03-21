@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run build:pages",
-    "build:pages": "node ./scripts/build-pages.mjs"
+    "build:pages": "node ./scripts/build-pages.mjs",
+    "optimize:media": "node ./scripts/optimize-public-media.mjs"
   }
 }

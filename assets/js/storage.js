@@ -223,6 +223,8 @@ export async function putMedia(record) {
         return "image/jpeg";
       case "png":
         return "image/png";
+      case "avif":
+        return "image/avif";
       case "webp":
         return "image/webp";
       case "gif":
@@ -252,6 +254,7 @@ export async function putMedia(record) {
     featured: Boolean(record.featured),
     portalId: record.portalId || "",
     src: record.src || "",
+    variants: record.variants || null,
   };
 
   await withStore("readwrite", (store) => store.put(entry));

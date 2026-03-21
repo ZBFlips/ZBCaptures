@@ -43,6 +43,14 @@ const rowUrls = new Map();
 let workspaceDirectoryHandle = null;
 let cloudPortalBackendConfigured = false;
 const portalUiState = new Map();
+const OPTIMIZED_PUBLIC_IMAGE_PLACEMENTS = new Set(["hero", "reveal", "gallery", "featured", "contact", "services"]);
+const PUBLIC_IMAGE_VARIANTS = [
+  { name: "thumb", maxWidth: 640, quality: 0.7 },
+  { name: "medium", maxWidth: 1280, quality: 0.82 },
+  { name: "full", maxWidth: 2200, quality: 0.9 },
+];
+const PUBLIC_IMAGE_VARIANT_TYPE = "image/webp";
+const PUBLIC_IMAGE_VARIANT_EXTENSION = "webp";
 
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
@@ -271,7 +279,7 @@ function portalRecordById(portalId) {
 function mediaPreviewUrl(item) {
   let url = rowUrls.get(item.id);
   if (!url) {
-    url = item.blob ? URL.createObjectURL(item.blob) : item.src || "";
+    url = item.blob ? URL.createObjectURL(item.blob) : item.variants?.thumb?.src || item.src || "";
     if (item.blob) {
       rowUrls.set(item.id, url);
     }
@@ -855,7 +863,7 @@ function adminMarkup() {
                 <button class="button ghost danger" type="button" id="clear-media">Clear media library</button>
               </div>
               <div class="admin-note">
-                Public portfolio media still stays in this browser until you save or publish it. Client delivery now uses Cloudflare storage instead of GitHub once the backend bindings are configured.
+                Public portfolio media still stays in this browser until you save or publish it. Save or publish now exports eligible public images as WebP thumb, medium, and full variants automatically. Client delivery still uses Cloudflare storage instead of GitHub once the backend bindings are configured.
               </div>
             </section>
 
@@ -885,7 +893,7 @@ function adminMarkup() {
                 <button class="button ghost" type="button" id="save-publish-config">Save publish settings</button>
                 <button class="button ghost" type="button" id="load-live-state">Load live state</button>
               </div>
-              <div class="admin-note" id="publish-status">Publishing updates <code>content/site-data.json</code> and the public portfolio media only. Client delivery portals now live outside the repo.</div>
+              <div class="admin-note" id="publish-status">Publishing updates <code>content/site-data.json</code> and the public portfolio media only. Eligible public images are exported as WebP thumb, medium, and full variants. Client delivery portals now live outside the repo.</div>
             </section>
           </details>
         </section>
@@ -1406,6 +1414,139 @@ function syncServicesFromEditor() {
   state.services = nextServices;
 }
 
+function isOptimizablePublicImage(item) {
+  return (
+    !item?.portalId &&
+    String(item?.type || "").startsWith("image/") &&
+    OPTIMIZED_PUBLIC_IMAGE_PLACEMENTS.has(String(item?.placement || "gallery"))
+  );
+}
+
+function variantRelativePath(itemId, variantName) {
+  return `assets/uploads/${itemId}-${variantName}.${PUBLIC_IMAGE_VARIANT_EXTENSION}`;
+}
+
+function scaledDimensions(width, height, maxWidth) {
+  const safeWidth = Math.max(1, Math.round(Number(width) || maxWidth || 1));
+  const safeHeight = Math.max(1, Math.round(Number(height) || safeWidth));
+  if (!maxWidth || safeWidth <= maxWidth) {
+    return { width: safeWidth, height: safeHeight };
+  }
+
+  const scale = maxWidth / safeWidth;
+  return {
+    width: Math.max(1, Math.round(safeWidth * scale)),
+    height: Math.max(1, Math.round(safeHeight * scale)),
+  };
+}
+
+async function loadSourceBlobForVariants(item) {
+  if (item?.blob instanceof Blob) {
+    return item.blob;
+  }
+
+  if (!item?.src) {
+    throw new Error(`No image source is available for ${item?.title || item?.id || "this media item"}.`);
+  }
+
+  const response = await fetch(item.src, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Unable to load ${item.title || item.id || "this image"} for optimization.`);
+  }
+
+  return response.blob();
+}
+
+function loadRenderableImage(blob) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () =>
+      resolve({
+        image,
+        width: image.naturalWidth || image.width,
+        height: image.naturalHeight || image.height,
+        revoke() {
+          URL.revokeObjectURL(url);
+        },
+      });
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Unable to decode one of the uploaded images."));
+    };
+    image.src = url;
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+
+        reject(new Error("This browser could not encode the optimized image format."));
+      },
+      type,
+      quality
+    );
+  });
+}
+
+async function buildOptimizedImagePackage(item) {
+  const sourceBlob = await loadSourceBlobForVariants(item);
+  const { image, width, height, revoke } = await loadRenderableImage(sourceBlob);
+
+  try {
+    const generatedFiles = [];
+    const variants = {};
+
+    for (const variant of PUBLIC_IMAGE_VARIANTS) {
+      const target = scaledDimensions(width, height, variant.maxWidth);
+      const canvas = document.createElement("canvas");
+      canvas.width = target.width;
+      canvas.height = target.height;
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        throw new Error("The browser could not prepare the image optimizer.");
+      }
+
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+      context.drawImage(image, 0, 0, target.width, target.height);
+
+      const blob = await canvasToBlob(canvas, PUBLIC_IMAGE_VARIANT_TYPE, variant.quality);
+      const relativePath = variantRelativePath(item.id, variant.name);
+
+      generatedFiles.push({
+        path: relativePath,
+        type: PUBLIC_IMAGE_VARIANT_TYPE,
+        data: await blobToBase64(blob),
+      });
+
+      variants[variant.name] = {
+        src: `./${relativePath}`,
+        type: PUBLIC_IMAGE_VARIANT_TYPE,
+        width: target.width,
+        height: target.height,
+      };
+    }
+
+    return {
+      src: variants.full?.src || item.src || "",
+      type: PUBLIC_IMAGE_VARIANT_TYPE,
+      variants,
+      generatedFiles,
+    };
+  } finally {
+    revoke();
+  }
+}
+
 function collectMediaDraftsFromDom() {
   const draftById = new Map(media.map((item) => [item.id, item]));
 
@@ -1445,15 +1586,17 @@ function buildMediaSaveRecord(item) {
     featured: Boolean(item.featured),
     portalId: item.portalId || "",
     src: item.src || `./assets/uploads/${item.id}.${extension}`,
+    variants: item.variants || null,
     blob: item.blob || null,
   };
 }
 
 function buildPublicMediaRecord(item) {
-  const { blob, data, portalId, ...rest } = item;
+  const { blob, data, generatedFiles, portalId, ...rest } = item;
   return {
     ...rest,
     src: rest.src || `./assets/uploads/${rest.id}.${guessExtension(rest)}`,
+    variants: rest.variants || null,
   };
 }
 
@@ -1480,13 +1623,21 @@ async function buildSavePayload() {
   const payloadMedia = await Promise.all(
     mediaDrafts.map(async (item) => {
       const record = buildMediaSaveRecord(item);
-      if (record.blob) {
+      if (isOptimizablePublicImage(record) && (record.blob || !record.variants?.full?.src)) {
+        const optimized = await buildOptimizedImagePackage(record);
+        record.generatedFiles = optimized.generatedFiles;
+        record.variants = optimized.variants;
+        record.src = optimized.src;
+        record.type = optimized.type;
+      } else if (record.blob) {
         record.data = await blobToBase64(record.blob);
       }
+
       delete record.blob;
       return record;
     })
   );
+  const publicMedia = payloadMedia.filter((item) => !item.portalId).map((item) => buildPublicMediaRecord(item));
 
   return {
     settings: state.settings,
@@ -1494,7 +1645,7 @@ async function buildSavePayload() {
     localClientPortals: localPortals,
     clientPortals: publishedPortals,
     media: payloadMedia,
-    publicMedia: payloadMedia.filter((item) => !item.portalId).map((item) => buildPublicMediaRecord(item)),
+    publicMedia,
     mediaDrafts,
     savedAt: new Date().toISOString(),
   };
@@ -1574,43 +1725,36 @@ async function saveToLocalFolder(payload) {
     throw new Error("Permission to write to the project folder was denied.");
   }
 
-  const mediaOutput = [];
-
   for (const item of payload.media) {
     if (!item) {
       continue;
     }
 
-    const extension = guessExtension(item);
-    const relativePath = item.src ? normalizeRelativePath(item.src) : `assets/uploads/${item.id}.${extension}`;
-    const finalPath = relativePath;
+    if (Array.isArray(item.generatedFiles) && item.generatedFiles.length) {
+      for (const file of item.generatedFiles) {
+        if (!file?.data || !file?.path) {
+          continue;
+        }
 
-    if (item.data) {
-      const bytes = Uint8Array.from(atob(item.data), (char) => char.charCodeAt(0));
-      await writeFileToWorkspace(workspaceDirectoryHandle, finalPath, bytes);
+        const bytes = Uint8Array.from(atob(file.data), (char) => char.charCodeAt(0));
+        await writeFileToWorkspace(workspaceDirectoryHandle, normalizeRelativePath(file.path), bytes);
+      }
+      continue;
     }
 
-    mediaOutput.push({
-      id: String(item.id),
-      name: String(item.name || item.title || item.id),
-      type: String(item.type || "application/octet-stream"),
-      createdAt: item.createdAt,
-      title: String(item.title || ""),
-      caption: String(item.caption || ""),
-      alt: String(item.alt || ""),
-      placement: String(item.placement || "gallery"),
-      order: item.order,
-      featured: Boolean(item.featured),
-      portalId: String(item.portalId || ""),
-      src: `./${finalPath.replace(/^\.?\//, "")}`,
-    });
+    const extension = guessExtension(item);
+    const relativePath = item.src ? normalizeRelativePath(item.src) : `assets/uploads/${item.id}.${extension}`;
+    if (item.data) {
+      const bytes = Uint8Array.from(atob(item.data), (char) => char.charCodeAt(0));
+      await writeFileToWorkspace(workspaceDirectoryHandle, relativePath, bytes);
+    }
   }
 
   const siteData = {
     settings: payload.settings,
     services: payload.services,
     clientPortals: payload.clientPortals,
-    media: mediaOutput.filter((item) => !item.portalId).map(({ portalId, ...rest }) => rest),
+    media: payload.publicMedia || [],
     savedAt: new Date().toISOString(),
   };
 
@@ -2223,7 +2367,7 @@ function wireBackupButtons() {
   document.getElementById("save-all").addEventListener("click", async () => {
     try {
       if (saveStatus) {
-        saveStatus.textContent = "Saving changes...";
+        saveStatus.textContent = "Generating optimized media and saving changes...";
       }
 
       const payload = await buildSavePayload();
@@ -2409,6 +2553,7 @@ function wireBackupButtons() {
       }
 
       savePublishConfig(publishConfig);
+      status.textContent = "Generating optimized media...";
       const payload = await buildSavePayload();
       state.settings = payload.settings;
       state.services = payload.services;
@@ -2421,7 +2566,7 @@ function wireBackupButtons() {
       for (const item of payload.mediaDrafts) {
         await putMedia(item);
       }
-      status.textContent = "Uploading media and site data...";
+      status.textContent = "Uploading optimized media and site data...";
       await publishToGitHub(payload);
       status.textContent = "Published. GitHub Pages may take a short moment to rebuild.";
       alert("Published to GitHub.");
@@ -2465,6 +2610,7 @@ function guessExtension(item) {
     return "bin";
   }
 
+  if (item.type.includes("avif")) return "avif";
   if (item.type.includes("jpeg")) return "jpg";
   if (item.type.includes("png")) return "png";
   if (item.type.includes("webp")) return "webp";
@@ -2543,54 +2689,29 @@ async function putRepoFile(path, content, message) {
 }
 
 async function publishToGitHub(portalPayload = {}) {
-  const uploadedMedia = [];
-  for (const item of media) {
-    if (item.portalId) {
+  for (const item of portalPayload.media || []) {
+    if (Array.isArray(item.generatedFiles) && item.generatedFiles.length) {
+      for (const file of item.generatedFiles) {
+        if (!file?.path || !file?.data) {
+          continue;
+        }
+
+        await putRepoFile(file.path, file.data, `Publish media ${item.title || item.id}`);
+      }
       continue;
     }
 
-    if (!item.blob) {
-      uploadedMedia.push(item);
-      continue;
+    const path = normalizeRelativePath(item.src || `assets/uploads/${item.id}.${guessExtension(item)}`);
+    if (item.data) {
+      await putRepoFile(path, item.data, `Publish media ${item.title || item.id}`);
     }
-
-    const extension = guessExtension(item);
-    const path = `assets/uploads/${item.id}.${extension}`;
-    const base64 = await blobToBase64(item.blob);
-    await putRepoFile(path, base64, `Publish media ${item.title || item.id}`);
-    uploadedMedia.push({
-      id: item.id,
-      name: item.name,
-      type: item.type,
-      createdAt: item.createdAt,
-      title: item.title,
-      caption: item.caption,
-      alt: item.alt,
-      placement: item.placement,
-      order: item.order,
-      featured: item.featured,
-      portalId: item.portalId || "",
-      src: `./${path}`,
-    });
   }
 
   const publishPayload = {
     settings: portalPayload.settings || state.settings,
     services: portalPayload.services || state.services,
     clientPortals: [],
-    media: uploadedMedia
-      .filter((item) => !item.portalId)
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        caption: item.caption,
-        alt: item.alt,
-        placement: item.placement,
-        order: item.order,
-        featured: item.featured,
-        type: item.type,
-        src: item.src || `./assets/uploads/${item.id}.${guessExtension(item)}`,
-      })),
+    media: portalPayload.publicMedia || [],
   };
 
   const json = JSON.stringify(publishPayload, null, 2);

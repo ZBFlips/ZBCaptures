@@ -24,6 +24,7 @@ function Get-ContentType([string]$path) {
     ".js" { "text/javascript; charset=utf-8" }
     ".json" { "application/json; charset=utf-8" }
     ".png" { "image/png" }
+    ".avif" { "image/avif" }
     ".jpg" { "image/jpeg" }
     ".jpeg" { "image/jpeg" }
     ".webp" { "image/webp" }
@@ -62,6 +63,7 @@ function Get-UploadExtension($item) {
   $type = [string]$item.type
   if ($type -like "*jpeg*") { return "jpg" }
   if ($type -like "*png*") { return "png" }
+  if ($type -like "*avif*") { return "avif" }
   if ($type -like "*webp*") { return "webp" }
   if ($type -like "*gif*") { return "gif" }
   if ($type -like "*mp4*") { return "mp4" }
@@ -88,10 +90,31 @@ try {
       try {
         $rawBody = Read-RequestBody $context.Request
         $payload = $rawBody | ConvertFrom-Json -Depth 32
-        $mediaOutput = @()
+        $writtenCount = 0
 
         foreach ($item in @($payload.media)) {
           if (-not $item) {
+            continue
+          }
+
+          if ($item.generatedFiles) {
+            foreach ($generated in @($item.generatedFiles)) {
+              if (-not $generated -or [string]::IsNullOrWhiteSpace([string]$generated.path) -or [string]::IsNullOrWhiteSpace([string]$generated.data)) {
+                continue
+              }
+
+              $generatedPath = Normalize-RelativePath ([string]$generated.path)
+              $generatedAbsolutePath = Join-Path $root $generatedPath
+              $generatedDirectory = Split-Path $generatedAbsolutePath -Parent
+              if ($generatedDirectory -and -not (Test-Path $generatedDirectory)) {
+                New-Item -ItemType Directory -Path $generatedDirectory -Force | Out-Null
+              }
+
+              $generatedBytes = [Convert]::FromBase64String([string]$generated.data)
+              [System.IO.File]::WriteAllBytes($generatedAbsolutePath, $generatedBytes)
+              $writtenCount += 1
+            }
+
             continue
           }
 
@@ -110,21 +133,7 @@ try {
           if ($item.data) {
             $bytes = [Convert]::FromBase64String([string]$item.data)
             [System.IO.File]::WriteAllBytes($absolutePath, $bytes)
-          }
-
-          $mediaOutput += [ordered]@{
-            id = [string]$item.id
-            name = [string]$item.name
-            type = [string]$item.type
-            createdAt = $item.createdAt
-            title = [string]$item.title
-            caption = [string]$item.caption
-            alt = [string]$item.alt
-            placement = [string]$item.placement
-            order = $item.order
-            featured = [bool]$item.featured
-            portalId = [string]$item.portalId
-            src = "./$relativePath"
+            $writtenCount += 1
           }
         }
 
@@ -132,21 +141,7 @@ try {
           settings = $payload.settings
           services = $payload.services
           clientPortals = @($payload.clientPortals)
-          media = @($mediaOutput | Where-Object { [string]$_.portalId -eq "" } | ForEach-Object {
-            [ordered]@{
-              id = $_.id
-              name = $_.name
-              type = $_.type
-              createdAt = $_.createdAt
-              title = $_.title
-              caption = $_.caption
-              alt = $_.alt
-              placement = $_.placement
-              order = $_.order
-              featured = $_.featured
-              src = $_.src
-            }
-          })
+          media = @($payload.publicMedia)
           savedAt = (Get-Date).ToString("o")
         }
 
@@ -166,7 +161,7 @@ try {
         Send-JsonResponse $context 200 @{
           ok = $true
           message = "Saved site files."
-          mediaCount = $mediaOutput.Count
+          mediaCount = $writtenCount
           savedAt = $siteData.savedAt
         }
       } catch {

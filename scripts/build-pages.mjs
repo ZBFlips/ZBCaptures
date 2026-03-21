@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const projectRoot = process.cwd();
@@ -13,7 +13,7 @@ const requiredFiles = [
   "client-access.html",
 ];
 
-const requiredDirectories = ["assets", "content"];
+const requiredDirectories = ["assets/css", "assets/js", "assets/brand", "content"];
 const optionalFiles = ["robots.txt", "sitemap.xml", "favicon.ico", "_headers", "_redirects"];
 
 const routesManifest = {
@@ -74,6 +74,36 @@ async function copyOptionalEntry(relativePath) {
   await copyEntry(relativePath);
 }
 
+async function referencedAssetFiles() {
+  const siteDataPath = await ensureEntryExists("content/site-data.json");
+  const raw = await readFile(siteDataPath, "utf8");
+  const siteData = JSON.parse(raw);
+  const files = new Set();
+
+  const maybeAdd = (value) => {
+    if (typeof value !== "string") {
+      return;
+    }
+
+    const normalized = value.replace(/^\.\//, "");
+    if (!normalized.startsWith("assets/")) {
+      return;
+    }
+
+    files.add(normalized);
+  };
+
+  for (const item of siteData.media || []) {
+    maybeAdd(item?.src);
+
+    for (const variant of Object.values(item?.variants || {})) {
+      maybeAdd(variant?.src);
+    }
+  }
+
+  return Array.from(files);
+}
+
 async function build() {
   await rm(distDir, { recursive: true, force: true });
   await mkdir(distDir, { recursive: true });
@@ -86,6 +116,10 @@ async function build() {
   for (const directory of requiredDirectories) {
     await ensureEntryExists(directory);
     await copyEntry(directory);
+  }
+
+  for (const assetFile of await referencedAssetFiles()) {
+    await copyOptionalEntry(assetFile);
   }
 
   for (const file of optionalFiles) {

@@ -10,6 +10,15 @@ interface Env {
 type Submission = {
   name: string;
   email: string;
+  phone: string;
+  brokerage: string;
+  propertyAddress: string;
+  propertyType: string;
+  squareFeet: string;
+  shootDate: string;
+  packageInterest: string;
+  turnaround: string;
+  addOns: string[];
   message: string;
   source: string;
   page: string;
@@ -40,18 +49,39 @@ function normalizeField(value: unknown) {
   return "";
 }
 
+function normalizeList(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeField(item)).filter(Boolean);
+  }
+
+  const single = normalizeField(value);
+  return single ? [single] : [];
+}
+
 function buildKey(timestamp: string, id: string) {
   const safeStamp = timestamp.replace(/[:.]/g, "-");
   return `submissions/${timestamp.slice(0, 10)}/${safeStamp}-${id}.json`;
 }
 
 function buildEmail(submission: Submission, savedAs: string, from: string, to: string) {
-  const subject = `New contact form submission from ${submission.name || "website visitor"}`;
+  const subject = submission.propertyAddress
+    ? `New contact form submission for ${submission.propertyAddress}`
+    : `New contact form submission from ${submission.name || "website visitor"}`;
   const body = [
     `New contact form submission`,
     ``,
     `Name: ${submission.name || "-"}`,
     `Email: ${submission.email || "-"}`,
+    `Phone: ${submission.phone || "-"}`,
+    `Brokerage or team: ${submission.brokerage || "-"}`,
+    `Property address: ${submission.propertyAddress || "-"}`,
+    `Property type: ${submission.propertyType || "-"}`,
+    `Square footage: ${submission.squareFeet || "-"}`,
+    `Preferred shoot date: ${submission.shootDate || "-"}`,
+    `Package: ${submission.packageInterest || "-"}`,
+    `Turnaround: ${submission.turnaround || "-"}`,
+    `Add-ons: ${submission.addOns.length ? submission.addOns.join(", ") : "-"}`,
+    ``,
     `Message:`,
     submission.message || "-",
     ``,
@@ -94,6 +124,15 @@ async function parseSubmission(request: Request): Promise<Submission> {
   return {
     name: normalizeField(raw.name),
     email: normalizeField(raw.email),
+    phone: normalizeField(raw.phone),
+    brokerage: normalizeField(raw.brokerage),
+    propertyAddress: normalizeField(raw.propertyAddress),
+    propertyType: normalizeField(raw.propertyType),
+    squareFeet: normalizeField(raw.squareFeet),
+    shootDate: normalizeField(raw.shootDate),
+    packageInterest: normalizeField(raw.packageInterest),
+    turnaround: normalizeField(raw.turnaround),
+    addOns: normalizeList(raw.addOns),
     message: normalizeField(raw.message),
     source: normalizeField(raw.source) || "ZB Captures website",
     page: normalizeField(raw.page),
@@ -118,9 +157,9 @@ export default {
 
     const submission = await parseSubmission(request);
 
-    if (!submission.name || !submission.email || !submission.message) {
+    if (!submission.name || !submission.email || !submission.phone || !submission.propertyAddress || !submission.message) {
       return Response.json(
-        { ok: false, error: "Name, email, and message are required." },
+        { ok: false, error: "Name, email, phone, property address, and message are required." },
         { status: 400, headers: corsHeaders() }
       );
     }

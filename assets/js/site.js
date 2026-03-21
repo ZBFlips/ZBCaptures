@@ -165,13 +165,19 @@ async function loadPublishedSiteData() {
   }
 }
 
-function navItems() {
+function headerNavItems() {
   return [
     { href: "./index.html", label: "Home" },
     { href: "./services.html", label: "Services" },
     { href: "./contact.html", label: "Contact" },
-    { href: "./client-access.html", label: "Client Access" },
     { href: "./admin.html", label: "Admin" },
+  ];
+}
+
+function footerNavItems() {
+  return [
+    ...headerNavItems(),
+    { href: "./client-access.html", label: "Client Access" },
   ];
 }
 
@@ -184,7 +190,7 @@ function headerLogoMedia() {
 
 function renderHeader() {
   const currentPath = location.pathname.split("/").pop() || "index.html";
-  const links = navItems()
+  const links = headerNavItems()
     .map(
       (item) => `
         <a href="${item.href}" ${currentPath === item.href.split("/").pop() ? 'aria-current="page"' : ""}>${item.label}</a>
@@ -312,7 +318,7 @@ function wireHeaderMenu() {
 function renderFooter() {
   const marketsMarkup = SEO_SERVICE_AREAS.map((market) => `<span class="footer__chip">${safeText(market)}</span>`).join("");
   const platformsMarkup = SEO_PLATFORMS.map((platform) => `<span class="footer__chip footer__chip--platform">${safeText(platform)}</span>`).join("");
-  const linksMarkup = navItems()
+  const linksMarkup = footerNavItems()
     .map((item) => `<a href="${item.href}">${safeText(item.label)}</a>`)
     .join("");
 
@@ -384,17 +390,67 @@ function lightboxRecords() {
   return [...mediaCache, ...activePortalMedia];
 }
 
-function mediaUrlFor(record) {
+function mediaVariant(record, key = "full") {
+  if (!record?.variants || !key) {
+    return null;
+  }
+
+  return record.variants[key] || null;
+}
+
+function mediaSourceSet(record, keys = ["thumb", "medium", "full"]) {
+  if (!record?.variants || record?.previewUrl) {
+    return "";
+  }
+
+  const unique = [];
+  const seen = new Set();
+  for (const key of keys) {
+    const variant = mediaVariant(record, key);
+    const width = Number(variant?.width);
+    const src = String(variant?.src || "").trim();
+    if (!src || !Number.isFinite(width) || seen.has(src)) {
+      continue;
+    }
+
+    seen.add(src);
+    unique.push(`${src} ${width}w`);
+  }
+
+  return unique.join(", ");
+}
+
+function responsiveImageAttrs(record, keys, sizes) {
+  const srcset = mediaSourceSet(record, keys);
+  if (!srcset) {
+    return "";
+  }
+
+  return `srcset="${safeText(srcset)}" sizes="${safeText(sizes)}"`;
+}
+
+function mediaUrlFor(record, key = "") {
   if (record?.previewUrl) {
     return record.previewUrl;
+  }
+
+  const match = objectUrls.find((entry) => entry.id === record?.id);
+  if (match) {
+    return match.url;
+  }
+
+  if (key) {
+    const variant = mediaVariant(record, key);
+    if (variant?.src) {
+      return variant.src;
+    }
   }
 
   if (record?.src) {
     return record.src;
   }
 
-  const match = objectUrls.find((entry) => entry.id === record?.id);
-  return match ? match.url : "";
+  return "";
 }
 
 function portalDownloadUrl(record) {
@@ -437,7 +493,7 @@ function renderLightboxRecord(record) {
       : "";
   const safeCaption = String(record.caption || "").trim();
   const captionText = [safeTitle, safeCaption].filter(Boolean).join(" - ");
-  lightboxImage.src = url;
+  lightboxImage.src = mediaUrlFor(record, "full") || url;
   lightboxImage.alt = record.alt || record.title || record.name || "Portfolio image";
   lightboxCaption.textContent = captionText;
   lightboxCaption.hidden = !captionText;
@@ -448,10 +504,10 @@ function heroMarkup() {
   const backgroundImage = heroMedia();
   const revealImage = heroRevealMedia();
   const backgroundMarkup = backgroundImage
-    ? `<img class="hero__backgroundImage" src="${mediaUrlFor(backgroundImage)}" alt="${safeText(backgroundImage.alt || backgroundImage.title || state.settings.brandName)}" fetchpriority="high" decoding="async" />`
+    ? `<img class="hero__backgroundImage" src="${mediaUrlFor(backgroundImage, "full")}" ${responsiveImageAttrs(backgroundImage, ["medium", "full"], "100vw")} alt="${safeText(backgroundImage.alt || backgroundImage.title || state.settings.brandName)}" fetchpriority="high" decoding="async" />`
     : `<div class="hero__backgroundImage hero__backgroundImage--fallback" aria-hidden="true"></div>`;
   const revealMarkup = revealImage
-    ? `<img class="hero__revealImage" src="${mediaUrlFor(revealImage)}" alt="${safeText(revealImage.alt || revealImage.title || "Reveal image")}" fetchpriority="high" decoding="async" />`
+    ? `<img class="hero__revealImage" src="${mediaUrlFor(revealImage, "full")}" ${responsiveImageAttrs(revealImage, ["medium", "full"], "100vw")} alt="${safeText(revealImage.alt || revealImage.title || "Reveal image")}" fetchpriority="high" decoding="async" />`
     : "";
 
   const spotlight = featuredFrameMedia();
@@ -460,7 +516,7 @@ function heroMarkup() {
   const spotlightMarkup = spotlight
     ? `
       <article class="hero__card">
-        <img class="hero__cardMedia" src="${mediaUrlFor(spotlight)}" alt="${safeText(spotlight.alt || spotlight.title || "Featured work")}" loading="eager" fetchpriority="high" decoding="async" />
+        <img class="hero__cardMedia" src="${mediaUrlFor(spotlight, "medium")}" ${responsiveImageAttrs(spotlight, ["thumb", "medium", "full"], "(max-width: 1100px) 100vw, 32vw")} alt="${safeText(spotlight.alt || spotlight.title || "Featured work")}" loading="eager" fetchpriority="high" decoding="async" />
         <div class="hero__cardBody">
           <div class="hero__cardEyebrow">Featured frame</div>
           <h2 class="hero__cardTitle">${safeText(spotlightTitle)}</h2>
@@ -545,7 +601,7 @@ function galleryMarkup() {
               (item) => `
                 <article class="gallery-mobile-strip__item">
                   <button class="gallery-mobile-strip__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                    <img class="gallery-mobile-strip__image" src="${mediaUrlFor(item)}" alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                    <img class="gallery-mobile-strip__image" src="${mediaUrlFor(item, "thumb")}" ${responsiveImageAttrs(item, ["thumb", "medium"], "72vw")} alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
                   </button>
                 </article>
               `
@@ -560,7 +616,7 @@ function galleryMarkup() {
               (item) => `
                 <article class="media-tile">
                   <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                    <img class="media-tile__image" src="${mediaUrlFor(item)}" alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                    <img class="media-tile__image" src="${mediaUrlFor(item, "thumb")}" ${responsiveImageAttrs(item, ["thumb", "medium", "full"], "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw")} alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
                   </button>
                 </article>
               `
@@ -577,7 +633,7 @@ function galleryMarkup() {
                     (item) => `
                       <article class="gallery-reel__item">
                         <button class="gallery-reel__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                          <img class="gallery-reel__image" src="${mediaUrlFor(item)}" alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                          <img class="gallery-reel__image" src="${mediaUrlFor(item, "thumb")}" ${responsiveImageAttrs(item, ["thumb", "medium", "full"], "(max-width: 720px) 72vw, (max-width: 1100px) 46vw, 340px")} alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
                         </button>
                       </article>
                     `
@@ -596,7 +652,7 @@ function galleryMarkup() {
                   (item) => `
                     <article class="media-tile">
                       <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                        <img class="media-tile__image" src="${mediaUrlFor(item)}" alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                        <img class="media-tile__image" src="${mediaUrlFor(item, "thumb")}" ${responsiveImageAttrs(item, ["thumb", "medium", "full"], "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw")} alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
                       </button>
                     </article>
                   `
@@ -792,6 +848,37 @@ const faqItems = [
   },
 ];
 
+const contactPropertyTypeOptions = [
+  { value: "Single-family home", label: "Single-family home" },
+  { value: "Condo or townhome", label: "Condo or townhome" },
+  { value: "Luxury listing", label: "Luxury listing" },
+  { value: "Short-term rental", label: "Short-term rental" },
+  { value: "Commercial property", label: "Commercial property" },
+  { value: "Land or exterior only", label: "Land or exterior only" },
+  { value: "Other", label: "Other" },
+];
+
+const contactPackageOptions = [
+  { value: "Starter photo package", label: "Starter photo package" },
+  { value: "Standard photo + drone", label: "Standard photo + drone" },
+  { value: "Full photo + video package", label: "Full photo + video package" },
+  { value: "Custom quote", label: "Custom quote" },
+];
+
+const contactTurnaroundOptions = [
+  { value: "Same-day if available", label: "Same-day if available" },
+  { value: "Next-day delivery", label: "Next-day delivery" },
+  { value: "Flexible timeline", label: "Flexible timeline" },
+];
+
+const contactAddOnOptions = [
+  { value: "Drone photos", label: "Drone photos" },
+  { value: "Drone video", label: "Drone video" },
+  { value: "Social reel", label: "Social reel" },
+  { value: "Twilight images", label: "Twilight images" },
+  { value: "Rush delivery", label: "Rush delivery" },
+];
+
 function testimonialsMarkup() {
   return `
     <section class="section testimonials-strip">
@@ -895,6 +982,10 @@ function contactMarkup() {
               <div class="contact-label">Coverage</div>
               <div class="contact-value">${safeText(state.settings.serviceArea)}</div>
             </div>
+            <div class="contact-row">
+              <div class="contact-label">Response time</div>
+              <div class="contact-value">${safeText(state.settings.responseTime || "Usually replies quickly during business hours.")}</div>
+            </div>
           </div>
           <div class="contact-box">
             <strong>Best for:</strong>
@@ -902,27 +993,92 @@ function contactMarkup() {
           </div>
         </div>
         <div class="contact-panel">
-          ${contactRecord ? `<div class="card"><button class="media-tile__button" data-preview data-id="${contactRecord.id}" type="button" aria-label="Preview ${safeText(contactRecord.title || "contact image")}"><img class="card__image" src="${mediaUrlFor(contactRecord)}" alt="${safeText(contactRecord.alt || contactRecord.title || "Contact image")}" loading="lazy" decoding="async" /></button></div>` : ""}
+          ${contactRecord ? `<div class="card"><button class="media-tile__button" data-preview data-id="${contactRecord.id}" type="button" aria-label="Preview ${safeText(contactRecord.title || "contact image")}"><img class="card__image" src="${mediaUrlFor(contactRecord, "medium")}" ${responsiveImageAttrs(contactRecord, ["thumb", "medium", "full"], "(max-width: 1100px) 100vw, 52vw")} alt="${safeText(contactRecord.alt || contactRecord.title || "Contact image")}" loading="lazy" decoding="async" /></button></div>` : ""}
           <div class="contact-box">
             <form class="form" id="contact-form">
-              <div class="field">
-                <label for="name">Name</label>
-                <input id="name" name="name" autocomplete="name" placeholder="Your name" required />
-              </div>
-              <div class="field">
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
-              </div>
-              <div class="field">
-                <label for="message">Project details</label>
-                <textarea id="message" name="message" placeholder="Property address, desired turnaround, number of photos, video needs, anything else." required></textarea>
+              <div class="helper">A few booking details up front make it easier to quote accurately and confirm timing faster.</div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="name">Name</label>
+                  <input id="name" name="name" autocomplete="name" placeholder="Your name" required />
+                </div>
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+                </div>
+                <div class="field">
+                  <label for="phone">Phone</label>
+                  <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="(555) 123-4567" required />
+                </div>
+                <div class="field">
+                  <label for="brokerage">Brokerage or team</label>
+                  <input id="brokerage" name="brokerage" autocomplete="organization" placeholder="Brokerage, team, or company name" />
+                </div>
+                <div class="field field--wide">
+                  <label for="propertyAddress">Property address</label>
+                  <input id="propertyAddress" name="propertyAddress" autocomplete="street-address" placeholder="Full property address" required />
+                </div>
+                <div class="field">
+                  <label for="propertyType">Property type</label>
+                  <select id="propertyType" name="propertyType" required>
+                    <option value="">Select property type</option>
+                    ${contactPropertyTypeOptions
+                      .map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`)
+                      .join("")}
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="squareFeet">Approximate square footage</label>
+                  <input id="squareFeet" name="squareFeet" inputmode="numeric" placeholder="2,400" />
+                </div>
+                <div class="field">
+                  <label for="shootDate">Preferred shoot date</label>
+                  <input id="shootDate" name="shootDate" type="date" required />
+                </div>
+                <div class="field">
+                  <label for="packageInterest">Package</label>
+                  <select id="packageInterest" name="packageInterest" required>
+                    <option value="">Select a package</option>
+                    ${contactPackageOptions
+                      .map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`)
+                      .join("")}
+                  </select>
+                </div>
+                <div class="field field--wide">
+                  <label for="turnaround">Turnaround</label>
+                  <select id="turnaround" name="turnaround">
+                    <option value="">Choose a turnaround</option>
+                    ${contactTurnaroundOptions
+                      .map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`)
+                      .join("")}
+                  </select>
+                </div>
+                <div class="field field--wide">
+                  <span class="field__label">Add-ons</span>
+                  <div class="check-grid">
+                    ${contactAddOnOptions
+                      .map(
+                        (option) => `
+                          <label class="check-pill">
+                            <input type="checkbox" name="addOns" value="${safeText(option.value)}" />
+                            <span>${safeText(option.label)}</span>
+                          </label>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                </div>
+                <div class="field field--wide">
+                  <label for="message">Project details and access notes</label>
+                  <textarea id="message" name="message" placeholder="Anything helpful before the shoot: gate codes, occupancy, room count, special angles, listing deadline, or anything else." required></textarea>
+                </div>
               </div>
               <div class="field field--honeypot" aria-hidden="true">
                 <label for="company">Company</label>
                 <input id="company" name="company" tabindex="-1" autocomplete="off" />
               </div>
               <button class="button button--accent" type="submit" data-contact-submit>Send inquiry</button>
-              <div class="helper" data-contact-status>The built-in contact form sends directly from this site. If that service is unavailable, your email app will open as a fallback.</div>
+              <div class="helper" data-contact-status>The built-in contact form sends directly from this site. If that service is unavailable, your email app will open as a fallback with the same booking details.</div>
             </form>
           </div>
         </div>
@@ -2270,6 +2426,15 @@ function wireContactForm() {
     const formData = new FormData(form);
     const name = formData.get("name")?.toString().trim() || "";
     const email = formData.get("email")?.toString().trim() || "";
+    const phone = formData.get("phone")?.toString().trim() || "";
+    const brokerage = formData.get("brokerage")?.toString().trim() || "";
+    const propertyAddress = formData.get("propertyAddress")?.toString().trim() || "";
+    const propertyType = formData.get("propertyType")?.toString().trim() || "";
+    const squareFeet = formData.get("squareFeet")?.toString().trim() || "";
+    const shootDate = formData.get("shootDate")?.toString().trim() || "";
+    const packageInterest = formData.get("packageInterest")?.toString().trim() || "";
+    const turnaround = formData.get("turnaround")?.toString().trim() || "";
+    const addOns = formData.getAll("addOns").map((value) => value.toString().trim()).filter(Boolean);
     const message = formData.get("message")?.toString().trim() || "";
     const company = formData.get("company")?.toString().trim() || "";
     const endpoint = state.settings.contactNotificationEndpoint?.trim() || defaultContactEndpoint();
@@ -2294,6 +2459,15 @@ function wireContactForm() {
         body: JSON.stringify({
           name,
           email,
+          phone,
+          brokerage,
+          propertyAddress,
+          propertyType,
+          squareFeet,
+          shootDate,
+          packageInterest,
+          turnaround,
+          addOns,
           message,
           company,
           source: `${state.settings.brandName} website`,
@@ -2324,8 +2498,27 @@ function wireContactForm() {
       }
     }
 
-    const subject = encodeURIComponent(`Project inquiry from ${name || "website visitor"}`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nProject details:\n${message}\n`);
+    const subject = encodeURIComponent(
+      `Project inquiry${propertyAddress ? ` for ${propertyAddress}` : ""} from ${name || "website visitor"}`
+    );
+    const body = encodeURIComponent(
+      [
+        `Name: ${name}`,
+        `Email: ${email}`,
+        `Phone: ${phone}`,
+        `Brokerage or team: ${brokerage || "-"}`,
+        `Property address: ${propertyAddress || "-"}`,
+        `Property type: ${propertyType || "-"}`,
+        `Square footage: ${squareFeet || "-"}`,
+        `Preferred shoot date: ${shootDate || "-"}`,
+        `Package: ${packageInterest || "-"}`,
+        `Turnaround: ${turnaround || "-"}`,
+        `Add-ons: ${addOns.length ? addOns.join(", ") : "-"}`,
+        "",
+        "Project details and access notes:",
+        message || "-",
+      ].join("\n")
+    );
 
     window.location.href = `mailto:${state.settings.email}?subject=${subject}&body=${body}`;
   });

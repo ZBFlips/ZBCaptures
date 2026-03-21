@@ -22,18 +22,39 @@ function normalizeField(value) {
   return "";
 }
 
+function normalizeList(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeField(item)).filter(Boolean);
+  }
+
+  const single = normalizeField(value);
+  return single ? [single] : [];
+}
+
 function buildKey(timestamp, id) {
   const safeStamp = timestamp.replace(/[:.]/g, "-");
   return `submissions/${timestamp.slice(0, 10)}/${safeStamp}-${id}.json`;
 }
 
 function buildEmail(submission, savedAs, from, to) {
-  const subject = `New contact form submission from ${submission.name || "website visitor"}`;
+  const subject = submission.propertyAddress
+    ? `New contact form submission for ${submission.propertyAddress}`
+    : `New contact form submission from ${submission.name || "website visitor"}`;
   const body = [
     "New contact form submission",
     "",
     `Name: ${submission.name || "-"}`,
     `Email: ${submission.email || "-"}`,
+    `Phone: ${submission.phone || "-"}`,
+    `Brokerage or team: ${submission.brokerage || "-"}`,
+    `Property address: ${submission.propertyAddress || "-"}`,
+    `Property type: ${submission.propertyType || "-"}`,
+    `Square footage: ${submission.squareFeet || "-"}`,
+    `Preferred shoot date: ${submission.shootDate || "-"}`,
+    `Package: ${submission.packageInterest || "-"}`,
+    `Turnaround: ${submission.turnaround || "-"}`,
+    `Add-ons: ${submission.addOns?.length ? submission.addOns.join(", ") : "-"}`,
+    "",
     "Message:",
     submission.message || "-",
     "",
@@ -76,6 +97,15 @@ async function parseSubmission(request) {
   return {
     name: normalizeField(raw.name),
     email: normalizeField(raw.email),
+    phone: normalizeField(raw.phone),
+    brokerage: normalizeField(raw.brokerage),
+    propertyAddress: normalizeField(raw.propertyAddress),
+    propertyType: normalizeField(raw.propertyType),
+    squareFeet: normalizeField(raw.squareFeet),
+    shootDate: normalizeField(raw.shootDate),
+    packageInterest: normalizeField(raw.packageInterest),
+    turnaround: normalizeField(raw.turnaround),
+    addOns: normalizeList(raw.addOns),
     message: normalizeField(raw.message),
     company: normalizeField(raw.company),
     source: normalizeField(raw.source) || "ZB Captures website",
@@ -125,11 +155,11 @@ export async function onRequestPost(context) {
       return json({ ok: true, message: "Submission received." }, 200, corsHeaders(origin));
     }
 
-    if (!submission.name || !submission.email || !submission.message) {
+    if (!submission.name || !submission.email || !submission.phone || !submission.propertyAddress || !submission.message) {
       return json(
         {
           ok: false,
-          error: "Name, email, and project details are required.",
+          error: "Name, email, phone, property address, and project details are required.",
         },
         400,
         corsHeaders(origin)
