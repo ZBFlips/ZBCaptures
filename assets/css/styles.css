@@ -986,7 +986,7 @@ img {
 .location-page__coverage .section-grid,
 .location-page__fitGrid,
 .location-market-grid {
-  gap: 24px;
+  gap: 16px;
 }
 
 .location-page__introGrid {
@@ -1040,11 +1040,49 @@ img {
 }
 
 .location-market-card .card__title {
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-size: clamp(1.06rem, 1.35vw, 1.36rem);
+  line-height: 1.18;
 }
 
 .location-market-card .card__text {
-  max-width: 42ch;
+  max-width: 34ch;
+  margin-top: 10px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.location-market-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.location-market-card {
+  min-height: 100%;
+}
+
+.location-market-card .card__body {
+  padding: 15px 16px 16px;
+}
+
+.location-market-card .card__eyebrow {
+  margin-bottom: 8px;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+}
+
+.location-market-card .card__footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  gap: 6px;
+}
+
+.location-market-card .card__footerLabel {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+}
+
+.location-market-card .card__footerText {
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .services-packages {
