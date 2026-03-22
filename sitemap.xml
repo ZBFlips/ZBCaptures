@@ -2,14 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://zbcaptures.pages.dev/</loc>
-    <lastmod>2026-03-20</lastmod>
+    <lastmod>2026-03-22</lastmod>
   </url>
   <url>
     <loc>https://zbcaptures.pages.dev/services.html</loc>
-    <lastmod>2026-03-20</lastmod>
+    <lastmod>2026-03-22</lastmod>
   </url>
   <url>
     <loc>https://zbcaptures.pages.dev/contact.html</loc>
-    <lastmod>2026-03-20</lastmod>
+    <lastmod>2026-03-22</lastmod>
+  </url>
+  <url>
+    <loc>https://zbcaptures.pages.dev/locations/gulf-breeze-fl/</loc>
+    <lastmod>2026-03-22</lastmod>
+  </url>
+  <url>
+    <loc>https://zbcaptures.pages.dev/locations/navarre-fl/</loc>
+    <lastmod>2026-03-22</lastmod>
+  </url>
+  <url>
+    <loc>https://zbcaptures.pages.dev/locations/pace-fl/</loc>
+    <lastmod>2026-03-22</lastmod>
+  </url>
+  <url>
+    <loc>https://zbcaptures.pages.dev/locations/orange-beach-al/</loc>
+    <lastmod>2026-03-22</lastmod>
   </url>
 </urlset>

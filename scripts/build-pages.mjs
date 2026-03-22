@@ -4,6 +4,7 @@ import path from "node:path";
 const projectRoot = process.cwd();
 const distDir = path.join(projectRoot, "dist");
 const maxPagesFileSizeBytes = 25 * 1024 * 1024;
+const siteOrigin = "https://zbcaptures.pages.dev";
 
 const requiredFiles = [
   "index.html",
@@ -21,6 +22,109 @@ const routesManifest = {
   include: ["/api/*"],
   exclude: [],
 };
+
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char]));
+}
+
+async function loadLocationPages() {
+  try {
+    const raw = await readFile(path.join(projectRoot, "content", "locations.json"), "utf8");
+    const payload = JSON.parse(raw);
+    return Array.isArray(payload?.pages) ? payload.pages.filter((item) => item?.slug) : [];
+  } catch {
+    return [];
+  }
+}
+
+function publicPageShell({ title, description, page, assetPrefix = "./", bodyAttributes = "" }) {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="${escapeHtml(description)}" />
+    <title>${escapeHtml(title)}</title>
+    <link rel="icon" href="${assetPrefix}assets/brand/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="${assetPrefix}assets/css/styles.css" />
+  </head>
+  <body data-page="${escapeHtml(page)}"${bodyAttributes ? ` ${bodyAttributes}` : ""}>
+    <div class="page-shell">
+      <header id="site-header"></header>
+      <main id="site-main"></main>
+      <footer id="site-footer"></footer>
+    </div>
+
+    <div class="lightbox" id="lightbox" aria-hidden="true" hidden>
+      <button class="lightbox__backdrop" data-lightbox-close aria-label="Close image preview"></button>
+      <figure class="lightbox__dialog" role="dialog" aria-modal="true" aria-label="Image preview">
+        <button class="lightbox__close" data-lightbox-close aria-label="Close preview">Close</button>
+        <div class="lightbox__toolbar">
+          <button class="lightbox__nav" type="button" data-lightbox-prev aria-label="Previous image">Previous</button>
+          <span class="lightbox__count" id="lightbox-count"></span>
+          <button class="lightbox__nav" type="button" data-lightbox-next aria-label="Next image">Next</button>
+        </div>
+        <img class="lightbox__image" id="lightbox-image" alt="" />
+        <figcaption class="lightbox__caption" id="lightbox-caption"></figcaption>
+      </figure>
+    </div>
+
+    <script type="module" src="${assetPrefix}assets/js/site.js"></script>
+  </body>
+</html>
+`;
+}
+
+async function writeGeneratedPage(relativePath, html) {
+  const target = path.join(distDir, relativePath);
+  await mkdir(path.dirname(target), { recursive: true });
+  await writeFile(target, `${html.trim()}\n`);
+}
+
+async function writeLocationPages(locationPages) {
+  for (const locationPage of locationPages) {
+    const title = locationPage.seoTitle || `${locationPage.market || locationPage.name} Real Estate Photography | ZB Captures`;
+    const description =
+      locationPage.seoDescription ||
+      `Real estate photography, drone coverage, and fast listing media for ${locationPage.market || locationPage.name}.`;
+
+    await writeGeneratedPage(
+      path.join("locations", locationPage.slug, "index.html"),
+      publicPageShell({
+        title,
+        description,
+        page: "location",
+        assetPrefix: "../../",
+        bodyAttributes: `data-base-path="../../" data-location-slug="${escapeHtml(locationPage.slug)}"`,
+      })
+    );
+  }
+}
+
+async function writeSitemap(locationPages) {
+  const today = new Date().toISOString().slice(0, 10);
+  const urls = [
+    `${siteOrigin}/`,
+    `${siteOrigin}/services.html`,
+    `${siteOrigin}/contact.html`,
+    ...locationPages.map((item) => `${siteOrigin}/locations/${item.slug}/`),
+  ];
+
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls
+  .map(
+    (url) => `  <url>
+    <loc>${escapeHtml(url)}</loc>
+    <lastmod>${today}</lastmod>
+  </url>`
+  )
+  .join("\n")}
+</urlset>
+`;
+
+  await writeFile(path.join(distDir, "sitemap.xml"), sitemap);
+}
 
 async function ensureEntryExists(relativePath) {
   const absolutePath = path.join(projectRoot, relativePath);
@@ -107,6 +211,7 @@ async function referencedAssetFiles() {
 async function build() {
   await rm(distDir, { recursive: true, force: true });
   await mkdir(distDir, { recursive: true });
+  const locationPages = await loadLocationPages();
 
   for (const file of requiredFiles) {
     await ensureEntryExists(file);
@@ -125,6 +230,9 @@ async function build() {
   for (const file of optionalFiles) {
     await copyOptionalEntry(file);
   }
+
+  await writeLocationPages(locationPages);
+  await writeSitemap(locationPages);
 
   await writeFile(path.join(distDir, "_routes.json"), `${JSON.stringify(routesManifest, null, 2)}\n`);
 

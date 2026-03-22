@@ -3,6 +3,8 @@ import { DEFAULT_STATE, hasSavedState, loadState, listMedia } from "./storage.js
 import { loadUnlockedCloudPortal, unlockCloudPortal } from "./client-delivery-api.js";
 
 const page = document.body.dataset.page;
+const pageBasePath = document.body.dataset.basePath || "./";
+const locationSlug = String(document.body.dataset.locationSlug || "").trim();
 const headerEl = document.getElementById("site-header");
 const mainEl = document.getElementById("site-main");
 const footerEl = document.getElementById("site-footer");
@@ -67,6 +69,7 @@ let activePortalMedia = [];
 let clientPortalError = "";
 let lightboxItems = [];
 let lightboxIndex = -1;
+let locationPages = [];
 let leafletAssetsPromise = null;
 let serviceAreaMap = null;
 let serviceAreaCircle = null;
@@ -80,6 +83,36 @@ if (mainEl) {
 
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
+}
+
+function normalizePathname(pathname = "/") {
+  const value = String(pathname || "/").replace(/\/index\.html$/, "/");
+  return value === "" ? "/" : value;
+}
+
+function absoluteSiteUrl(relativePath = "") {
+  const value = String(relativePath || "").trim();
+  if (!value) {
+    return new URL(pageBasePath, window.location.href).toString();
+  }
+
+  if (/^(?:[a-z]+:)?\/\//i.test(value) || value.startsWith("data:") || value.startsWith("blob:") || value.startsWith("mailto:") || value.startsWith("tel:") || value.startsWith("#")) {
+    return value;
+  }
+
+  return new URL(value.replace(/^\.\//, ""), new URL(pageBasePath, window.location.href)).toString();
+}
+
+function currentPathname() {
+  return normalizePathname(window.location.pathname || "/");
+}
+
+function resolvedPathname(relativePath = "") {
+  return normalizePathname(new URL(absoluteSiteUrl(relativePath), window.location.href).pathname);
+}
+
+function currentPageSlug() {
+  return locationSlug;
 }
 
 function mergeClientPortals(localPortals = [], publishedPortals = []) {
@@ -154,7 +187,7 @@ function mergeMediaRecords(localMedia, publishedMedia) {
 
 async function loadPublishedSiteData() {
   try {
-    const response = await fetch("./content/site-data.json", { cache: "no-store" });
+    const response = await fetch(absoluteSiteUrl("content/site-data.json"), { cache: "no-store" });
     if (!response.ok) {
       return null;
     }
@@ -165,20 +198,54 @@ async function loadPublishedSiteData() {
   }
 }
 
+async function loadLocationPagesData() {
+  try {
+    const response = await fetch(absoluteSiteUrl("content/locations.json"), { cache: "no-store" });
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = await response.json();
+    return Array.isArray(payload?.pages) ? payload.pages : [];
+  } catch {
+    return [];
+  }
+}
+
 function headerNavItems() {
   return [
-    { href: "./index.html", label: "Home" },
-    { href: "./services.html", label: "Services" },
-    { href: "./contact.html", label: "Contact" },
-    { href: "./admin.html", label: "Admin" },
+    { href: absoluteSiteUrl("index.html"), label: "Home" },
+    { href: absoluteSiteUrl("services.html"), label: "Services" },
+    { href: absoluteSiteUrl("contact.html"), label: "Contact" },
+    { href: absoluteSiteUrl("admin.html"), label: "Admin" },
   ];
 }
 
 function footerNavItems() {
   return [
     ...headerNavItems(),
-    { href: "./client-access.html", label: "Client Access" },
+    { href: absoluteSiteUrl("client-access.html"), label: "Client Access" },
   ];
+}
+
+function featuredLocationPages(limit = 4, excludeSlug = "") {
+  return locationPages.filter((item) => item?.slug && item.slug !== excludeSlug).slice(0, limit);
+}
+
+function findLocationPage(slug = currentPageSlug()) {
+  if (!slug) {
+    return null;
+  }
+
+  return locationPages.find((item) => item?.slug === slug) || null;
+}
+
+function locationPageHref(record) {
+  if (!record?.slug) {
+    return absoluteSiteUrl("services.html");
+  }
+
+  return absoluteSiteUrl(`locations/${record.slug}/`);
 }
 
 function headerLogoMedia() {
@@ -189,11 +256,11 @@ function headerLogoMedia() {
 }
 
 function renderHeader() {
-  const currentPath = location.pathname.split("/").pop() || "index.html";
+  const currentPath = currentPathname();
   const links = headerNavItems()
     .map(
       (item) => `
-        <a href="${item.href}" ${currentPath === item.href.split("/").pop() ? 'aria-current="page"' : ""}>${item.label}</a>
+        <a href="${item.href}" ${currentPath === resolvedPathname(item.href) ? 'aria-current="page"' : ""}>${item.label}</a>
       `
     )
     .join("");
@@ -207,7 +274,7 @@ function renderHeader() {
   headerEl.innerHTML = `
     <div class="site-header">
       <div class="site-header__inner">
-        <a class="brand ${logo ? "brand--logo-only" : ""}" href="./index.html" aria-label="Go to home page">
+        <a class="brand ${logo ? "brand--logo-only" : ""}" href="${absoluteSiteUrl("index.html")}" aria-label="Go to home page">
           ${logoMarkup}
           ${tagMarkup}
         </a>
@@ -218,7 +285,7 @@ function renderHeader() {
         </button>
         <nav class="nav" id="site-nav" data-site-nav aria-label="Primary navigation">
           ${links}
-          <a class="nav__cta" href="./contact.html">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
+          <a class="nav__cta" href="${absoluteSiteUrl("contact.html")}">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
         </nav>
       </div>
     </div>
@@ -321,6 +388,16 @@ function renderFooter() {
   const linksMarkup = footerNavItems()
     .map((item) => `<a href="${item.href}">${safeText(item.label)}</a>`)
     .join("");
+  const locationLinksMarkup = featuredLocationPages().length
+    ? `
+        <div class="footer__heading">Featured markets</div>
+        <div class="footer__links footer__links--markets">
+          ${featuredLocationPages()
+            .map((item) => `<a href="${locationPageHref(item)}">${safeText(item.market || item.name || item.slug)}</a>`)
+            .join("")}
+        </div>
+      `
+    : "";
 
   footerEl.innerHTML = `
     <div class="footer">
@@ -342,6 +419,7 @@ function renderFooter() {
           <div class="footer__heading">Platform compatibility</div>
           <p class="footer__copy">Built for agents, brokers, and hosts who need media that fits the expectations of MLS listings, Zillow, Homes.com, Redfin, Airbnb, and VRBO.</p>
           <div class="footer__chips">${platformsMarkup}</div>
+          ${locationLinksMarkup}
           <div class="footer__links">
             ${linksMarkup}
           </div>
@@ -408,7 +486,7 @@ function mediaSourceSet(record, keys = ["thumb", "medium", "full"]) {
   for (const key of keys) {
     const variant = mediaVariant(record, key);
     const width = Number(variant?.width);
-    const src = String(variant?.src || "").trim();
+    const src = absoluteSiteUrl(String(variant?.src || "").trim());
     if (!src || !Number.isFinite(width) || seen.has(src)) {
       continue;
     }
@@ -442,12 +520,12 @@ function mediaUrlFor(record, key = "") {
   if (key) {
     const variant = mediaVariant(record, key);
     if (variant?.src) {
-      return variant.src;
+      return absoluteSiteUrl(variant.src);
     }
   }
 
   if (record?.src) {
-    return record.src;
+    return absoluteSiteUrl(record.src);
   }
 
   return "";
@@ -547,8 +625,8 @@ function heroMarkup() {
             <h1 class="hero__title">${safeText(state.settings.heroHeadline)}</h1>
             <p class="hero__lead">${safeText(state.settings.heroLead)}</p>
             <div class="hero__actions">
-              <a class="button button--accent" href="${safeText(state.settings.heroCtas.primaryHref)}">${safeText(state.settings.heroCtas.primaryLabel)}</a>
-              <a class="button" href="${safeText(state.settings.heroCtas.secondaryHref)}">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
+              <a class="button button--accent" href="${absoluteSiteUrl(state.settings.heroCtas.primaryHref)}">${safeText(state.settings.heroCtas.primaryLabel)}</a>
+              <a class="button" href="${absoluteSiteUrl(state.settings.heroCtas.secondaryHref)}">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
             </div>
             <div class="hero__stats">
               ${state.settings.heroStats
@@ -711,8 +789,8 @@ function servicesMarkup() {
           <p class="section__lead">${safeText(state.settings.servicesLead)}</p>
           ${serviceSignalsMarkup()}
           <div class="section__actions">
-            <a class="button button--accent" href="./services.html">View the full services page</a>
-            <a class="button" href="./contact.html">Book a session</a>
+          <a class="button button--accent" href="${absoluteSiteUrl("services.html")}">View the full services page</a>
+          <a class="button" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
           </div>
         </div>
         <div class="section-grid grid--cards services-home__cards">
@@ -878,6 +956,116 @@ const contactAddOnOptions = [
   { value: "Twilight images", label: "Twilight images" },
 ];
 
+function currentLocationPage() {
+  return findLocationPage(currentPageSlug());
+}
+
+function currentFaqItems() {
+  const locationPage = currentLocationPage();
+  if (page === "location" && Array.isArray(locationPage?.faq) && locationPage.faq.length) {
+    return locationPage.faq;
+  }
+
+  return faqItems;
+}
+
+function serviceCardsMarkup() {
+  return state.services
+    .map(
+      (service, index) => `
+        <article class="card card--interactive ${service.featured ? "card--featured" : ""}">
+          <div class="card__body">
+            <div class="card__header">
+              <div>
+                <div class="card__eyebrow">${safeText(service.featured ? "Featured package" : `0${index + 1}`)}</div>
+                <h2 class="card__title">${safeText(service.title)}</h2>
+              </div>
+              ${service.price ? `<div class="card__price">${safeText(service.price)}</div>` : ""}
+            </div>
+            <p class="card__text">${safeText(service.description)}</p>
+            <div class="card__metaLabel">Includes</div>
+            <div class="card__meta">
+              ${(service.bullets || []).map((bullet) => `<span class="pill">${safeText(bullet)}</span>`).join("")}
+            </div>
+            <div class="card__footer">
+              <span class="card__footerLabel">Best fit</span>
+              <div class="card__footerText">${safeText(serviceSummary(service, index))}</div>
+            </div>
+          </div>
+        </article>
+      `
+    )
+    .join("");
+}
+
+function locationSignalsMarkup(locationPage) {
+  const highlights = Array.isArray(locationPage?.highlights) ? locationPage.highlights.filter((item) => item?.label && item?.value) : [];
+  if (!highlights.length) {
+    return "";
+  }
+
+  return `
+    <div class="signal-grid" aria-label="${safeText(locationPage.market || locationPage.name || "Location highlights")}">
+      ${highlights
+        .map(
+          (signal) => `
+            <div class="signal-card">
+              <span class="signal-card__label">${safeText(signal.label)}</span>
+              <strong class="signal-card__value">${safeText(signal.value)}</strong>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function locationMarketsSectionMarkup(records, options = {}) {
+  const items = (records || []).filter(Boolean);
+  if (!items.length) {
+    return "";
+  }
+
+  const eyebrow = options.eyebrow || "Featured markets";
+  const title = options.title || "Browse nearby Gulf Coast service areas.";
+  const lead =
+    options.lead ||
+    "Each location page focuses on the kinds of listings, booking patterns, and marketing needs that show up most often in that market.";
+
+  return `
+    <section class="section location-markets">
+      <div class="section__eyebrow">${safeText(eyebrow)}</div>
+      <h2 class="section__title">${safeText(title)}</h2>
+      <p class="section__lead">${safeText(lead)}</p>
+      <div class="section-grid grid--cards location-market-grid">
+        ${items
+          .map(
+            (item) => `
+              <a class="card card--interactive location-market-card" href="${locationPageHref(item)}">
+                <div class="card__body">
+                  <div class="card__eyebrow">${safeText(item.market || item.name || item.slug)}</div>
+                  <h3 class="card__title">${safeText(item.cardTitle || item.headline || `Real estate photography in ${item.name || item.market || "this market"}`)}</h3>
+                  <p class="card__text">${safeText(item.cardLead || item.lead || "")}</p>
+                  ${
+                    item.coverageSummary
+                      ? `
+                        <div class="card__footer">
+                          <span class="card__footerLabel">Coverage</span>
+                          <div class="card__footerText">${safeText(item.coverageSummary)}</div>
+                        </div>
+                      `
+                      : ""
+                  }
+                </div>
+              </a>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function testimonialsMarkup() {
   return `
     <section class="section testimonials-strip">
@@ -921,8 +1109,8 @@ function clientDeliveryTeaserMarkup() {
           <h2 class="section__title">A delivery portal that feels polished instead of technical.</h2>
           <p class="section__lead">Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.</p>
           <div class="section__actions">
-            <a class="button button--accent" href="./client-access.html">Open client access</a>
-            <a class="button" href="./contact.html">Book your appointment</a>
+            <a class="button button--accent" href="${absoluteSiteUrl("client-access.html")}">Open client access</a>
+            <a class="button" href="${absoluteSiteUrl("contact.html")}">Book your appointment</a>
           </div>
         </div>
         <div class="timeline">
@@ -1095,7 +1283,7 @@ function trustSectionMarkup() {
           <h2 class="section__title">Built around the pace and standards of real estate marketing.</h2>
           <p class="section__lead">This is not generic photography packaging. The workflow is tuned for agents who care about speed, listing-platform compatibility, consistent visual quality, and a handoff process that feels easy for clients.</p>
           <div class="section__actions">
-            <a class="button button--accent" href="./contact.html">Book a session</a>
+            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
             <a class="button" href="${safeText(GOOGLE_BUSINESS_PROFILE_URL)}" target="_blank" rel="noreferrer">View Google Business Profile</a>
           </div>
         </div>
@@ -1131,18 +1319,24 @@ function trustSectionMarkup() {
   `;
 }
 
-function faqMarkup() {
+function faqMarkup(items = faqItems, options = {}) {
+  const eyebrow = options.eyebrow || "FAQ & SERVICE AREA";
+  const title = options.title || "Questions agents usually ask before booking.";
+  const lead =
+    options.lead ||
+    "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.";
+
   return `
     <section class="section faq-section">
-      <div class="section__eyebrow">FAQ &amp; SERVICE AREA</div>
+      <div class="section__eyebrow">${safeText(eyebrow)}</div>
       <div class="faq-layout">
         <div class="faq-layout__content">
           <div class="faq-layout__copy">
-            <h2 class="section__title">Questions agents usually ask before booking.</h2>
-            <p class="section__lead">The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.</p>
+            <h2 class="section__title">${safeText(title)}</h2>
+            <p class="section__lead">${safeText(lead)}</p>
           </div>
           <div class="faq-list">
-            ${faqItems
+            ${items
               .map(
                 (item) => `
                   <details class="faq-item">
@@ -1382,47 +1576,135 @@ function servicesPageMarkup() {
       <p class="section__lead">${safeText(state.settings.servicesLead)}</p>
       ${serviceSignalsMarkup()}
       <div class="section__actions">
-        <a class="button button--accent" href="./contact.html">Book a session</a>
-        <a class="button" href="./client-access.html">See the delivery experience</a>
+        <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
+        <a class="button" href="${absoluteSiteUrl("client-access.html")}">See the delivery experience</a>
       </div>
     </section>
 
     <section class="section services-page__packages">
       <div class="section-grid grid--cards services-packages">
-        ${state.services
-          .map(
-            (service, index) => `
-              <article class="card card--interactive ${service.featured ? "card--featured" : ""}">
-                <div class="card__body">
-                  <div class="card__header">
-                    <div>
-                      <div class="card__eyebrow">${safeText(service.featured ? "Featured package" : `0${index + 1}`)}</div>
-                      <h2 class="card__title">${safeText(service.title)}</h2>
-                    </div>
-                    ${service.price ? `<div class="card__price">${safeText(service.price)}</div>` : ""}
-                  </div>
-                  <p class="card__text">${safeText(service.description)}</p>
-                  <div class="card__metaLabel">Includes</div>
-                  <div class="card__meta">
-                    ${(service.bullets || []).map((bullet) => `<span class="pill">${safeText(bullet)}</span>`).join("")}
-                  </div>
-                  <div class="card__footer">
-                    <span class="card__footerLabel">Best fit</span>
-                    <div class="card__footerText">${safeText(serviceSummary(service, index))}</div>
-                  </div>
-                </div>
-              </article>
-            `
-          )
-          .join("")}
+        ${serviceCardsMarkup()}
       </div>
     </section>
+
+    ${locationMarketsSectionMarkup(featuredLocationPages(), {
+      eyebrow: "Location pages",
+      title: "Browse the nearby markets I actively serve.",
+      lead:
+        "These pages are built to speak to the kinds of listings and booking patterns that show up in each Gulf Coast market, while keeping the same packages and delivery workflow."
+    })}
 
     ${agentProofMarkup()}
 
     ${videoMarkup()}
 
     ${faqMarkup()}
+  `;
+}
+
+function locationPageMarkup() {
+  const locationPage = currentLocationPage();
+  if (!locationPage) {
+    return `
+      <section class="section">
+        <div class="section__eyebrow">Location page</div>
+        <h1 class="section__title">This market page is not configured yet.</h1>
+        <p class="section__lead">Add a record to <code>content/locations.json</code> and rebuild the site to publish a new location-specific URL.</p>
+        <div class="section__actions">
+          <a class="button button--accent" href="${absoluteSiteUrl("services.html")}">View services</a>
+          <a class="button" href="${absoluteSiteUrl("contact.html")}">Contact ZB Captures</a>
+        </div>
+      </section>
+    `;
+  }
+
+  const coverageAreas = Array.isArray(locationPage.coverageAreas) ? locationPage.coverageAreas.filter(Boolean) : [];
+  const fitCards = Array.isArray(locationPage.fitCards) ? locationPage.fitCards.filter((item) => item?.title && item?.text) : [];
+  const nearbyMarkets = Array.isArray(locationPage.nearbySlugs)
+    ? locationPage.nearbySlugs.map((slug) => findLocationPage(slug)).filter(Boolean)
+    : featuredLocationPages(3, locationPage.slug);
+
+  return `
+    <section class="section services-page__intro location-page__intro">
+      <div class="section__eyebrow">${safeText(locationPage.eyebrow || locationPage.market || locationPage.name || "Market")}</div>
+      <h1 class="section__title">${safeText(locationPage.headline || `Real estate photography in ${locationPage.market || locationPage.name || "this market"}`)}</h1>
+      <p class="section__lead">${safeText(locationPage.lead || "")}</p>
+      ${locationSignalsMarkup(locationPage)}
+      <div class="section__actions">
+        <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
+        <a class="button" href="${absoluteSiteUrl("services.html")}">See packages</a>
+      </div>
+    </section>
+
+    <section class="section location-page__coverage">
+      <div class="section-grid grid--split">
+        <div class="location-page__copy">
+          <div class="section__eyebrow">Coverage in ${safeText(locationPage.name || locationPage.market || "this market")}</div>
+          <h2 class="section__title">${safeText(locationPage.coverageTitle || `Where this service fits in ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
+          <p class="section__lead">${safeText(locationPage.coverageLead || "")}</p>
+        </div>
+        <aside class="card location-page__coverageCard">
+          <div class="card__body">
+            <div class="card__eyebrow">Common coverage areas</div>
+            <h3 class="card__title">${safeText(locationPage.market || locationPage.name || "Local coverage")}</h3>
+            <p class="card__text">${safeText(locationPage.coverageSummary || "This page is meant to capture real, nearby markets you actually want to book consistently.")}</p>
+            <div class="card__meta">
+              ${coverageAreas.map((item) => `<span class="pill">${safeText(item)}</span>`).join("")}
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    ${
+      fitCards.length
+        ? `
+          <section class="section location-page__fit">
+            <div class="section__eyebrow">Best fit</div>
+            <h2 class="section__title">${safeText(locationPage.fitTitle || `What agents usually need in ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
+            <p class="section__lead">${safeText(locationPage.fitLead || "These are the booking patterns and listing types this page is meant to speak to directly.")}</p>
+            <div class="section-grid grid--cards location-page__fitGrid">
+              ${fitCards
+                .map(
+                  (item, index) => `
+                    <article class="card ${index === 1 ? "card--featured" : ""}">
+                      <div class="card__body">
+                        <div class="card__eyebrow">${safeText(item.eyebrow || "Use case")}</div>
+                        <h3 class="card__title">${safeText(item.title)}</h3>
+                        <p class="card__text">${safeText(item.text)}</p>
+                      </div>
+                    </article>
+                  `
+                )
+                .join("")}
+            </div>
+          </section>
+        `
+        : ""
+    }
+
+    <section class="section services-page__packages">
+      <div class="section__eyebrow">Packages</div>
+      <h2 class="section__title">${safeText(locationPage.packagesTitle || `Packages available for ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
+      <p class="section__lead">${safeText(locationPage.packagesLead || "The package structure stays consistent, while the local page focuses the messaging around the kinds of listings that show up most often in this market.")}</p>
+      <div class="section-grid grid--cards services-packages">
+        ${serviceCardsMarkup()}
+      </div>
+    </section>
+
+    ${locationMarketsSectionMarkup(nearbyMarkets, {
+      eyebrow: "Nearby markets",
+      title: `Also serving nearby Gulf Coast markets around ${locationPage.market || locationPage.name || "this area"}.`,
+      lead: locationPage.nearbyLead || "If you work across several nearby cities, these location pages keep the copy and internal links specific to each market without changing the core service workflow."
+    })}
+
+    ${faqMarkup(currentFaqItems(), {
+      eyebrow: `${locationPage.name || locationPage.market || "Market"} FAQ`,
+      title: `Questions about booking in ${locationPage.market || locationPage.name || "this market"}.`,
+      lead:
+        locationPage.faqLead ||
+        `The answers below are tailored to the way listing work usually gets scheduled and delivered in ${locationPage.market || locationPage.name || "this market"}.`
+    })}
   `;
 }
 
@@ -1508,48 +1790,65 @@ function loadingShellMarkup(currentPage) {
   return generic;
 }
 
-function absolutePageUrl(relativePath = ".") {
-  return new URL(relativePath, window.location.href).toString();
+function absolutePageUrl(relativePath = "") {
+  return absoluteSiteUrl(relativePath);
 }
 
 function seoImageUrl() {
-  return absolutePageUrl("./assets/brand/social-share.png");
+  return absolutePageUrl("assets/brand/social-share.png");
 }
 
 function pageSeoConfig() {
+  const locationPage = currentLocationPage();
   switch (page) {
+    case "location":
+      if (locationPage) {
+        return {
+          title: locationPage.seoTitle || `${locationPage.market || locationPage.name} Real Estate Photography | ${state.settings.brandName}`,
+          description:
+            locationPage.seoDescription ||
+            `${state.settings.brandName} provides real estate photography, drone coverage, and fast listing media for ${locationPage.market || locationPage.name}.`,
+          path: `locations/${locationPage.slug}/`,
+        };
+      }
+
+      return {
+        title: `Service Area | ${state.settings.brandName}`,
+        description: `${state.settings.brandName} serves Gulf Coast listings with location-specific pages for nearby markets.`,
+        path: "services.html",
+      };
     case "services":
       return {
         title: "Real Estate Photography Services in Pensacola, FL | ZB Captures",
         description:
           "Real estate photography services in Pensacola, Florida with MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video for Zillow, Homes.com, Redfin, Airbnb, and VRBO listings.",
-        path: "./services.html",
+        path: "services.html",
       };
     case "contact":
       return {
         title: "Contact ZB Captures | Pensacola Real Estate Photographer",
         description:
           "Contact ZB Captures for Pensacola real estate photography, MLS-ready photos, drone photos, and listing media with same-day availability when possible across the Gulf Coast.",
-        path: "./contact.html",
+        path: "contact.html",
       };
     case "client-access":
       return {
         title: "Client Delivery Portal | ZB Captures",
         description: "Client delivery portal for reviewing and downloading real estate photography and video files.",
-        path: "./client-access.html",
+        path: "client-access.html",
       };
     case "admin":
       return {
         title: "Admin Dashboard | ZB Captures",
         description: "Admin dashboard for managing ZB Captures content, media uploads, and client delivery portals.",
-        path: "./admin.html",
+        path: "admin.html",
       };
     default:
       return {
         title: "ZB Captures | Real Estate Photography",
         description:
           "ZB Captures provides Pensacola real estate photography with MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video for Zillow, Homes.com, Redfin, Airbnb, and VRBO listings across the Gulf Coast.",
-        path: "./index.html",
+        path: "",
       };
   }
 }
@@ -1583,6 +1882,9 @@ function applyStructuredData(seo) {
     return;
   }
 
+  const locationPage = currentLocationPage();
+  const areaServed = page === "location" && locationPage?.market ? [locationPage.market] : SEO_SERVICE_AREAS;
+  const faqSchemaItems = currentFaqItems();
   const canonicalUrl = absolutePageUrl(seo.path);
   const businessId = `${window.location.origin}/#business`;
   const business = {
@@ -1592,7 +1894,7 @@ function applyStructuredData(seo) {
     url: window.location.origin,
     image: seoImageUrl(),
     description: seo.description,
-    areaServed: SEO_SERVICE_AREAS,
+    areaServed,
     email: state.settings.email,
     telephone: state.settings.phone,
     priceRange: "$$",
@@ -1636,10 +1938,22 @@ function applyStructuredData(seo) {
     });
   }
 
-  if (page === "home" || page === "services") {
+  if (page === "location" && locationPage) {
+    graph.push({
+      "@type": "Service",
+      serviceType: "Real estate photography",
+      name: `Real estate photography in ${locationPage.market || locationPage.name}`,
+      provider: { "@id": businessId },
+      areaServed,
+      url: canonicalUrl,
+      description: seo.description,
+    });
+  }
+
+  if ((page === "home" || page === "services" || page === "location") && faqSchemaItems.length) {
     graph.push({
       "@type": "FAQPage",
-      mainEntity: faqItems.map((item) => ({
+      mainEntity: faqSchemaItems.map((item) => ({
         "@type": "Question",
         name: item.question,
         acceptedAnswer: {
@@ -2537,7 +2851,7 @@ function clearClientPortalState() {
 }
 
 function defaultContactEndpoint() {
-  return new URL("./api/contact", window.location.href).toString();
+  return absoluteSiteUrl("api/contact");
 }
 
 function rememberPortalCode(slug, accessCode) {
@@ -2557,7 +2871,7 @@ function getRememberedPortalCode(slug) {
 }
 
 function removeCodeFromUrl(slug) {
-  const next = slug ? `./client-access.html?portal=${encodeURIComponent(slug)}` : "./client-access.html";
+  const next = slug ? `${absoluteSiteUrl("client-access.html")}?portal=${encodeURIComponent(slug)}` : absoluteSiteUrl("client-access.html");
   window.history.replaceState({}, "", next);
 }
 
@@ -2641,7 +2955,7 @@ function wireClientAccessPage() {
     const accessCode = formData.get("accessCode")?.toString().trim() || "";
     const originalLabel = submitButton?.textContent || "Open delivery";
 
-    const targetUrl = `./client-access.html?portal=${encodeURIComponent(slug)}`;
+    const targetUrl = `${absoluteSiteUrl("client-access.html")}?portal=${encodeURIComponent(slug)}`;
     if (!portalSlugFromLocation() && slug) {
       window.history.replaceState({}, "", targetUrl);
     }
@@ -2739,6 +3053,14 @@ function renderPage() {
     return;
   }
 
+  if (page === "location") {
+    clearClientPortalState();
+    mainEl.innerHTML = locationPageMarkup();
+    wireSectionReveal();
+    wireServiceAreaMap();
+    return;
+  }
+
   if (page === "contact") {
     clearClientPortalState();
     mainEl.innerHTML = contactMarkup();
@@ -2762,6 +3084,7 @@ function renderPage() {
 
 async function bootstrap() {
   const published = await loadPublishedSiteData();
+  locationPages = await loadLocationPagesData();
   const localMedia = await loadMedia();
   const localState = loadState();
   const hasLocalDraft = hasSavedState() || localMedia.length > 0;
