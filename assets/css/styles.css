@@ -566,8 +566,16 @@ img {
   align-items: end;
 }
 
+.hero__grid--focused {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .hero__copy {
   max-width: 86ch;
+}
+
+.hero__copy--focused {
+  max-width: min(72ch, 100%);
 }
 
 .hero__kicker {
@@ -599,6 +607,18 @@ img {
   color: var(--muted);
   font-size: 1.08rem;
   line-height: 1.75;
+}
+
+.hero__copy--focused .hero__lead {
+  max-width: 42ch;
+}
+
+.hero__subnote {
+  max-width: 48ch;
+  margin: 18px 0 0;
+  color: rgba(243, 239, 231, 0.82);
+  font-size: 0.94rem;
+  line-height: 1.7;
 }
 
 .hero__actions {
@@ -1472,6 +1492,10 @@ img {
   gap: 14px;
 }
 
+.trust-section__process {
+  margin-top: 28px;
+}
+
 .trust-card__eyebrow,
 .trust-meta__label {
   color: var(--accent-2);
@@ -2208,10 +2232,37 @@ img {
   color: var(--accent);
 }
 
+.footer__meta {
+  display: grid;
+  gap: 12px;
+}
+
+.footer__metaItem {
+  display: grid;
+  gap: 4px;
+}
+
+.footer__metaItem a {
+  color: var(--text);
+}
+
+.footer__metaLabel {
+  color: var(--accent-2);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 .footer__links {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.footer__links--stacked {
+  display: grid;
+  gap: 10px;
 }
 
 .footer__links--markets {

@@ -54,7 +54,6 @@ const SEO_SERVICE_AREAS = [
   "Fairhope, AL",
   "Daphne, AL",
   "Mobile, AL",
-  "Enterprise, FL",
 ];
 const SEO_PLATFORMS = ["MLS", "Zillow", "Homes.com", "Redfin", "Airbnb", "VRBO"];
 const SEO_DELIVERABLES = ["MLS-ready photos", "Zillow-ready images", "HDR photography", "drone photos", "social video"];
@@ -393,44 +392,43 @@ function wireHeaderMenu() {
 }
 
 function renderFooter() {
-  const marketsMarkup = SEO_SERVICE_AREAS.map((market) => `<span class="footer__chip">${safeText(market)}</span>`).join("");
-  const platformsMarkup = SEO_PLATFORMS.map((platform) => `<span class="footer__chip footer__chip--platform">${safeText(platform)}</span>`).join("");
   const linksMarkup = footerNavItems()
     .map((item) => `<a href="${item.href}">${safeText(item.label)}</a>`)
     .join("");
-  const locationLinksMarkup = featuredLocationPages().length
-    ? `
-        <div class="footer__heading">Featured markets</div>
-        <div class="footer__links footer__links--markets">
-          ${featuredLocationPages()
-            .map((item) => `<a href="${locationPageHref(item)}">${safeText(item.market || item.name || item.slug)}</a>`)
-            .join("")}
-        </div>
-      `
-    : "";
 
   footerEl.innerHTML = `
     <div class="footer">
       <div class="footer__inner">
         <div class="footer__brand">
           <strong>${safeText(state.settings.brandName)}</strong>
-          <p class="footer__headline">Pensacola real estate photography for ${safeText(SEO_PLATFORMS.join(", "))}-ready listings.</p>
-          <p class="footer__copy">${safeText(state.settings.footerNote)}</p>
-          <p class="footer__copy">${safeText(SEO_DELIVERABLES.join(", "))}, with same-day availability when possible for Gulf Coast agents who need media that works fast across industry-standard platforms.</p>
-          <p class="footer__copy">${safeText(BUSINESS_HOURS.label)}</p>
+          <p class="footer__headline">Pensacola real estate photography and video for clean, market-ready listing launches.</p>
+          <p class="footer__copy">${safeText(state.settings.serviceArea)}</p>
           <a class="footer__contact" href="mailto:${safeText(state.settings.email)}">Primary contact: ${safeText(state.settings.email)}</a>
         </div>
         <div class="footer__stack">
-          <div class="footer__heading">Service area</div>
-          <p class="footer__copy">${safeText(state.settings.serviceArea)}</p>
-          <div class="footer__chips">${marketsMarkup}</div>
+          <div class="footer__heading">Details</div>
+          <div class="footer__meta">
+            <div class="footer__metaItem">
+              <span class="footer__metaLabel">Phone</span>
+              <a href="tel:${safeText(state.settings.phone)}">${safeText(state.settings.phone)}</a>
+            </div>
+            <div class="footer__metaItem">
+              <span class="footer__metaLabel">Instagram</span>
+              <span>${safeText(state.settings.instagram)}</span>
+            </div>
+            <div class="footer__metaItem">
+              <span class="footer__metaLabel">Response time</span>
+              <span>${safeText(state.settings.responseTime || "Usually replies quickly during business hours.")}</span>
+            </div>
+            <div class="footer__metaItem">
+              <span class="footer__metaLabel">Hours</span>
+              <span>${safeText(BUSINESS_HOURS.label)}</span>
+            </div>
+          </div>
         </div>
         <div class="footer__stack">
-          <div class="footer__heading">Platform compatibility</div>
-          <p class="footer__copy">Built for agents, brokers, and hosts who need media that fits the expectations of MLS listings, Zillow, Homes.com, Redfin, Airbnb, and VRBO.</p>
-          <div class="footer__chips">${platformsMarkup}</div>
-          ${locationLinksMarkup}
-          <div class="footer__links">
+          <div class="footer__heading">Quick links</div>
+          <div class="footer__links footer__links--stacked">
             ${linksMarkup}
           </div>
         </div>
@@ -720,38 +718,7 @@ function heroMarkup() {
         fetchpriority: "high",
       })
     : "";
-
-  const spotlight = featuredFrameMedia();
-  const spotlightTitle = state.settings.featuredFrameTitle || "Selected work";
-  const spotlightLead = state.settings.featuredFrameLead || "A single image can carry the whole listing.";
-  const spotlightMarkup = spotlight
-    ? `
-      <article class="hero__card">
-        ${responsivePictureMarkup(spotlight, {
-          imgClass: "hero__cardMedia",
-          alt: spotlight.alt || spotlight.title || "Featured work",
-          keys: ["thumb", "medium", "full"],
-          sizes: "(max-width: 1100px) 100vw, 32vw",
-          loading: "eager",
-          decoding: "async",
-          fetchpriority: "high",
-        })}
-        <div class="hero__cardBody">
-          <div class="hero__cardEyebrow">Featured frame</div>
-          <h2 class="hero__cardTitle">${safeText(spotlightTitle)}</h2>
-          <p class="hero__cardLead">${safeText(spotlightLead)}</p>
-        </div>
-      </article>
-    `
-    : `
-      <article class="hero__card">
-        <div class="hero__cardBody">
-          <div class="hero__cardEyebrow">Built for speed</div>
-          <h2 class="hero__cardTitle">Fast, sleek, and simple to manage.</h2>
-          <p class="hero__cardLead">Upload photography, choose the placement, and let the page present the work without extra friction.</p>
-        </div>
-      </article>
-    `;
+  const heroKicker = String(state.settings.heroKicker || "").trim();
 
   return `
     <section class="section hero" id="hero">
@@ -760,29 +727,17 @@ function heroMarkup() {
         ${revealMarkup}
       </div>
       <div class="hero__inner">
-        <div class="hero__grid">
-          <div class="hero__copy">
-            <div class="hero__kicker">${safeText(state.settings.heroKicker)}</div>
+        <div class="hero__grid hero__grid--focused">
+          <div class="hero__copy hero__copy--focused">
+            ${heroKicker ? `<div class="hero__kicker">${safeText(heroKicker)}</div>` : ""}
             <h1 class="hero__title">${safeText(state.settings.heroHeadline)}</h1>
             <p class="hero__lead">${safeText(state.settings.heroLead)}</p>
             <div class="hero__actions">
               <a class="button button--accent" href="${absoluteSiteUrl(state.settings.heroCtas.primaryHref)}">${safeText(state.settings.heroCtas.primaryLabel)}</a>
               <a class="button" href="${absoluteSiteUrl(state.settings.heroCtas.secondaryHref)}">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
             </div>
-            <div class="hero__stats">
-              ${state.settings.heroStats
-                .map(
-                  (stat) => `
-                    <div class="stat">
-                      <span class="stat__label">${safeText(stat.label)}</span>
-                      <div class="stat__value">${safeText(stat.value)}</div>
-                    </div>
-                  `
-                )
-                .join("")}
-            </div>
+            <p class="hero__subnote">Serving Pensacola and nearby Gulf Coast markets with fast turnaround and a clean delivery process.</p>
           </div>
-          <div class="hero__rail">${spotlightMarkup}</div>
         </div>
       </div>
     </section>
@@ -1025,33 +980,38 @@ function agentProofMarkup() {
 const testimonials = [
   {
     name: "Eric B.",
-    role: "Gulf Coast Client",
-    quote: "Timely, cost-effective, and a pleasure to work with. We'd book again.",
+    role: "Thumbtack review",
+    quote: "Zac was great to work with, providing timely and cost-effective service with a smile. His photos came out great and we'll definitely use him again.",
   },
   {
     name: "Caleb P.",
-    role: "Client",
-    quote: "Professional, kind, and excellent on short notice. Highly recommend.",
+    role: "Thumbtack review",
+    quote: "Zac was very good. I highly recommend him. He was very kind and thoughtful of what we wanted. He was very respectful. He took all of our ideas into consideration. I would absolutely use Zac again 100%. If you want a pro photographer on a short notice, Zac is your guy.",
+  },
+  {
+    name: "Samantha L.",
+    role: "Thumbtack review",
+    quote: "I've enjoyed working with Zac on many occasions. I like his style, his willingness to get things done, and meet deadlines. There are few in this work that can be organized and creative at the same time. Highly recommend to book!",
   },
   {
     name: "Mike H.",
-    role: "Repeat Client",
-    quote: "Creative, organized, and fast. The quality is unmatched.",
-  },
-  {
-    name: "Martha F.",
-    role: "Client",
-    quote: "Responsive, fair, and consistently high quality. I'd hire him again.",
+    role: "Thumbtack review",
+    quote: "What I've noticed most about working with Zac over the years is the amount of genuine passion that goes into each project he takes on. ZB goes well above and beyond, making sure the client is happy with the work and they are included in the creative process each step of the way. His turnaround times are speedy and his quality of work is unmatched.",
   },
   {
     name: "Ryan D.",
-    role: "Longtime Client",
-    quote: "Passionate, collaborative, and always above and beyond.",
+    role: "Thumbtack review",
+    quote: "We have been a customer (photo, video, editing, etc.) for over 5 years now and our expectations have always been exceeded. Zac is professional, thorough, creative, fair, and overall a pleasure to work with. He has mastered his craft, but is always looking for ways to improve. We wouldn't work with anyone else; we highly recommend!",
+  },
+  {
+    name: "Martha F.",
+    role: "Thumbtack review",
+    quote: "Zac was very professional and responsive. He gave a fair price for high quality work. I highly recommend him and would hire him again.",
   },
   {
     name: "Nikki H.",
-    role: "Client",
-    quote: "Professional, polished, and better than I imagined.",
+    role: "Thumbtack review",
+    quote: "Zac was very professional we love our photos they came out better than I could have imagined... Thanks Zac!!",
   },
 ];
 
@@ -1073,6 +1033,24 @@ const trustPillars = [
   },
 ];
 
+const homeProcessSteps = [
+  {
+    step: "01",
+    title: "Send the address and timeline",
+    text: "Once I have the property address, target launch date, and the kind of coverage you need, I can confirm the best fit quickly.",
+  },
+  {
+    step: "02",
+    title: "Shoot, edit, and turn it around fast",
+    text: "The workflow is built around quick scheduling, polished photography, and fast delivery once the property is ready.",
+  },
+  {
+    step: "03",
+    title: "Receive files ready for the listing launch",
+    text: "You get clean, organized media that is easy to review, download, and hand off when it is time to go live.",
+  },
+];
+
 const faqItems = [
   {
     question: "How fast is delivery?",
@@ -1084,7 +1062,7 @@ const faqItems = [
   },
   {
     question: "What areas do you serve?",
-    answer: "ZB Captures is based in Pensacola, Florida and generally serves addresses within roughly 120 miles of Pensacola, including Gulf Breeze, Pace, Milton, Jay, Century, Navarre, DeFuniak Springs, Mary Esther, Valparaiso, Destin, Panama City Beach, Perdido Key, Foley, Loxley, Robertsdale, Summerdale, Silverhill, Atmore, Orange Beach, Fairhope, and surrounding Gulf Coast markets.",
+    answer: "ZB Captures is based in Pensacola and generally serves nearby Gulf Coast markets within roughly 120 miles. If you are unsure about a property address, use the service-area map below or send it over for a quick confirmation.",
   },
   {
     question: "Do you offer drone photos and video?",
@@ -1613,15 +1591,15 @@ function locationMarketsSectionMarkup(records, options = {}) {
 function testimonialsMarkup() {
   return `
     <section class="section testimonials-strip">
-      <div class="section__eyebrow">Client testimonials</div>
+      <div class="section__eyebrow">Client feedback</div>
       <div class="testimonials-strip__header">
         <div>
-          <h2 class="section__title">The kind of feedback that helps a listing feel safer to hire.</h2>
-          <p class="section__lead">Clients want proof that the work is polished, responsive, and dependable. These are the words they use after booking.</p>
+          <h2 class="section__title">Real feedback from past clients.</h2>
+          <p class="section__lead">These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.</p>
         </div>
         <div class="testimonials-strip__badge">
-          <strong>5/5</strong>
-          <span>client confidence</span>
+          <strong>${testimonials.length}</strong>
+          <span>Thumbtack reviews</span>
         </div>
       </div>
       <div class="testimonials-strip__rail" aria-label="Client testimonials" data-testimonials-rail>
@@ -1678,6 +1656,42 @@ function clientDeliveryTeaserMarkup() {
               <h3 class="timeline__title">Download the originals</h3>
               <p class="timeline__text">Grab individual files or use the download-all button for the full delivery set in original resolution.</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function homeContactCtaMarkup() {
+  return `
+    <section class="section contact-section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Start a project</div>
+          <h2 class="section__title">Ready when the next listing is.</h2>
+          <p class="section__lead">If you already know the address, timeline, or package you need, send it through and I will follow up with availability and the best fit.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Go to the inquiry form</a>
+            <a class="button" href="mailto:${safeText(state.settings.email)}">Email directly</a>
+          </div>
+        </div>
+        <div class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Email</div>
+            <div class="contact-value"><a href="mailto:${safeText(state.settings.email)}">${safeText(state.settings.email)}</a></div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Phone</div>
+            <div class="contact-value"><a href="tel:${safeText(state.settings.phone)}">${safeText(state.settings.phone)}</a></div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Coverage</div>
+            <div class="contact-value">${safeText(state.settings.serviceArea)}</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Response time</div>
+            <div class="contact-value">${safeText(state.settings.responseTime || "Usually replies quickly during business hours.")}</div>
           </div>
         </div>
       </div>
@@ -1848,14 +1862,14 @@ function contactMarkup(options = {}) {
 function trustSectionMarkup() {
   return `
     <section class="section trust-section">
-      <div class="section__eyebrow">Why Agents Trust ZB Captures</div>
+      <div class="section__eyebrow">Trust & process</div>
       <div class="trust-layout">
         <div class="trust-layout__copy">
-          <h2 class="section__title">Built around the pace and standards of real estate marketing.</h2>
-          <p class="section__lead">This is not generic photography packaging. The workflow is tuned for agents who care about speed, listing-platform compatibility, consistent visual quality, and a handoff process that feels easy for clients.</p>
+          <h2 class="section__title">Fast turnaround, clean delivery, and a process that stays easy.</h2>
+          <p class="section__lead">The goal is simple: make the property look strong, get the files back quickly, and keep the booking-to-delivery flow clear for agents and clients.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
-            <a class="button" href="${safeText(GOOGLE_BUSINESS_PROFILE_URL)}" target="_blank" rel="noreferrer">View Google Business Profile</a>
+            <a class="button" href="${absoluteSiteUrl("services.html")}">See packages</a>
           </div>
         </div>
         <div class="trust-grid">
@@ -1884,6 +1898,44 @@ function trustSectionMarkup() {
               <strong class="trust-meta__value">Gulf Coast service area within roughly 120 miles</strong>
             </div>
           </article>
+        </div>
+      </div>
+      <div class="section-grid grid--split trust-section__process">
+        <div class="contact-box">
+          <div class="card__eyebrow">How it works</div>
+          <h3 class="card__title">A straightforward flow from address to delivery.</h3>
+          <div class="timeline">
+            ${homeProcessSteps
+              .map(
+                (item) => `
+                  <div class="timeline__item">
+                    <div class="timeline__step">${safeText(item.step)}</div>
+                    <div>
+                      <h4 class="timeline__title">${safeText(item.title)}</h4>
+                      <p class="timeline__text">${safeText(item.text)}</p>
+                    </div>
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
+        </div>
+        <div class="contact-box">
+          <div class="card__eyebrow">What you can expect</div>
+          <h3 class="card__title">Built for quick answers and ready-to-use files.</h3>
+          <p class="card__text">If a listing is getting close to launch, the process is designed to keep things moving without turning the handoff into a project of its own.</p>
+          <div class="contact-row">
+            <div class="contact-label">Turnaround</div>
+            <div class="contact-value">Same-day availability when possible</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Delivery</div>
+            <div class="contact-value">Clean portal handoff with download-ready files</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Next step</div>
+            <div class="contact-value"><a href="${absoluteSiteUrl("contact.html")}">Send the property details</a></div>
+          </div>
         </div>
       </div>
     </section>
@@ -2428,6 +2480,8 @@ function servicesPageMarkup() {
 
     ${agentProofMarkup()}
 
+    ${clientDeliveryTeaserMarkup()}
+
     ${videoMarkup()}
 
     ${faqMarkup()}
@@ -2607,9 +2661,7 @@ function homePageMarkup() {
     servicesMarkup(),
     testimonialsMarkup(),
     trustSectionMarkup(),
-    clientDeliveryTeaserMarkup(),
-    faqMarkup(),
-    contactMarkup({ showContactImage: false, showEstimate: false, showBestFit: false }),
+    homeContactCtaMarkup(),
   ].join("");
 }
 
@@ -3193,29 +3245,23 @@ function clientAccessIntroMarkup(slug) {
             <div class="${statusClass}" data-client-access-status>${safeText(statusText)}</div>
           </form>
         </div>
-        <div class="timeline">
-          <div class="timeline__item">
-            <div class="timeline__step">01</div>
-            <div>
-              <h3 class="timeline__title">Open the portal</h3>
-              <p class="timeline__text">Use the delivery link, or enter the portal ID and access code that came with your photoshoot delivery.</p>
-            </div>
+        <aside class="contact-box">
+          <div class="card__eyebrow">Need help?</div>
+          <h2 class="card__title">The portal should stay simple once you have the link.</h2>
+          <p class="card__text">If you were sent a one-click delivery link, it may unlock the gallery automatically. If not, use the portal ID and access code exactly as provided.</p>
+          <div class="contact-row">
+            <div class="contact-label">One-click links</div>
+            <div class="contact-value">Can open the gallery without re-entering the code</div>
           </div>
-          <div class="timeline__item">
-            <div class="timeline__step">02</div>
-            <div>
-              <h3 class="timeline__title">Review the media</h3>
-              <p class="timeline__text">Preview the delivered files in a clean gallery that works on desktop and mobile.</p>
-            </div>
+          <div class="contact-row">
+            <div class="contact-label">Downloads</div>
+            <div class="contact-value">Save the full gallery or download files one at a time</div>
           </div>
-          <div class="timeline__item">
-            <div class="timeline__step">03</div>
-            <div>
-              <h3 class="timeline__title">Download the originals</h3>
-              <p class="timeline__text">Download the full gallery as one ZIP, or tap any file tile to save that original by itself.</p>
-            </div>
+          <div class="contact-row">
+            <div class="contact-label">Support</div>
+            <div class="contact-value"><a href="mailto:${safeText(state.settings.email)}">${safeText(state.settings.email)}</a></div>
           </div>
-        </div>
+        </aside>
       </div>
     </section>
   `;

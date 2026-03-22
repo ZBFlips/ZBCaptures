@@ -3,14 +3,14 @@
     "brandName": "ZB Captures",
     "brandTag": "",
     "location": "Serving luxury, commercial, and residential listings",
-    "heroKicker": "Premium Real Estate Media, 24-Hour Turnaround, Guaranteed.",
-    "heroHeadline": "Turn your listing into a sale.",
-    "heroLead": "High-end media designed to capture attention, move quickly, and give your listings a competitive edge.",
+    "heroKicker": "Pensacola real estate photography",
+    "heroHeadline": "Market-ready media for listings that need to move fast.",
+    "heroLead": "Photography, drone coverage, and video built for polished launches, quick turnaround, and a clean handoff once the property is ready to go live.",
     "featuredFrameTitle": "Highlighted Photo",
     "featuredFrameLead": "A single image can carry the whole listing.",
     "featuredFrameMediaId": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
     "heroCtas": {
-      "primaryLabel": "Explore services",
+      "primaryLabel": "View packages",
       "primaryHref": "./services.html",
       "secondaryLabel": "Start a project",
       "secondaryHref": "./contact.html"
@@ -77,7 +77,7 @@
     {
       "id": "service-luxury",
       "title": "The Standard",
-      "description": "By adding dedicated drone photos to the interior set, this tier gives buyers a better sense of the property’s exterior layout and surrounding curb appeal.",
+      "description": "By adding dedicated drone photos to the interior set, this tier gives buyers a better sense of the property's exterior layout and surrounding curb appeal.",
       "bullets": [
         "35 HDR Images",
         "5 Drone Images",
@@ -1120,3 +1120,4 @@
   ],
   "savedAt": "2026-03-22T19:22:19.586Z"
 }
+
