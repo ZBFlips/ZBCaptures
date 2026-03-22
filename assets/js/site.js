@@ -753,7 +753,9 @@ function heroMarkup() {
 function galleryMarkup() {
   const items = featuredMedia();
   const topItems = items.slice(0, 4);
-  const middleItems = items.slice(4);
+  const bottomStart = items.length > 8 ? items.length - 4 : 4;
+  const middleItems = items.slice(4, bottomStart);
+  const bottomItems = items.slice(bottomStart);
   const showReelArrows = middleItems.length > 4;
 
   if (!items.length) {
@@ -841,6 +843,30 @@ function galleryMarkup() {
                   .join("")}
               </div>
               ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--next" type="button" data-gallery-reel-next aria-label="Scroll gallery images right">Next</button>` : ""}
+            </div>
+          `
+          : ""}
+        ${bottomItems.length
+          ? `
+            <div class="portfolio-grid gallery-grid gallery-grid--lower">
+              ${bottomItems
+                .map(
+                  (item) => `
+                    <article class="media-tile">
+                      <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
+                        ${responsivePictureMarkup(item, {
+                          imgClass: "media-tile__image",
+                          alt: item.alt || item.title || item.name || "Portfolio image",
+                          keys: ["thumb", "medium", "full"],
+                          sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
+                          loading: "lazy",
+                          decoding: "async",
+                        })}
+                      </button>
+                    </article>
+                  `
+                )
+                .join("")}
             </div>
           `
           : ""}
