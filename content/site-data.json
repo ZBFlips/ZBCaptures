@@ -523,41 +523,6 @@
       "originalType": "image/jpeg"
     },
     {
-      "id": "2b17845d-ec45-476b-8af1-ecf8dbe6e473",
-      "name": "Untitled2.jpg",
-      "type": "image/webp",
-      "createdAt": 1774196879246,
-      "title": "",
-      "caption": "",
-      "alt": "",
-      "placement": "gallery",
-      "order": 8,
-      "featured": false,
-      "src": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473-full.webp",
-      "variants": {
-        "thumb": {
-          "src": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473-thumb.webp",
-          "type": "image/webp",
-          "width": 640,
-          "height": 427
-        },
-        "medium": {
-          "src": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473-medium.webp",
-          "type": "image/webp",
-          "width": 1280,
-          "height": 853
-        },
-        "full": {
-          "src": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473-full.webp",
-          "type": "image/webp",
-          "width": 2200,
-          "height": 1467
-        }
-      },
-      "originalSrc": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473.jpg",
-      "originalType": "image/jpeg"
-    },
-    {
       "id": "6ddad90d-a384-4715-9bba-3a1d55494f82",
       "name": "Untitled.jpg",
       "type": "image/webp",
@@ -1152,5 +1117,6 @@
       "originalSrc": "./assets/uploads/0782c117-ba6c-4b14-9f4e-e721d7dedd8f.jpg",
       "originalType": "image/jpeg"
     }
-  ]
+  ],
+  "savedAt": "2026-03-22T19:11:47.617Z"
 }
