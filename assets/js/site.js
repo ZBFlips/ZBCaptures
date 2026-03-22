@@ -1578,8 +1578,8 @@ function locationMarketsSectionMarkup(records, options = {}) {
               <a class="card card--interactive location-market-card" href="${locationPageHref(item)}">
                 <div class="card__body">
                   <div class="card__eyebrow">${safeText(item.market || item.name || item.slug)}</div>
-                  <h3 class="card__title">${safeText(item.cardTitle || item.headline || `Real estate photography in ${item.name || item.market || "this market"}`)}</h3>
-                  <p class="card__text">${safeText(item.cardLead || item.lead || "")}</p>
+                  <h3 class="card__title">${safeText(item.name || item.market || item.slug)}</h3>
+                  <p class="card__text">${safeText(item.cardLead || item.lead || item.coverageSummary || "")}</p>
                   ${
                     item.coverageSummary
                       ? `
