@@ -507,6 +507,48 @@ function responsiveImageAttrs(record, keys, sizes) {
   return `srcset="${safeText(srcset)}" sizes="${safeText(sizes)}"`;
 }
 
+function mediaOriginalUrlFor(record) {
+  if (record?.originalSrc) {
+    return absoluteSiteUrl(record.originalSrc);
+  }
+
+  return mediaUrlFor(record, "full") || mediaUrlFor(record);
+}
+
+function responsiveImageSourceMarkup(record, keys, sizes) {
+  const srcset = mediaSourceSet(record, keys);
+  if (!srcset) {
+    return "";
+  }
+
+  return `<source type="image/webp" srcset="${safeText(srcset)}" sizes="${safeText(sizes)}" />`;
+}
+
+function responsivePictureMarkup(record, options = {}) {
+  const {
+    imgClass = "",
+    pictureClass = "responsive-picture",
+    alt = "",
+    keys = ["thumb", "medium", "full"],
+    sizes = "100vw",
+    loading = "lazy",
+    decoding = "async",
+    fetchpriority = "",
+  } = options;
+
+  const sourceMarkup = responsiveImageSourceMarkup(record, keys, sizes);
+  const fallbackSrc = mediaOriginalUrlFor(record);
+  const classAttr = imgClass ? ` class="${imgClass}"` : "";
+  const pictureAttr = pictureClass ? ` class="${pictureClass}"` : "";
+  const loadingAttr = loading ? ` loading="${loading}"` : "";
+  const decodingAttr = decoding ? ` decoding="${decoding}"` : "";
+  const fetchpriorityAttr = fetchpriority ? ` fetchpriority="${fetchpriority}"` : "";
+
+  return sourceMarkup
+    ? `<picture${pictureAttr}>${sourceMarkup}<img${classAttr} src="${safeText(fallbackSrc)}" alt="${safeText(alt)}"${loadingAttr}${decodingAttr}${fetchpriorityAttr} /></picture>`
+    : `<img${classAttr} src="${safeText(fallbackSrc)}" alt="${safeText(alt)}"${loadingAttr}${decodingAttr}${fetchpriorityAttr} />`;
+}
+
 function mediaUrlFor(record, key = "") {
   if (record?.previewUrl) {
     return record.previewUrl;
@@ -571,7 +613,7 @@ function renderLightboxRecord(record) {
       : "";
   const safeCaption = String(record.caption || "").trim();
   const captionText = [safeTitle, safeCaption].filter(Boolean).join(" - ");
-  lightboxImage.src = mediaUrlFor(record, "full") || url;
+  lightboxImage.src = mediaOriginalUrlFor(record) || url;
   lightboxImage.alt = record.alt || record.title || record.name || "Portfolio image";
   lightboxCaption.textContent = captionText;
   lightboxCaption.hidden = !captionText;
@@ -582,10 +624,26 @@ function heroMarkup() {
   const backgroundImage = heroMedia();
   const revealImage = heroRevealMedia();
   const backgroundMarkup = backgroundImage
-    ? `<img class="hero__backgroundImage" src="${mediaUrlFor(backgroundImage, "full")}" ${responsiveImageAttrs(backgroundImage, ["medium", "full"], "100vw")} alt="${safeText(backgroundImage.alt || backgroundImage.title || state.settings.brandName)}" fetchpriority="high" decoding="async" />`
+    ? responsivePictureMarkup(backgroundImage, {
+        imgClass: "hero__backgroundImage",
+        alt: backgroundImage.alt || backgroundImage.title || state.settings.brandName,
+        keys: ["medium", "full"],
+        sizes: "100vw",
+        loading: "",
+        decoding: "async",
+        fetchpriority: "high",
+      })
     : `<div class="hero__backgroundImage hero__backgroundImage--fallback" aria-hidden="true"></div>`;
   const revealMarkup = revealImage
-    ? `<img class="hero__revealImage" src="${mediaUrlFor(revealImage, "full")}" ${responsiveImageAttrs(revealImage, ["medium", "full"], "100vw")} alt="${safeText(revealImage.alt || revealImage.title || "Reveal image")}" fetchpriority="high" decoding="async" />`
+    ? responsivePictureMarkup(revealImage, {
+        imgClass: "hero__revealImage",
+        alt: revealImage.alt || revealImage.title || "Reveal image",
+        keys: ["medium", "full"],
+        sizes: "100vw",
+        loading: "",
+        decoding: "async",
+        fetchpriority: "high",
+      })
     : "";
 
   const spotlight = featuredFrameMedia();
@@ -594,7 +652,15 @@ function heroMarkup() {
   const spotlightMarkup = spotlight
     ? `
       <article class="hero__card">
-        <img class="hero__cardMedia" src="${mediaUrlFor(spotlight, "medium")}" ${responsiveImageAttrs(spotlight, ["thumb", "medium", "full"], "(max-width: 1100px) 100vw, 32vw")} alt="${safeText(spotlight.alt || spotlight.title || "Featured work")}" loading="eager" fetchpriority="high" decoding="async" />
+        ${responsivePictureMarkup(spotlight, {
+          imgClass: "hero__cardMedia",
+          alt: spotlight.alt || spotlight.title || "Featured work",
+          keys: ["thumb", "medium", "full"],
+          sizes: "(max-width: 1100px) 100vw, 32vw",
+          loading: "eager",
+          decoding: "async",
+          fetchpriority: "high",
+        })}
         <div class="hero__cardBody">
           <div class="hero__cardEyebrow">Featured frame</div>
           <h2 class="hero__cardTitle">${safeText(spotlightTitle)}</h2>
@@ -679,7 +745,14 @@ function galleryMarkup() {
               (item) => `
                 <article class="gallery-mobile-strip__item">
                   <button class="gallery-mobile-strip__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                    <img class="gallery-mobile-strip__image" src="${mediaUrlFor(item, "thumb")}" ${responsiveImageAttrs(item, ["thumb", "medium"], "72vw")} alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                    ${responsivePictureMarkup(item, {
+                      imgClass: "gallery-mobile-strip__image",
+                      alt: item.alt || item.title || item.name || "Portfolio image",
+                      keys: ["thumb", "medium"],
+                      sizes: "72vw",
+                      loading: "lazy",
+                      decoding: "async",
+                    })}
                   </button>
                 </article>
               `
@@ -694,7 +767,14 @@ function galleryMarkup() {
               (item) => `
                 <article class="media-tile">
                   <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                    <img class="media-tile__image" src="${mediaUrlFor(item, "thumb")}" ${responsiveImageAttrs(item, ["thumb", "medium", "full"], "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw")} alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                    ${responsivePictureMarkup(item, {
+                      imgClass: "media-tile__image",
+                      alt: item.alt || item.title || item.name || "Portfolio image",
+                      keys: ["thumb", "medium", "full"],
+                      sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
+                      loading: "lazy",
+                      decoding: "async",
+                    })}
                   </button>
                 </article>
               `
@@ -711,7 +791,14 @@ function galleryMarkup() {
                     (item) => `
                       <article class="gallery-reel__item">
                         <button class="gallery-reel__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                          <img class="gallery-reel__image" src="${mediaUrlFor(item, "thumb")}" ${responsiveImageAttrs(item, ["thumb", "medium", "full"], "(max-width: 720px) 72vw, (max-width: 1100px) 46vw, 340px")} alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                          ${responsivePictureMarkup(item, {
+                            imgClass: "gallery-reel__image",
+                            alt: item.alt || item.title || item.name || "Portfolio image",
+                            keys: ["thumb", "medium", "full"],
+                            sizes: "(max-width: 720px) 72vw, (max-width: 1100px) 46vw, 340px",
+                            loading: "lazy",
+                            decoding: "async",
+                          })}
                         </button>
                       </article>
                     `
@@ -730,7 +817,14 @@ function galleryMarkup() {
                   (item) => `
                     <article class="media-tile">
                       <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                        <img class="media-tile__image" src="${mediaUrlFor(item, "thumb")}" ${responsiveImageAttrs(item, ["thumb", "medium", "full"], "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw")} alt="${safeText(item.alt || item.title || item.name || "Portfolio image")}" loading="lazy" decoding="async" />
+                        ${responsivePictureMarkup(item, {
+                          imgClass: "media-tile__image",
+                          alt: item.alt || item.title || item.name || "Portfolio image",
+                          keys: ["thumb", "medium", "full"],
+                          sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
+                          loading: "lazy",
+                          decoding: "async",
+                        })}
                       </button>
                     </article>
                   `
@@ -1180,7 +1274,14 @@ function contactMarkup() {
           </div>
         </div>
         <div class="contact-panel">
-          ${contactRecord ? `<div class="card"><button class="media-tile__button" data-preview data-id="${contactRecord.id}" type="button" aria-label="Preview ${safeText(contactRecord.title || "contact image")}"><img class="card__image" src="${mediaUrlFor(contactRecord, "medium")}" ${responsiveImageAttrs(contactRecord, ["thumb", "medium", "full"], "(max-width: 1100px) 100vw, 52vw")} alt="${safeText(contactRecord.alt || contactRecord.title || "Contact image")}" loading="lazy" decoding="async" /></button></div>` : ""}
+          ${contactRecord ? `<div class="card"><button class="media-tile__button" data-preview data-id="${contactRecord.id}" type="button" aria-label="Preview ${safeText(contactRecord.title || "contact image")}">${responsivePictureMarkup(contactRecord, {
+            imgClass: "card__image",
+            alt: contactRecord.alt || contactRecord.title || "Contact image",
+            keys: ["thumb", "medium", "full"],
+            sizes: "(max-width: 1100px) 100vw, 52vw",
+            loading: "lazy",
+            decoding: "async",
+          })}</button></div>` : ""}
           <div class="contact-box">
             <form class="form" id="contact-form">
               <div class="helper">A few booking details up front make it easier to quote accurately and confirm timing faster.</div>

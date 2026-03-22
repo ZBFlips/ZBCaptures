@@ -255,6 +255,8 @@ export async function putMedia(record) {
     portalId: record.portalId || "",
     src: record.src || "",
     variants: record.variants || null,
+    originalSrc: record.originalSrc || "",
+    originalType: record.originalType || "",
   };
 
   await withStore("readwrite", (store) => store.put(entry));

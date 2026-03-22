@@ -273,6 +273,10 @@ img {
   line-height: 1.75;
 }
 
+.responsive-picture {
+  display: block;
+}
+
 .contact-section {
   padding-inline: clamp(26px, 4vw, 52px);
 }
@@ -454,6 +458,16 @@ img {
   inset: 0;
   z-index: -2;
   overflow: hidden;
+}
+
+.hero__media .responsive-picture {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__media .responsive-picture > img {
+  width: 100%;
+  height: 100%;
 }
 
 .hero__media::after {

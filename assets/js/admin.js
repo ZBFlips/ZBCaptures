@@ -1735,6 +1735,8 @@ function collectAllMediaDrafts() {
 
 function buildMediaSaveRecord(item) {
   const extension = guessExtension(item);
+  const originalExtensionMatch = String(item.originalSrc || "").match(/\.([a-z0-9]+)(?:[?#].*)?$/i);
+  const originalExtension = originalExtensionMatch?.[1]?.toLowerCase() || extension;
   return {
     id: item.id,
     name: item.name || item.title || item.id,
@@ -1749,6 +1751,8 @@ function buildMediaSaveRecord(item) {
     portalId: item.portalId || "",
     src: item.src || `./assets/uploads/${item.id}.${extension}`,
     variants: item.variants || null,
+    originalSrc: item.originalSrc || `./assets/uploads/${item.id}.${originalExtension}`,
+    originalType: item.originalType || item.type || (item.src ? `image/${originalExtension}` : "image/jpeg"),
     blob: item.blob || null,
   };
 }
@@ -1759,6 +1763,8 @@ function buildPublicMediaRecord(item) {
     ...rest,
     src: rest.src || `./assets/uploads/${rest.id}.${guessExtension(rest)}`,
     variants: rest.variants || null,
+    originalSrc: rest.originalSrc || "",
+    originalType: rest.originalType || "",
   };
 }
 

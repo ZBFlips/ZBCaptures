@@ -199,6 +199,7 @@ async function referencedAssetFiles() {
 
   for (const item of siteData.media || []) {
     maybeAdd(item?.src);
+    maybeAdd(item?.originalSrc);
 
     for (const variant of Object.values(item?.variants || {})) {
       maybeAdd(variant?.src);
