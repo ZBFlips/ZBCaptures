@@ -1,6 +1,240 @@
 {
   "pages": [
     {
+      "slug": "pensacola-fl",
+      "name": "Pensacola",
+      "market": "Pensacola, Florida",
+      "eyebrow": "Pensacola Real Estate Photography",
+      "headline": "Real estate photography in Pensacola built for polished listing launches and fast marketing turnarounds.",
+      "lead": "Pensacola listings often need more than clean photos. They need media that feels dependable, market-ready, and easy to move across MLS, Zillow, brokerage marketing, and social launch content without slowing the listing down.",
+      "seoTitle": "Pensacola Real Estate Photography | ZB Captures",
+      "seoDescription": "Pensacola real estate photography with MLS-ready photos, drone coverage, and fast turnaround for residential listings, condos, and polished Gulf Coast launches.",
+      "cardTitle": "Pensacola listing media for established neighborhoods, condos, and polished residential launches.",
+      "cardLead": "Built for Pensacola agents who want listing media that feels premium, clean, and ready to market quickly across platforms.",
+      "coverageTitle": "Coverage that matches the range of listing styles Pensacola agents work with most often.",
+      "coverageLead": "Pensacola can shift quickly from historic neighborhoods to newer developments, downtown condos, and waterfront-adjacent properties. The media needs to stay flexible enough to match that variety while still feeling consistent and professional.",
+      "coverageSummary": "Strong fit for established neighborhoods, downtown condos, family homes, and polished residential launches across Pensacola.",
+      "coverageAreas": [
+        "Downtown Pensacola",
+        "East Hill",
+        "Cordova and surrounding residential pockets",
+        "Pensacola waterfront-adjacent neighborhoods"
+      ],
+      "highlights": [
+        {
+          "label": "Best for",
+          "value": "Established neighborhoods, condos, move-up listings, and polished residential launches"
+        },
+        {
+          "label": "What matters",
+          "value": "A clean first impression, reliable turnaround, and media that feels ready for market immediately"
+        },
+        {
+          "label": "Workflow",
+          "value": "Built for MLS delivery, brokerage marketing, and quick listing launches"
+        }
+      ],
+      "fitTitle": "What usually matters most for Pensacola listing media.",
+      "fitLead": "Pensacola listings perform best when the imagery balances polish with clarity. Buyers need to understand the home quickly, and agents need media that feels strong enough for both MLS and broader promotion.",
+      "fitCards": [
+        {
+          "eyebrow": "Neighborhood character",
+          "title": "Homes that need to feel polished without losing personality.",
+          "text": "For Pensacola neighborhoods with older charm or stronger curb identity, the media works best when it keeps the home feeling refined while still showing what makes it distinct."
+        },
+        {
+          "eyebrow": "Downtown and condo inventory",
+          "title": "Listings that need layout clarity and a more premium online feel.",
+          "text": "Condos and tighter urban inventory usually benefit from clean image sequencing, bright interior treatment, and a presentation that helps the property feel efficient but elevated."
+        },
+        {
+          "eyebrow": "Fast market readiness",
+          "title": "Agents who need a dependable shoot-to-launch workflow.",
+          "text": "The delivery process is built to keep Pensacola listings moving quickly from shoot day to publication without sacrificing polish."
+        }
+      ],
+      "packagesTitle": "Packages available for Pensacola listings.",
+      "packagesLead": "The same package structure applies here, with the messaging tuned around the residential variety and launch speed that Pensacola agents often need.",
+      "faqLead": "These answers focus on how Pensacola listings are usually photographed, delivered, and brought to market.",
+      "faq": [
+        {
+          "question": "Is this a good fit for Pensacola homes in established neighborhoods or downtown condo inventory?",
+          "answer": "Yes. Pensacola is a strong fit for established residential neighborhoods, downtown condos, move-up homes, and listings that need clean, polished media without slowing down the launch."
+        },
+        {
+          "question": "Can Pensacola listings still move quickly if they are close to going live?",
+          "answer": "Yes. Same-day availability is offered when the schedule allows, and most standard photo deliveries are turned around within 24 hours."
+        },
+        {
+          "question": "Will the media work for both MLS and brokerage marketing?",
+          "answer": "Yes. The workflow is built around MLS-ready delivery while still giving agents assets that feel strong enough for listing launches, social promotion, and brokerage use."
+        }
+      ],
+      "heroMediaId": "",
+      "galleryMediaIds": [],
+      "nearbySlugs": [
+        "gulf-breeze-fl",
+        "pace-fl",
+        "navarre-fl"
+      ]
+    },
+    {
+      "slug": "panama-city-beach-fl",
+      "name": "Panama City Beach",
+      "market": "Panama City Beach, Florida",
+      "eyebrow": "Panama City Beach Real Estate Photography",
+      "headline": "Listing photography for Panama City Beach properties that need to sell both the unit and the coastal setting.",
+      "lead": "Panama City Beach listings often rely on more than interior coverage alone. Condos, resort-adjacent properties, and rental-oriented homes usually perform best when the media helps buyers understand both the space and the lifestyle value around it.",
+      "seoTitle": "Panama City Beach Real Estate Photography | ZB Captures",
+      "seoDescription": "Panama City Beach real estate photography with MLS-ready photos, drone coverage, and polished listing media for condos, coastal homes, and rental-oriented launches.",
+      "cardTitle": "Panama City Beach media for condos, coastal homes, and rental-oriented launches.",
+      "cardLead": "Designed for agents and marketers working with beach inventory that needs a polished first impression and stronger context online.",
+      "coverageTitle": "A strong fit for listings where setting, amenities, and presentation work together.",
+      "coverageLead": "Panama City Beach properties often need to communicate more than square footage. Exterior approach, amenity access, views, and a clean online presentation can all help the listing feel more compelling to buyers and investors.",
+      "coverageSummary": "Built for condos, resort-adjacent homes, and properties with strong vacation or investment appeal.",
+      "coverageAreas": [
+        "Front Beach Road corridors",
+        "Laguna Beach-adjacent pockets",
+        "Resort and condo districts",
+        "West Panama City Beach residential areas"
+      ],
+      "highlights": [
+        {
+          "label": "Best for",
+          "value": "Condos, resort-adjacent listings, and properties with rental or investment appeal"
+        },
+        {
+          "label": "Visual priority",
+          "value": "Context, amenities, exterior appeal, and a polished presentation across listing channels"
+        },
+        {
+          "label": "Marketing fit",
+          "value": "Useful for MLS, brokerage promotion, and listings that need stronger lifestyle context"
+        }
+      ],
+      "fitTitle": "What usually matters most for Panama City Beach listings.",
+      "fitLead": "The strongest media here often balances clean interior coverage with enough context to help the property feel desirable, practical, and worth clicking deeper into.",
+      "fitCards": [
+        {
+          "eyebrow": "Condo presentation",
+          "title": "Units that need to feel bright, organized, and high-value online.",
+          "text": "Panama City Beach condo inventory usually performs best when the image set keeps the space feeling clean and efficient while still supporting the premium value of the location."
+        },
+        {
+          "eyebrow": "Rental and investor appeal",
+          "title": "Listings that need to market both use and potential.",
+          "text": "When a property also carries rental or investment value, the media can help sell the practical side of the unit while still supporting stronger promotional use."
+        },
+        {
+          "eyebrow": "Exterior context",
+          "title": "Properties where surrounding value matters quickly.",
+          "text": "Drone coverage and stronger exterior context can help when proximity, amenities, or the broader setting add real value to the listing story."
+        }
+      ],
+      "packagesTitle": "Packages available for Panama City Beach listings.",
+      "packagesLead": "The package structure stays the same, while this page focuses the language around condo, coastal, and rental-oriented listing needs that show up often in Panama City Beach.",
+      "faqLead": "These answers are tailored to how Panama City Beach properties are commonly marketed and launched.",
+      "faq": [
+        {
+          "question": "Is this a good fit for Panama City Beach condos and coastal properties?",
+          "answer": "Yes. This workflow is a strong fit for condos, coastal homes, and listings where online polish, exterior context, and a stronger lifestyle presentation all matter."
+        },
+        {
+          "question": "Can the media support both MLS and broader promotional use?",
+          "answer": "Yes. The photos are structured to stay MLS-ready while still being flexible enough for brokerage marketing and listings that benefit from a stronger promotional angle."
+        },
+        {
+          "question": "Do Panama City Beach listings often benefit from drone coverage?",
+          "answer": "Often they do. Drone photos and video can add meaningful value when location, amenity access, or the surrounding setting help the property stand out."
+        }
+      ],
+      "heroMediaId": "",
+      "galleryMediaIds": [],
+      "nearbySlugs": [
+        "destin-fl",
+        "navarre-fl",
+        "pensacola-fl"
+      ]
+    },
+    {
+      "slug": "destin-fl",
+      "name": "Destin",
+      "market": "Destin, Florida",
+      "eyebrow": "Destin Real Estate Photography",
+      "headline": "Real estate photography in Destin for listings that need to feel premium, coastal, and launch-ready.",
+      "lead": "Destin listings often call for a cleaner premium look right away. Whether the property is a condo, a coastal home, or a second-home listing, the media usually needs to communicate both polish and setting without feeling overworked.",
+      "seoTitle": "Destin Real Estate Photography | ZB Captures",
+      "seoDescription": "Destin real estate photography with MLS-ready photos, drone coverage, and polished media for condos, coastal homes, and premium listing launches.",
+      "cardTitle": "Destin listing media for coastal homes, condos, and premium launches.",
+      "cardLead": "Built for Destin agents marketing properties that need a stronger first impression and a cleaner premium presentation online.",
+      "coverageTitle": "Coverage designed for listings where polish and coastal context both matter.",
+      "coverageLead": "Destin properties often benefit from imagery that feels refined, bright, and deliberate. The strongest presentation usually highlights the property cleanly while still helping buyers understand the surrounding value and lifestyle appeal.",
+      "coverageSummary": "A strong fit for condos, second homes, coastal listings, and higher-value residential launches in Destin.",
+      "coverageAreas": [
+        "Destin proper",
+        "Holiday Isle",
+        "Crystal Beach",
+        "Mid-Bay and nearby coastal communities"
+      ],
+      "highlights": [
+        {
+          "label": "Best for",
+          "value": "Coastal homes, condos, second-home inventory, and premium residential launches"
+        },
+        {
+          "label": "Visual priority",
+          "value": "A clean premium look with enough exterior and setting context to support value"
+        },
+        {
+          "label": "Delivery",
+          "value": "Fast listing-ready handoff for agents moving quickly toward launch"
+        }
+      ],
+      "fitTitle": "What usually matters most for Destin listings.",
+      "fitLead": "Destin properties usually reward imagery that feels sharp, elevated, and easy to market across MLS plus higher-touch brokerage promotion.",
+      "fitCards": [
+        {
+          "eyebrow": "Premium presentation",
+          "title": "Listings that need to feel elevated without looking over-produced.",
+          "text": "The strongest Destin media often keeps the home feeling bright, polished, and high-value while still making the property easy to understand at a glance."
+        },
+        {
+          "eyebrow": "Coastal and condo inventory",
+          "title": "Spaces where layout and context both need to read clearly.",
+          "text": "Condos and coastal inventory benefit from image sets that make the space feel efficient and premium while still supporting the location story."
+        },
+        {
+          "eyebrow": "Drone and exterior context",
+          "title": "Listings where setting adds meaningful value quickly.",
+          "text": "Destin properties often gain from drone coverage when exterior approach, neighborhood context, or proximity help the listing feel more compelling online."
+        }
+      ],
+      "packagesTitle": "Packages available for Destin listings.",
+      "packagesLead": "The package structure stays consistent, while the page language is tuned around the cleaner premium presentation and coastal context that Destin listings often need.",
+      "faqLead": "These answers focus on how Destin properties are typically photographed, delivered, and prepared for launch.",
+      "faq": [
+        {
+          "question": "Is this a strong fit for Destin condos and coastal homes?",
+          "answer": "Yes. Destin is a strong fit for condos, coastal homes, second-home inventory, and properties that need a more premium online presentation right away."
+        },
+        {
+          "question": "Can the media support both MLS and higher-end brokerage marketing?",
+          "answer": "Yes. The workflow is built around MLS-ready delivery while still producing assets that feel polished enough for stronger brokerage promotion and listing launches."
+        },
+        {
+          "question": "Do Destin listings often benefit from drone coverage?",
+          "answer": "Often they do. Drone coverage can add value when setting, proximity, lot context, or exterior presentation help the property stand out more quickly online."
+        }
+      ],
+      "heroMediaId": "",
+      "galleryMediaIds": [],
+      "nearbySlugs": [
+        "panama-city-beach-fl",
+        "navarre-fl",
+        "pensacola-fl"
+      ]
+    },
+    {
       "slug": "gulf-breeze-fl",
       "name": "Gulf Breeze",
       "market": "Gulf Breeze, Florida",
