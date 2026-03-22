@@ -216,6 +216,74 @@ async function loadPublishedSiteData() {
   }
 }
 
+async function loadPublishedLocationPages() {
+  try {
+    const response = await fetch("./content/locations.json", { cache: "no-store" });
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = await response.json();
+    return Array.isArray(payload?.pages) ? payload.pages : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeLocationPageRecord(page = {}) {
+  const heroMediaId = typeof page.heroMediaId === "string" ? page.heroMediaId.trim() : "";
+  const galleryMediaIds = Array.isArray(page.galleryMediaIds)
+    ? Array.from(
+        new Set(
+          page.galleryMediaIds
+            .map((value) => String(value || "").trim())
+            .filter(Boolean)
+        )
+      )
+    : [];
+
+  return {
+    ...page,
+    heroMediaId,
+    galleryMediaIds,
+  };
+}
+
+function mergeLocationPages(localPages = [], publishedPages = []) {
+  const bySlug = new Map();
+
+  for (const page of publishedPages) {
+    if (!page?.slug) {
+      continue;
+    }
+
+    bySlug.set(page.slug, normalizeLocationPageRecord(page));
+  }
+
+  for (const page of localPages) {
+    if (!page?.slug) {
+      continue;
+    }
+
+    const current = bySlug.get(page.slug) || {};
+    const merged = normalizeLocationPageRecord({
+      ...current,
+      ...page,
+      heroMediaId: page.heroMediaId ?? current.heroMediaId ?? "",
+      galleryMediaIds: Array.isArray(page.galleryMediaIds) ? page.galleryMediaIds : current.galleryMediaIds || [],
+    });
+
+    if (bySlug.has(page.slug)) {
+      bySlug.set(page.slug, merged);
+      continue;
+    }
+
+    bySlug.set(page.slug, merged);
+  }
+
+  return Array.from(bySlug.values());
+}
+
 function mergePublishedState(published) {
   return {
     ...DEFAULT_STATE,
@@ -227,6 +295,10 @@ function mergePublishedState(published) {
     services: Array.isArray(published.services) ? published.services : DEFAULT_STATE.services,
     clientPortals: Array.isArray(published.clientPortals) ? published.clientPortals : DEFAULT_STATE.clientPortals,
   };
+}
+
+function currentLocationPages() {
+  return mergeLocationPages(Array.isArray(state.locationPages) ? state.locationPages : [], []);
 }
 
 function mergeClientPortals(localPortals = [], publishedPortals = []) {
@@ -274,6 +346,73 @@ function sortPortalFiles(items = []) {
 
 function portalRecordById(portalId) {
   return (state.clientPortals || []).find((portal) => portal.id === portalId) || null;
+}
+
+function publicImageMediaItems() {
+  return media
+    .filter((item) => !item?.portalId)
+    .filter((item) => !item?.type || String(item.type).startsWith("image/"))
+    .sort((left, right) => {
+      const leftOrder = Number.isFinite(Number(left.order)) ? Number(left.order) : 9999;
+      const rightOrder = Number.isFinite(Number(right.order)) ? Number(right.order) : 9999;
+      return leftOrder - rightOrder || String(left.title || left.name || left.id).localeCompare(String(right.title || right.name || right.id));
+    });
+}
+
+function publicImageOptionLabel(item) {
+  const label = item?.title || item?.name || item?.id || "Untitled image";
+  const placement = item?.placement ? ` (${item.placement})` : "";
+  return `${label}${placement}`;
+}
+
+function publicImageRecordById(id = "") {
+  const targetId = String(id || "").trim();
+  if (!targetId) {
+    return null;
+  }
+
+  return media.find(
+    (item) =>
+      item?.id === targetId &&
+      !item?.portalId &&
+      (!item?.type || String(item.type).startsWith("image/"))
+  ) || null;
+}
+
+function locationPageRecordBySlug(slug = "") {
+  const targetSlug = String(slug || "").trim();
+  if (!targetSlug) {
+    return null;
+  }
+
+  return currentLocationPages().find((page) => page.slug === targetSlug) || null;
+}
+
+function saveLocationPagesDraft(nextPages) {
+  state.locationPages = mergeLocationPages(nextPages, []);
+  saveState(state);
+}
+
+function updateLocationPageBySlug(slug, updater) {
+  const pages = currentLocationPages();
+  const nextPages = pages.map((page) => {
+    if (page.slug !== slug) {
+      return page;
+    }
+
+    const nextValue = typeof updater === "function" ? updater(page) : { ...page, ...(updater || {}) };
+    return normalizeLocationPageRecord(nextValue);
+  });
+
+  saveLocationPagesDraft(nextPages);
+  return nextPages.find((page) => page.slug === slug) || null;
+}
+
+function updateLocationEditorStatus(message) {
+  const status = document.getElementById("location-pages-status");
+  if (status) {
+    status.textContent = message;
+  }
 }
 
 function mediaPreviewUrl(item) {
@@ -731,6 +870,7 @@ function adminMarkup() {
         <button type="button" class="is-active" data-jump="#hero">Hero</button>
         <button type="button" data-jump="#portfolio">Portfolio</button>
         <button type="button" data-jump="#gallery-order">Gallery order</button>
+        <button type="button" data-jump="#locations">Location pages</button>
         <button type="button" data-jump="#client-delivery">Client delivery</button>
         <button type="button" data-jump="#services">Services</button>
         <button type="button" data-jump="#settings">Settings</button>
@@ -871,6 +1011,15 @@ function adminMarkup() {
             <span class="admin-note" id="gallery-order-status">Use the arrows to move images up or down.</span>
           </div>
           <div class="gallery-order-list" id="gallery-order-list"></div>
+        </section>
+
+        <section class="admin-panel" id="locations">
+          <h2 class="admin-panel__title">Location pages</h2>
+          <p class="admin-panel__text">Assign a dedicated hero image and a small ordered gallery to each market page using the same shared media library. These selections autosave in this browser and are written into <code>content/locations.json</code> when you save or publish.</p>
+          <div class="admin-toolbar">
+            <span class="admin-note" id="location-pages-status">Choose a hero image and add the photos you want to spotlight on each location page.</span>
+          </div>
+          <div class="location-admin-list" id="location-pages-list"></div>
         </section>
 
         <section class="admin-panel" id="client-delivery">
@@ -1063,7 +1212,7 @@ function adminMarkup() {
                 <button class="button ghost" type="button" id="save-publish-config">Save publish settings</button>
                 <button class="button ghost" type="button" id="load-live-state">Load live state</button>
               </div>
-              <div class="admin-note" id="publish-status">Publishing updates <code>content/site-data.json</code> and the public portfolio media only. Eligible public images are exported as WebP thumb, medium, and full variants. Client delivery portals now live outside the repo.</div>
+              <div class="admin-note" id="publish-status">Publishing updates <code>content/site-data.json</code>, <code>content/locations.json</code>, and the public portfolio media. Eligible public images are exported as WebP thumb, medium, and full variants. Client delivery portals now live outside the repo.</div>
             </section>
           </details>
         </section>
@@ -1189,6 +1338,165 @@ function renderGalleryOrderEditor() {
         )
         .join("")
     : `<div class="admin-note">Upload gallery images to use the reorder controls.</div>`;
+}
+
+function renderLocationPagesEditor() {
+  const target = document.getElementById("location-pages-list");
+  if (!target) {
+    return;
+  }
+
+  const pages = currentLocationPages();
+  const imageMedia = publicImageMediaItems();
+
+  if (!pages.length) {
+    target.innerHTML = `<div class="admin-note">No location pages are configured yet. Add records to <code>content/locations.json</code> first.</div>`;
+    return;
+  }
+
+  target.innerHTML = pages
+    .map((page) => {
+      const heroRecord = publicImageRecordById(page.heroMediaId);
+      const selectedGallery = (page.galleryMediaIds || []).map((id) => ({
+        id,
+        item: publicImageRecordById(id),
+      }));
+      const selectedIds = new Set(selectedGallery.map((entry) => entry.id));
+      const heroSelectId = `location-hero-${page.slug}`;
+      const heroOptions = [
+        `<option value="" ${page.heroMediaId ? "" : "selected"}>No dedicated hero image</option>`,
+        ...imageMedia.map(
+          (item) =>
+            `<option value="${safeText(item.id)}" ${page.heroMediaId === item.id ? "selected" : ""}>${safeText(publicImageOptionLabel(item))}</option>`
+        ),
+      ].join("");
+
+      const heroPreviewMarkup = heroRecord
+        ? `
+            <div class="location-picker__preview">
+              <img class="location-picker__previewImage" src="${mediaPreviewUrl(heroRecord)}" alt="${safeText(heroRecord.alt || heroRecord.title || page.name || "Location hero image")}" />
+              <div class="location-picker__previewBody">
+                <strong>${safeText(heroRecord.title || heroRecord.name || heroRecord.id)}</strong>
+                <span>${safeText(heroRecord.caption || heroRecord.alt || publicImageOptionLabel(heroRecord))}</span>
+              </div>
+            </div>
+          `
+        : `<div class="location-picker__empty">No hero image selected yet. The page will lean on copy alone until you choose one.</div>`;
+
+      const selectedGalleryMarkup = selectedGallery.length
+        ? `
+            <div class="location-selection-list">
+              ${selectedGallery
+                .map(({ id, item }, index) => {
+                  if (!item) {
+                    return `
+                      <article class="location-selection-item location-selection-item--missing">
+                        <div class="location-picker__empty">This saved media selection is no longer available in the shared library.</div>
+                        <div class="location-selection-item__actions">
+                          <button class="button ghost" type="button" data-location-gallery-remove="${safeText(id)}" data-location-slug="${safeText(page.slug)}">Remove missing item</button>
+                        </div>
+                      </article>
+                    `;
+                  }
+
+                  return `
+                    <article class="location-selection-item">
+                      <img class="location-selection-item__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Location gallery image")}" />
+                      <div class="location-selection-item__meta">
+                        <div class="location-selection-item__title">
+                          <strong>${safeText(item.title || item.name || item.id)}</strong>
+                          <span>#${index + 1}</span>
+                        </div>
+                        <div class="location-selection-item__sub">
+                          ${safeText(item.caption || publicImageOptionLabel(item))}
+                        </div>
+                        <div class="media-workflow__pills">
+                          <span class="media-workflow__pill ${page.heroMediaId === item.id ? "is-ready" : "is-muted"}">${page.heroMediaId === item.id ? "Hero" : safeText(item.placement || "image")}</span>
+                        </div>
+                      </div>
+                      <div class="location-selection-item__actions">
+                        <button class="button ghost" type="button" data-location-gallery-move="up" data-location-gallery-id="${safeText(item.id)}" data-location-slug="${safeText(page.slug)}" ${index === 0 ? "disabled" : ""}>Up</button>
+                        <button class="button ghost" type="button" data-location-gallery-move="down" data-location-gallery-id="${safeText(item.id)}" data-location-slug="${safeText(page.slug)}" ${index === selectedGallery.length - 1 ? "disabled" : ""}>Down</button>
+                        <button class="button ghost danger" type="button" data-location-gallery-remove="${safeText(item.id)}" data-location-slug="${safeText(page.slug)}">Remove</button>
+                      </div>
+                    </article>
+                  `;
+                })
+                .join("")}
+            </div>
+          `
+        : `<div class="location-picker__empty">No gallery images selected yet. Add the photos you want this market page to showcase.</div>`;
+
+      const availableMediaMarkup = imageMedia.length
+        ? `
+            <div class="location-media-picker">
+              ${imageMedia
+                .map((item) => {
+                  const isSelected = selectedIds.has(item.id);
+                  return `
+                    <article class="location-media-option ${isSelected ? "is-selected" : ""}">
+                      <img class="location-media-option__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Media option")}" />
+                      <div class="location-media-option__body">
+                        <strong>${safeText(item.title || item.name || item.id)}</strong>
+                        <span>${safeText(item.caption || publicImageOptionLabel(item))}</span>
+                      </div>
+                      <div class="location-media-option__actions">
+                        ${page.heroMediaId === item.id ? `<span class="media-workflow__pill is-ready">Hero</span>` : ""}
+                        ${
+                          isSelected
+                            ? `<span class="media-workflow__pill is-ready">Added</span>`
+                            : `<button class="button ghost" type="button" data-location-gallery-add="${safeText(item.id)}" data-location-slug="${safeText(page.slug)}">Add</button>`
+                        }
+                      </div>
+                    </article>
+                  `;
+                })
+                .join("")}
+            </div>
+          `
+        : `<div class="admin-note">Upload at least one public image in the Portfolio section to assign media to location pages.</div>`;
+
+      return `
+        <article class="location-admin-card" data-location-card="${safeText(page.slug)}">
+          <div class="location-admin-card__header">
+            <div>
+              <div class="section__eyebrow">Location page</div>
+              <h3 class="card__title">${safeText(page.market || page.name || page.slug)}</h3>
+              <div class="location-admin-card__slug">/locations/${safeText(page.slug)}/</div>
+            </div>
+            <div class="media-workflow__pills">
+              <span class="media-workflow__pill ${page.heroMediaId ? "is-ready" : "is-muted"}">${page.heroMediaId ? "Hero set" : "No hero"}</span>
+              <span class="media-workflow__pill ${selectedGallery.length ? "is-ready" : "is-muted"}">${selectedGallery.length} gallery photo${selectedGallery.length === 1 ? "" : "s"}</span>
+            </div>
+          </div>
+
+          <div class="location-admin-card__grid">
+            <div class="location-picker">
+              <div class="field">
+                <label for="${safeText(heroSelectId)}">Hero image</label>
+                <select id="${safeText(heroSelectId)}" data-location-field="heroMediaId" data-location-slug="${safeText(page.slug)}">
+                  ${heroOptions}
+                </select>
+              </div>
+              ${heroPreviewMarkup}
+            </div>
+
+            <div class="location-picker">
+              <div class="section__eyebrow">Selected gallery</div>
+              <p class="admin-note">These images show up on the location page in the order listed here.</p>
+              ${selectedGalleryMarkup}
+            </div>
+          </div>
+
+          <div class="location-picker">
+            <div class="section__eyebrow">Add more photos</div>
+            <p class="admin-note">Every option below comes from the same shared media library you already use for the homepage and other public sections.</p>
+            ${availableMediaMarkup}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function clientPortalCard(portal) {
@@ -1785,6 +2093,7 @@ async function buildPublishedClientPortals(mediaDrafts) {
 async function buildSavePayload() {
   syncSettingsFromForms();
   syncServicesFromEditor();
+  state.locationPages = currentLocationPages();
 
   const mediaDrafts = collectAllMediaDrafts().filter((item) => !item.portalId);
   const { localPortals, publishedPortals } = await buildPublishedClientPortals(mediaDrafts);
@@ -1810,6 +2119,7 @@ async function buildSavePayload() {
   return {
     settings: state.settings,
     services: state.services,
+    locationPages: currentLocationPages(),
     localClientPortals: localPortals,
     clientPortals: publishedPortals,
     media: payloadMedia,
@@ -1930,6 +2240,12 @@ async function saveToLocalFolder(payload) {
     workspaceDirectoryHandle,
     "content/site-data.json",
     `${JSON.stringify(siteData, null, 2)}\n`
+  );
+
+  await writeFileToWorkspace(
+    workspaceDirectoryHandle,
+    "content/locations.json",
+    `${JSON.stringify({ pages: payload.locationPages || [] }, null, 2)}\n`
   );
 
   return siteData;
@@ -2174,6 +2490,100 @@ function wireGalleryOrderEditor() {
       status.textContent = "Gallery order saved.";
     }
     await syncAndRender();
+  });
+}
+
+function wireLocationPagesEditor() {
+  const target = document.getElementById("location-pages-list");
+  if (!target) {
+    return;
+  }
+
+  target.addEventListener("change", (event) => {
+    const field = event.target.closest("[data-location-field]");
+    if (!field) {
+      return;
+    }
+
+    const slug = field.dataset.locationSlug;
+    if (!slug) {
+      return;
+    }
+
+    if (field.dataset.locationField === "heroMediaId") {
+      updateLocationPageBySlug(slug, (page) => ({
+        ...page,
+        heroMediaId: field.value || "",
+      }));
+      renderLocationPagesEditor();
+      updateLocationEditorStatus("Location photo selections autosaved in this browser.");
+    }
+  });
+
+  target.addEventListener("click", (event) => {
+    const addButton = event.target.closest("[data-location-gallery-add]");
+    if (addButton) {
+      const slug = addButton.dataset.locationSlug;
+      const mediaId = addButton.dataset.locationGalleryAdd;
+      if (!slug || !mediaId) {
+        return;
+      }
+
+      updateLocationPageBySlug(slug, (page) => ({
+        ...page,
+        galleryMediaIds: [...(page.galleryMediaIds || []), mediaId],
+      }));
+      renderLocationPagesEditor();
+      updateLocationEditorStatus("Added that photo to the location gallery.");
+      return;
+    }
+
+    const removeButton = event.target.closest("[data-location-gallery-remove]");
+    if (removeButton) {
+      const slug = removeButton.dataset.locationSlug;
+      const mediaId = removeButton.dataset.locationGalleryRemove;
+      if (!slug || !mediaId) {
+        return;
+      }
+
+      updateLocationPageBySlug(slug, (page) => ({
+        ...page,
+        galleryMediaIds: (page.galleryMediaIds || []).filter((id) => id !== mediaId),
+      }));
+      renderLocationPagesEditor();
+      updateLocationEditorStatus("Removed that photo from the location gallery.");
+      return;
+    }
+
+    const moveButton = event.target.closest("[data-location-gallery-move]");
+    if (!moveButton) {
+      return;
+    }
+
+    const slug = moveButton.dataset.locationSlug;
+    const mediaId = moveButton.dataset.locationGalleryId;
+    const direction = moveButton.dataset.locationGalleryMove === "up" ? -1 : 1;
+    if (!slug || !mediaId || !direction) {
+      return;
+    }
+
+    updateLocationPageBySlug(slug, (page) => {
+      const ids = [...(page.galleryMediaIds || [])];
+      const index = ids.findIndex((id) => id === mediaId);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= ids.length) {
+        return page;
+      }
+
+      const [moved] = ids.splice(index, 1);
+      ids.splice(nextIndex, 0, moved);
+      return {
+        ...page,
+        galleryMediaIds: ids,
+      };
+    });
+    renderLocationPagesEditor();
+    updateLocationEditorStatus("Updated the location gallery order.");
   });
 }
 
@@ -2615,6 +3025,7 @@ function wireBackupButtons() {
     const exportPayload = {
       settings: state.settings,
       services: state.services,
+      locationPages: currentLocationPages(),
       clientPortals: state.clientPortals,
       media: media.map(({ blob, ...rest }) => rest),
       exportedAt: new Date().toISOString(),
@@ -2632,11 +3043,13 @@ function wireBackupButtons() {
     if (!confirm("Reset brand text and service cards to the defaults?")) {
       return;
     }
+    const preservedLocationPages = currentLocationPages();
     await clearMedia();
     rowUrls.forEach((url) => URL.revokeObjectURL(url));
     rowUrls.clear();
     resetState();
     state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    state.locationPages = preservedLocationPages;
     saveState(state);
     await syncAndRender();
   });
@@ -2664,6 +3077,9 @@ function wireBackupButtons() {
     }
     if (Array.isArray(parsed.services)) {
       state.services = parsed.services;
+    }
+    if (Array.isArray(parsed.locationPages)) {
+      state.locationPages = mergeLocationPages(parsed.locationPages, []);
     }
     if (Array.isArray(parsed.clientPortals)) {
       state.clientPortals = parsed.clientPortals;
@@ -2698,11 +3114,14 @@ function wireBackupButtons() {
 
   document.getElementById("load-live-state").addEventListener("click", async () => {
     try {
-      const response = await fetch("./content/site-data.json", { cache: "no-store" });
-      if (!response.ok) {
+      const [published, publishedLocationPages] = await Promise.all([
+        loadPublishedSiteData(),
+        loadPublishedLocationPages(),
+      ]);
+
+      if (!published) {
         throw new Error("No published site data found yet.");
       }
-      const published = await response.json();
       if (published.settings) {
         state.settings = { ...state.settings, ...published.settings };
       }
@@ -2728,6 +3147,7 @@ function wireBackupButtons() {
           });
         }
       }
+      state.locationPages = mergeLocationPages([], publishedLocationPages);
       saveState(state);
       await syncAndRender();
       alert("Loaded the live site data into the editor.");
@@ -2792,6 +3212,7 @@ async function syncAndRender() {
   wireHeaderActions();
   renderFeaturedFrameOptions();
   renderGalleryOrderEditor();
+  renderLocationPagesEditor();
   renderClientPortalsEditor();
   renderServicesEditor();
   await renderMediaList();
@@ -2917,6 +3338,12 @@ async function publishToGitHub(portalPayload = {}) {
     Array.from(new TextEncoder().encode(json), (byte) => String.fromCharCode(byte)).join("")
   );
   await putRepoFile("content/site-data.json", encoded, "Publish portfolio content");
+
+  const locationsJson = JSON.stringify({ pages: portalPayload.locationPages || [] }, null, 2);
+  const encodedLocations = btoa(
+    Array.from(new TextEncoder().encode(locationsJson), (byte) => String.fromCharCode(byte)).join("")
+  );
+  await putRepoFile("content/locations.json", encodedLocations, "Publish location pages");
 }
 
 async function bootstrap() {
@@ -2937,12 +3364,17 @@ async function bootstrap() {
     }
   }
 
-  const published = await loadPublishedSiteData();
+  const [published, publishedLocationPages] = await Promise.all([
+    loadPublishedSiteData(),
+    loadPublishedLocationPages(),
+  ]);
   if (published && !hasSavedState()) {
     state = mergePublishedState(published);
   } else {
     state = loadState();
   }
+
+  state.locationPages = mergeLocationPages(state.locationPages, publishedLocationPages);
 
   saveState(state);
   workspaceDirectoryHandle = await loadWorkspaceDirectoryHandle().catch(() => null);
@@ -2963,6 +3395,7 @@ async function bootstrap() {
   wireUploadForm();
   wireServicesEditor();
   wireGalleryOrderEditor();
+  wireLocationPagesEditor();
   wireClientPortalsEditor();
   wireMediaListEvents();
   wireBackupButtons();

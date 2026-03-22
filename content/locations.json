@@ -56,6 +56,8 @@
           "answer": "Yes. The workflow is built around MLS-ready photos while still giving agents assets that feel strong enough for Instagram, brokerage marketing, and listing announcements."
         }
       ],
+      "heroMediaId": "",
+      "galleryMediaIds": [],
       "nearbySlugs": ["navarre-fl", "pace-fl", "orange-beach-al"]
     },
     {
@@ -114,6 +116,8 @@
           "answer": "Same-day availability is offered when the schedule allows, and most standard photo sets are turned around within 24 hours."
         }
       ],
+      "heroMediaId": "",
+      "galleryMediaIds": [],
       "nearbySlugs": ["gulf-breeze-fl", "pace-fl", "orange-beach-al"]
     },
     {
@@ -172,6 +176,8 @@
           "answer": "Same-day availability is offered when the schedule allows, and most standard photo deliveries are completed within 24 hours."
         }
       ],
+      "heroMediaId": "",
+      "galleryMediaIds": [],
       "nearbySlugs": ["gulf-breeze-fl", "navarre-fl", "orange-beach-al"]
     },
     {
@@ -230,6 +236,8 @@
           "answer": "Often they do. Drone coverage can be especially helpful when exterior context, amenity layout, or proximity adds meaningful value to the listing presentation."
         }
       ],
+      "heroMediaId": "",
+      "galleryMediaIds": [],
       "nearbySlugs": ["gulf-breeze-fl", "navarre-fl", "pace-fl"]
     }
   ]

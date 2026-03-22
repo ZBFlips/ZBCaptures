@@ -158,6 +158,22 @@ try {
           [System.Text.UTF8Encoding]::new($false)
         )
 
+        $locationsPath = Join-Path $root "content/locations.json"
+        $locationsDirectory = Split-Path $locationsPath -Parent
+        if ($locationsDirectory -and -not (Test-Path $locationsDirectory)) {
+          New-Item -ItemType Directory -Path $locationsDirectory -Force | Out-Null
+        }
+
+        $locationsData = [ordered]@{
+          pages = @($payload.locationPages)
+        }
+
+        [System.IO.File]::WriteAllText(
+          $locationsPath,
+          ($locationsData | ConvertTo-Json -Depth 32),
+          [System.Text.UTF8Encoding]::new($false)
+        )
+
         Send-JsonResponse $context 200 @{
           ok = $true
           message = "Saved site files."

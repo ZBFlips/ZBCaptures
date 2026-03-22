@@ -464,6 +464,42 @@ function videoMedia() {
   return mediaCache.find((item) => !item.portalId && item.placement === "video") || null;
 }
 
+function publicImageRecordById(id = "") {
+  const targetId = String(id || "").trim();
+  if (!targetId) {
+    return null;
+  }
+
+  return mediaCache.find(
+    (item) =>
+      item?.id === targetId &&
+      !item?.portalId &&
+      (!item?.type || String(item.type).startsWith("image/"))
+  ) || null;
+}
+
+function locationHeroMedia(locationPage = currentLocationPage()) {
+  return publicImageRecordById(locationPage?.heroMediaId);
+}
+
+function locationGalleryMedia(locationPage = currentLocationPage()) {
+  const ids = Array.isArray(locationPage?.galleryMediaIds) ? locationPage.galleryMediaIds : [];
+  const unique = [];
+  const seen = new Set();
+
+  for (const id of ids) {
+    const record = publicImageRecordById(id);
+    if (!record || seen.has(record.id)) {
+      continue;
+    }
+
+    seen.add(record.id);
+    unique.push(record);
+  }
+
+  return unique;
+}
+
 function lightboxRecords() {
   return [...mediaCache, ...activePortalMedia];
 }
@@ -1724,16 +1760,74 @@ function locationPageMarkup() {
   const nearbyMarkets = Array.isArray(locationPage.nearbySlugs)
     ? locationPage.nearbySlugs.map((slug) => findLocationPage(slug)).filter(Boolean)
     : featuredLocationPages(3, locationPage.slug);
+  const heroRecord = locationHeroMedia(locationPage);
+  const galleryRecords = locationGalleryMedia(locationPage).filter((item) => item.id !== heroRecord?.id);
+  const heroCardMarkup = heroRecord
+    ? `
+        <aside class="card location-page__heroCard">
+          <button class="media-tile__button location-page__heroButton" data-preview data-id="${heroRecord.id}" type="button" aria-label="Preview ${safeText(heroRecord.title || heroRecord.name || "location image")}">
+            ${responsivePictureMarkup(heroRecord, {
+              imgClass: "location-page__heroImage",
+              alt: heroRecord.alt || heroRecord.title || `${locationPage.market || locationPage.name || "Location"} photography`,
+              keys: ["thumb", "medium", "full"],
+              sizes: "(max-width: 1100px) 100vw, 36vw",
+              loading: "eager",
+              decoding: "async",
+              fetchpriority: "high",
+            })}
+          </button>
+          <div class="card__body">
+            <div class="card__eyebrow">Local work</div>
+            <h2 class="card__title">${safeText(heroRecord.title || `Recent photography from ${locationPage.market || locationPage.name || "this market"}`)}</h2>
+            <p class="card__text">${safeText(heroRecord.caption || `A location-specific image selected from the shared portfolio library for ${locationPage.market || locationPage.name || "this market"}.`)}</p>
+          </div>
+        </aside>
+      `
+    : "";
+  const gallerySectionMarkup = galleryRecords.length
+    ? `
+        <section class="section location-page__gallery">
+          <div class="section__eyebrow">${safeText(locationPage.name || locationPage.market || "Market")} gallery</div>
+          <h2 class="section__title">${safeText(`Photography selected for ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
+          <p class="section__lead">${safeText(`These are the images chosen specifically to support the ${locationPage.market || locationPage.name || "local"} page while still pulling from the same shared portfolio library.`)}</p>
+          <div class="portfolio-grid gallery-grid location-page__galleryGrid">
+            ${galleryRecords
+              .map(
+                (item) => `
+                  <article class="media-tile">
+                    <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
+                      ${responsivePictureMarkup(item, {
+                        imgClass: "media-tile__image",
+                        alt: item.alt || item.title || item.name || "Location gallery image",
+                        keys: ["thumb", "medium", "full"],
+                        sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
+                        loading: "lazy",
+                        decoding: "async",
+                      })}
+                    </button>
+                  </article>
+                `
+              )
+              .join("")}
+          </div>
+        </section>
+      `
+    : "";
 
   return `
     <section class="section services-page__intro location-page__intro">
-      <div class="section__eyebrow">${safeText(locationPage.eyebrow || locationPage.market || locationPage.name || "Market")}</div>
-      <h1 class="section__title">${safeText(locationPage.headline || `Real estate photography in ${locationPage.market || locationPage.name || "this market"}`)}</h1>
-      <p class="section__lead">${safeText(locationPage.lead || "")}</p>
-      ${locationSignalsMarkup(locationPage)}
-      <div class="section__actions">
-        <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
-        <a class="button" href="${absoluteSiteUrl("services.html")}">See packages</a>
+      <div class="section-grid grid--split location-page__introGrid">
+        <div class="location-page__introCopy">
+          <div class="section__eyebrow">${safeText(locationPage.eyebrow || locationPage.market || locationPage.name || "Market")}</div>
+          <h1 class="section__title">${safeText(locationPage.headline || `Real estate photography in ${locationPage.market || locationPage.name || "this market"}`)}</h1>
+          <p class="section__lead">${safeText(locationPage.lead || "")}</p>
+          ${locationSignalsMarkup(locationPage)}
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
+            <a class="button" href="${absoluteSiteUrl("services.html")}">See packages</a>
+          </div>
+        </div>
+        ${heroCardMarkup}
       </div>
     </section>
 
@@ -1783,6 +1877,8 @@ function locationPageMarkup() {
         `
         : ""
     }
+
+    ${gallerySectionMarkup}
 
     <section class="section services-page__packages">
       <div class="section__eyebrow">Packages</div>
@@ -1984,6 +2080,7 @@ function applyStructuredData(seo) {
   }
 
   const locationPage = currentLocationPage();
+  const locationHero = page === "location" ? locationHeroMedia(locationPage) : null;
   const areaServed = page === "location" && locationPage?.market ? [locationPage.market] : SEO_SERVICE_AREAS;
   const faqSchemaItems = currentFaqItems();
   const canonicalUrl = absolutePageUrl(seo.path);
@@ -1993,7 +2090,7 @@ function applyStructuredData(seo) {
     "@id": businessId,
     name: state.settings.brandName,
     url: window.location.origin,
-    image: seoImageUrl(),
+    image: locationHero ? mediaOriginalUrlFor(locationHero) || mediaUrlFor(locationHero, "full") || seoImageUrl() : seoImageUrl(),
     description: seo.description,
     areaServed,
     email: state.settings.email,
