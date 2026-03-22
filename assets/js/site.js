@@ -585,6 +585,35 @@ function responsivePictureMarkup(record, options = {}) {
     : `<img${classAttr} src="${safeText(fallbackSrc)}" alt="${safeText(alt)}"${loadingAttr}${decodingAttr}${fetchpriorityAttr} />`;
 }
 
+function wireLazyMediaTransitions() {
+  const lazyImages = Array.from(mainEl?.querySelectorAll('img[loading="lazy"]') || []);
+  if (!lazyImages.length) {
+    return;
+  }
+
+  const revealImage = (image) => {
+    image.dataset.mediaFade = "true";
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        image.classList.add("is-loaded");
+      });
+    });
+  };
+
+  lazyImages.forEach((image) => {
+    image.dataset.mediaFade = "true";
+
+    if (image.complete) {
+      revealImage(image);
+      return;
+    }
+
+    const markReady = () => revealImage(image);
+    image.addEventListener("load", markReady, { once: true });
+    image.addEventListener("error", markReady, { once: true });
+  });
+}
+
 function mediaUrlFor(record, key = "") {
   if (record?.previewUrl) {
     return record.previewUrl;
@@ -2927,6 +2956,7 @@ function wireTestimonialsCarousel() {
 }
 
 function wireSectionReveal() {
+  const isCompactViewport = window.matchMedia("(max-width: 720px)").matches;
   const targets = Array.from(mainEl.querySelectorAll(".section, .hero__card, .card--interactive, .media-tile, .contact-box"));
   if (!targets.length) {
     return;
@@ -2934,7 +2964,7 @@ function wireSectionReveal() {
 
   targets.forEach((element, index) => {
     element.classList.add("reveal-target");
-    element.style.setProperty("--reveal-delay", `${Math.min(index * 70, 280)}ms`);
+    element.style.setProperty("--reveal-delay", `${Math.min(index * (isCompactViewport ? 34 : 70), isCompactViewport ? 136 : 280)}ms`);
   });
 
   if (!("IntersectionObserver" in window)) {
@@ -2951,7 +2981,7 @@ function wireSectionReveal() {
         }
       });
     },
-    { threshold: 0.16, rootMargin: "0px 0px -8% 0px" }
+    { threshold: isCompactViewport ? 0.08 : 0.16, rootMargin: isCompactViewport ? "0px 0px -2% 0px" : "0px 0px -8% 0px" }
   );
 
   targets.forEach((element) => observer.observe(element));
@@ -3265,6 +3295,7 @@ function renderPage() {
   if (page === "home") {
     clearClientPortalState();
     mainEl.innerHTML = homePageMarkup();
+    wireLazyMediaTransitions();
     wireSectionReveal();
     wireHeroParallax();
     wireTestimonialsCarousel();
@@ -3278,6 +3309,7 @@ function renderPage() {
   if (page === "services") {
     clearClientPortalState();
     mainEl.innerHTML = servicesPageMarkup();
+    wireLazyMediaTransitions();
     wireSectionReveal();
     wireTestimonialsCarousel();
     wireServiceAreaMap();
@@ -3289,6 +3321,7 @@ function renderPage() {
   if (page === "location") {
     clearClientPortalState();
     mainEl.innerHTML = locationPageMarkup();
+    wireLazyMediaTransitions();
     wireSectionReveal();
     wireServiceAreaMap();
     return;
@@ -3297,6 +3330,7 @@ function renderPage() {
   if (page === "contact") {
     clearClientPortalState();
     mainEl.innerHTML = contactMarkup();
+    wireLazyMediaTransitions();
     wireSectionReveal();
     wireContactForm();
     wirePreviewButtons();
@@ -3306,6 +3340,7 @@ function renderPage() {
 
   if (page === "client-access") {
     mainEl.innerHTML = clientAccessPageMarkup();
+    wireLazyMediaTransitions();
     wireSectionReveal();
     wireClientAccessPage();
     if (activePortalData) {

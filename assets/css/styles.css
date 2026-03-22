@@ -242,6 +242,20 @@ img {
   transform: translateY(0);
 }
 
+.js img[data-media-fade="true"] {
+  opacity: 0;
+  transform: translateY(10px) scale(0.992);
+  filter: saturate(0.94);
+  transition: opacity 420ms ease, transform 620ms cubic-bezier(0.22, 1, 0.36, 1), filter 420ms ease;
+  will-change: opacity, transform;
+}
+
+.js img[data-media-fade="true"].is-loaded {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: none;
+}
+
 .section + .section {
   margin-top: 24px;
 }
@@ -3109,6 +3123,24 @@ img {
 
   .gallery-stack {
     display: none;
+  }
+
+  .card,
+  .media-tile,
+  .contact-box,
+  .proof-card,
+  .testimonial-card {
+    content-visibility: visible;
+  }
+
+  .js .reveal-target {
+    transform: translateY(12px);
+    transition: opacity 560ms ease, transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .js img[data-media-fade="true"] {
+    transform: translateY(8px) scale(0.995);
+    transition: opacity 360ms ease, transform 520ms cubic-bezier(0.22, 1, 0.36, 1), filter 360ms ease;
   }
 
   .lightbox__toolbar {
