@@ -2,13 +2,13 @@
   "settings": {
     "brandName": "ZB Captures",
     "brandTag": "",
-    "location": "Pensacola real estate photography for Gulf Coast listings",
-    "heroKicker": "Pensacola Real Estate Photography | MLS, Zillow & Airbnb-Ready Media",
+    "location": "Serving luxury, commercial, and residential listings",
+    "heroKicker": "Premium Real Estate Media, 24-Hour Turnaround, Guaranteed.",
     "heroHeadline": "Turn your listing into a sale.",
     "heroLead": "High-end media designed to capture attention, move quickly, and give your listings a competitive edge.",
     "featuredFrameTitle": "Highlighted Photo",
     "featuredFrameLead": "A single image can carry the whole listing.",
-    "featuredFrameMediaId": "",
+    "featuredFrameMediaId": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
     "heroCtas": {
       "primaryLabel": "Explore services",
       "primaryHref": "./services.html",
@@ -29,7 +29,7 @@
         "value": "Designed to feel premium from the first second"
       }
     ],
-    "servicesLead": "ZB Captures provides Pensacola real estate photography for agents, brokers, and property marketers who need MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video that fit the expectations of Zillow, Homes.com, Redfin, Airbnb, and VRBO. Same-day availability is offered when the schedule allows.",
+    "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
     "proofEyebrow": "Why agents book this",
     "proofTitle": "The Impact",
     "proofLead": "According to eye-tracking data, buyers spend 60% of their time looking at listing photos (compared to 20% at the description). On average, professional photos drive 61% more views to a listing, and reduce time on the market by 32%. Better photos also improve the perceived value of a home, increasing the sale price by up to $11,200 on average.",
@@ -37,34 +37,34 @@
       {
         "eyebrow": "Faster launch",
         "title": "Listings can move from shoot to market quickly.",
-        "text": "Same-day availability when possible and next-day delivery keep agents moving when a property is ready to go live."
+        "text": "The turnaround and package structure make it easy for agents to keep momentum when a property is ready to go live."
       },
       {
-        "eyebrow": "Platform ready",
-        "title": "Media is built for the way agents actually market listings.",
-        "text": "The deliverables are positioned around MLS-ready photos, Zillow-ready images, HDR photography, drone work, and social-first video."
+        "eyebrow": "Stronger first impression",
+        "title": "Premium presentation makes the work feel worth hiring.",
+        "text": "The visual hierarchy, pricing clarity, and gallery treatment all reinforce a higher-value service."
       },
       {
         "eyebrow": "Simple handoff",
-        "title": "Media is easy to review, download, and share.",
-        "text": "The client delivery portal is designed to feel organized instead of technical, so agents can open the gallery and get moving fast."
+        "title": "Media is easy to review, choose, and share.",
+        "text": "The site is set up so the process feels organized instead of technical, so you never have to ask any questions."
       }
     ],
-    "contactLead": "Send the property address, target timeline, and the kind of coverage you need. Same-day availability is offered when the schedule allows.",
+    "contactLead": "Send a note with the property address, target timeline, and the kind of coverage you need.",
     "videoEmbedUrl": "",
-    "serviceArea": "Serving Pensacola, Gulf Breeze, Pace, Milton, Navarre, Perdido Key, Foley, Orange Beach, Fairhope, and surrounding Gulf Coast markets.",
+    "serviceArea": "Pensacola, FL",
     "email": "zacbrannen@gmail.com",
     "phone": "(850) 736-1946",
     "instagram": "@zb.re.media",
     "responseTime": "Usually replies within 2 hours during business days.",
     "contactNotificationEndpoint": "",
-    "footerNote": "Based in Pensacola, Florida. Serving real estate agents across the Gulf Coast."
+    "footerNote": "Custom-built and ready for your own domain."
   },
   "services": [
     {
       "id": "service-listing",
       "title": "The Starter",
-      "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional, MLS-ready look.",
+      "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
       "bullets": [
         "30 HDR Images",
         "No Drone Images",
@@ -90,7 +90,7 @@
     {
       "id": "service-media",
       "title": "The Works",
-      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social video and drone coverage to create a high-energy, immersive experience that stops the scroll across listing and social platforms.",
+      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social and drone video to create a high-energy, immersive experience that stops the scroll.",
       "bullets": [
         "45 HDR Images",
         "10 Drone Images",
@@ -107,24 +107,31 @@
   "media": [
     {
       "id": "8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb",
+      "name": "drone portfolio video_thf4.mp4",
+      "type": "video/mp4",
+      "createdAt": 1774027805363,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "video",
       "order": 0,
       "featured": false,
-      "type": "video/mp4",
-      "src": "https://raw.githubusercontent.com/ZBFlips/ZBCaptures/main/assets/uploads/8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb.mp4"
+      "src": "https://raw.githubusercontent.com/ZBFlips/ZBCaptures/main/assets/uploads/8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb.mp4",
+      "variants": null,
+      "originalSrc": "./assets/uploads/8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb.mp4",
+      "originalType": "video/mp4"
     },
     {
       "id": "952028f8-6a70-400c-b4d0-6b1ef94ac6e1",
+      "name": "2-1-print-396-revana-wy",
+      "type": "image/webp",
+      "createdAt": 1774026977938,
       "title": "2-1-print-396-revana-wy",
       "caption": "",
       "alt": "2-1-print-396-revana-wy.png",
       "placement": "hero",
       "order": 0,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/952028f8-6a70-400c-b4d0-6b1ef94ac6e1-full.webp",
       "variants": {
         "thumb": {
@@ -151,13 +158,15 @@
     },
     {
       "id": "6a25db3c-effe-45aa-9847-cf55c157d1ec",
+      "name": "Gemini_Generated_Image_e4siwne4siwne4si",
+      "type": "image/webp",
+      "createdAt": 1774026977929,
       "title": "Gemini_Generated_Image_e4siwne4siwne4si",
       "caption": "",
       "alt": "Twilight Real Estate Photography",
       "placement": "reveal",
       "order": 0,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/6a25db3c-effe-45aa-9847-cf55c157d1ec-full.webp",
       "variants": {
         "thumb": {
@@ -184,26 +193,31 @@
     },
     {
       "id": "e1e80edd-db68-4267-9e62-3ad353f6a3c7",
+      "name": "2024.png",
+      "type": "image/png",
+      "createdAt": 1774026941081,
       "title": "Header logo",
       "caption": "",
       "alt": "Header logo",
       "placement": "logo",
       "order": 0,
       "featured": false,
-      "type": "image/png",
       "src": "./assets/uploads/e1e80edd-db68-4267-9e62-3ad353f6a3c7.png",
+      "variants": null,
       "originalSrc": "./assets/uploads/e1e80edd-db68-4267-9e62-3ad353f6a3c7.png",
       "originalType": "image/png"
     },
     {
       "id": "bfdee870-6786-432d-9ef1-3c57c04b80a0",
+      "name": "Gemini_Generated_Image_e4siwne4siwne4si.png",
+      "type": "image/webp",
+      "createdAt": 1774026933850,
       "title": "Night reveal",
       "caption": "",
       "alt": "Night reveal",
       "placement": "reveal",
       "order": 0,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/bfdee870-6786-432d-9ef1-3c57c04b80a0-full.webp",
       "variants": {
         "thumb": {
@@ -230,13 +244,15 @@
     },
     {
       "id": "14a63367-726d-4164-9527-4404ec649cb8",
+      "name": "2-1-print-396-revana-wy.png",
+      "type": "image/webp",
+      "createdAt": 1774026930034,
       "title": "Daytime background",
       "caption": "",
       "alt": "Daytime background",
       "placement": "hero",
       "order": 0,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/14a63367-726d-4164-9527-4404ec649cb8-full.webp",
       "variants": {
         "thumb": {
@@ -263,13 +279,15 @@
     },
     {
       "id": "c38c5376-9a75-4319-b2d3-225169ca4cc8",
+      "name": "port",
+      "type": "image/webp",
+      "createdAt": 1774026900451,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
       "order": 0,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/c38c5376-9a75-4319-b2d3-225169ca4cc8-full.webp",
       "variants": {
         "thumb": {
@@ -295,14 +313,51 @@
       "originalType": "image/jpeg"
     },
     {
+      "id": "0b912644-3256-418a-8d59-331088303e63",
+      "name": "Interior (4).jpg",
+      "type": "image/webp",
+      "createdAt": 1774196822504,
+      "title": "Interior (4)",
+      "caption": "",
+      "alt": "Interior (4).jpg",
+      "placement": "gallery",
+      "order": 1,
+      "featured": false,
+      "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63.jpg",
+      "originalType": "image/jpeg"
+    },
+    {
       "id": "514a50d3-dde9-4b32-95fd-5b32a5cf24d6",
+      "name": "Interior (2).jpg",
+      "type": "image/webp",
+      "createdAt": 1774032289488,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 1,
+      "order": 2,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/514a50d3-dde9-4b32-95fd-5b32a5cf24d6-full.webp",
       "variants": {
         "thumb": {
@@ -329,13 +384,15 @@
     },
     {
       "id": "302fa87d-3104-4729-b49e-b45d2581d07a",
+      "name": "c10226c9afc0bd9dcf11399c01e065bd",
+      "type": "image/webp",
+      "createdAt": 1774026900451,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 2,
+      "order": 3,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/302fa87d-3104-4729-b49e-b45d2581d07a-full.webp",
       "variants": {
         "thumb": {
@@ -361,14 +418,51 @@
       "originalType": "image/jpeg"
     },
     {
-      "id": "cd877900-442c-42ae-bbed-60d462a72dc8",
+      "id": "babd7685-c34b-4194-a521-124452269480",
+      "name": "Untitled3.jpg",
+      "type": "image/webp",
+      "createdAt": 1774196907225,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 3,
+      "order": 4,
       "featured": false,
+      "src": "./assets/uploads/babd7685-c34b-4194-a521-124452269480-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/babd7685-c34b-4194-a521-124452269480-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/babd7685-c34b-4194-a521-124452269480-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/babd7685-c34b-4194-a521-124452269480-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/babd7685-c34b-4194-a521-124452269480.jpg",
+      "originalType": "image/jpeg"
+    },
+    {
+      "id": "cd877900-442c-42ae-bbed-60d462a72dc8",
+      "name": "15-14-print-396-revana-wy",
       "type": "image/webp",
+      "createdAt": 1774026900432,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 5,
+      "featured": false,
       "src": "./assets/uploads/cd877900-442c-42ae-bbed-60d462a72dc8-full.webp",
       "variants": {
         "thumb": {
@@ -394,14 +488,156 @@
       "originalType": "image/jpeg"
     },
     {
-      "id": "26e4d87b-f58a-4d45-9223-9a03ef37ce34",
+      "id": "ec03023f-2779-432a-a9fd-6d26f7d1eea5",
+      "name": "Untitled3-2.jpg",
+      "type": "image/webp",
+      "createdAt": 1774196903324,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 4,
+      "order": 7,
       "featured": false,
+      "src": "./assets/uploads/ec03023f-2779-432a-a9fd-6d26f7d1eea5-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/ec03023f-2779-432a-a9fd-6d26f7d1eea5-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/ec03023f-2779-432a-a9fd-6d26f7d1eea5-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/ec03023f-2779-432a-a9fd-6d26f7d1eea5-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/ec03023f-2779-432a-a9fd-6d26f7d1eea5.jpg",
+      "originalType": "image/jpeg"
+    },
+    {
+      "id": "2b17845d-ec45-476b-8af1-ecf8dbe6e473",
+      "name": "Untitled2.jpg",
       "type": "image/webp",
+      "createdAt": 1774196879246,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 8,
+      "featured": false,
+      "src": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/2b17845d-ec45-476b-8af1-ecf8dbe6e473.jpg",
+      "originalType": "image/jpeg"
+    },
+    {
+      "id": "6ddad90d-a384-4715-9bba-3a1d55494f82",
+      "name": "Untitled.jpg",
+      "type": "image/webp",
+      "createdAt": 1774196874675,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 9,
+      "featured": false,
+      "src": "./assets/uploads/6ddad90d-a384-4715-9bba-3a1d55494f82-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/6ddad90d-a384-4715-9bba-3a1d55494f82-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/6ddad90d-a384-4715-9bba-3a1d55494f82-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/6ddad90d-a384-4715-9bba-3a1d55494f82-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1466
+        }
+      },
+      "originalSrc": "./assets/uploads/6ddad90d-a384-4715-9bba-3a1d55494f82.jpg",
+      "originalType": "image/jpeg"
+    },
+    {
+      "id": "83e086ba-35ae-4b70-b2bf-8652f39206e6",
+      "name": "Untitled2.jpg",
+      "type": "image/webp",
+      "createdAt": 1774196822729,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 10,
+      "featured": false,
+      "src": "./assets/uploads/83e086ba-35ae-4b70-b2bf-8652f39206e6-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/83e086ba-35ae-4b70-b2bf-8652f39206e6-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/83e086ba-35ae-4b70-b2bf-8652f39206e6-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/83e086ba-35ae-4b70-b2bf-8652f39206e6-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/83e086ba-35ae-4b70-b2bf-8652f39206e6.jpg",
+      "originalType": "image/jpeg"
+    },
+    {
+      "id": "26e4d87b-f58a-4d45-9223-9a03ef37ce34",
+      "name": "7-007_ 1305 Sixth St Florala.jpg",
+      "type": "image/webp",
+      "createdAt": 1774032362576,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 11,
+      "featured": false,
       "src": "./assets/uploads/26e4d87b-f58a-4d45-9223-9a03ef37ce34-full.webp",
       "variants": {
         "thumb": {
@@ -427,14 +663,86 @@
       "originalType": "image/jpeg"
     },
     {
-      "id": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
+      "id": "d8aef652-34f4-4e7e-aae4-d54b551eb281",
+      "name": "Untitled3.jpg",
+      "type": "image/webp",
+      "createdAt": 1774196822736,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 5,
+      "order": 12,
       "featured": false,
+      "src": "./assets/uploads/d8aef652-34f4-4e7e-aae4-d54b551eb281-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/d8aef652-34f4-4e7e-aae4-d54b551eb281-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/d8aef652-34f4-4e7e-aae4-d54b551eb281-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/d8aef652-34f4-4e7e-aae4-d54b551eb281-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/d8aef652-34f4-4e7e-aae4-d54b551eb281.jpg",
+      "originalType": "image/jpeg"
+    },
+    {
+      "id": "328cba1c-65b8-47b6-9d99-cc5bfb0a65ac",
+      "name": "Interior (14).jpg",
       "type": "image/webp",
+      "createdAt": 1774196822497,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 13,
+      "featured": false,
+      "src": "./assets/uploads/328cba1c-65b8-47b6-9d99-cc5bfb0a65ac-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/328cba1c-65b8-47b6-9d99-cc5bfb0a65ac-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/328cba1c-65b8-47b6-9d99-cc5bfb0a65ac-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/328cba1c-65b8-47b6-9d99-cc5bfb0a65ac-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/328cba1c-65b8-47b6-9d99-cc5bfb0a65ac.jpg",
+      "originalType": "image/jpeg"
+    },
+    {
+      "id": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
+      "name": "RE-1-2.jpg",
+      "type": "image/webp",
+      "createdAt": 1774032418805,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 14,
+      "featured": false,
       "src": "./assets/uploads/d83eac99-2e41-43e6-92d6-1b64428a0ca0-full.webp",
       "variants": {
         "thumb": {
@@ -461,13 +769,15 @@
     },
     {
       "id": "5aba2a36-cba4-4621-b698-c4fc630c06d3",
+      "name": "8-010_f8_100 Hidden.JPG",
+      "type": "image/webp",
+      "createdAt": 1774032312968,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 6,
+      "order": 15,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/5aba2a36-cba4-4621-b698-c4fc630c06d3-full.webp",
       "variants": {
         "thumb": {
@@ -494,13 +804,15 @@
     },
     {
       "id": "a6dc9347-8bb1-45d2-a9ef-7e20d2b70538",
+      "name": "re.jpg",
+      "type": "image/webp",
+      "createdAt": 1774032223230,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 7,
+      "order": 16,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/a6dc9347-8bb1-45d2-a9ef-7e20d2b70538-full.webp",
       "variants": {
         "thumb": {
@@ -527,13 +839,15 @@
     },
     {
       "id": "7ee20adb-6cb8-4141-a5a3-5f2252556dbd",
+      "name": "46-004_F8_AERIAL_15817 Front Beach.jpg",
+      "type": "image/webp",
+      "createdAt": 1774032182524,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 8,
+      "order": 17,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/7ee20adb-6cb8-4141-a5a3-5f2252556dbd-full.webp",
       "variants": {
         "thumb": {
@@ -560,13 +874,15 @@
     },
     {
       "id": "43148f0d-4461-413f-8a97-06eaea1eb60c",
+      "name": "25639402985d9f218da3552fe3cd6a56.jpg",
+      "type": "image/webp",
+      "createdAt": 1773979595906,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 9,
+      "order": 18,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/43148f0d-4461-413f-8a97-06eaea1eb60c-full.webp",
       "variants": {
         "thumb": {
@@ -593,13 +909,15 @@
     },
     {
       "id": "9e0c87d5-1b2a-487e-aa43-e45e3b00a0f0",
+      "name": "47-46-print-396-revana-wy.jpg",
+      "type": "image/webp",
+      "createdAt": 1773979313994,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 10,
+      "order": 19,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/9e0c87d5-1b2a-487e-aa43-e45e3b00a0f0-full.webp",
       "variants": {
         "thumb": {
@@ -626,13 +944,15 @@
     },
     {
       "id": "040927aa-81b6-4c81-bd9b-ed1cdcc9a87d",
+      "name": "35-F8_5817 Front Beach Rd unit 1907_0034.jpg",
+      "type": "image/webp",
+      "createdAt": 1773979304903,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 11,
+      "order": 20,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/040927aa-81b6-4c81-bd9b-ed1cdcc9a87d-full.webp",
       "variants": {
         "thumb": {
@@ -659,13 +979,15 @@
     },
     {
       "id": "c1295aee-fbba-4a63-b620-fa0354cce484",
+      "name": "8-006_7604 Dewey Jernigan Rd.jpg",
+      "type": "image/webp",
+      "createdAt": 1773979295631,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 12,
+      "order": 21,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-full.webp",
       "variants": {
         "thumb": {
@@ -692,13 +1014,15 @@
     },
     {
       "id": "36a0b4cf-f03d-4031-b4d9-8660ef8fd6e0",
+      "name": "re-2.jpg",
+      "type": "image/webp",
+      "createdAt": 1773979271562,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 13,
+      "order": 22,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/36a0b4cf-f03d-4031-b4d9-8660ef8fd6e0-full.webp",
       "variants": {
         "thumb": {
@@ -725,13 +1049,15 @@
     },
     {
       "id": "255fe567-d6e7-4cb7-8e43-753fbd125eb6",
+      "name": "Interior (9).jpg",
+      "type": "image/webp",
+      "createdAt": 1773979261991,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 14,
+      "order": 23,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/255fe567-d6e7-4cb7-8e43-753fbd125eb6-full.webp",
       "variants": {
         "thumb": {
@@ -758,13 +1084,15 @@
     },
     {
       "id": "64401869-af1a-4199-880f-244fd744b7ab",
+      "name": "lost key-4.jpg",
+      "type": "image/webp",
+      "createdAt": 1773979252009,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 15,
+      "order": 24,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/64401869-af1a-4199-880f-244fd744b7ab-full.webp",
       "variants": {
         "thumb": {
@@ -786,18 +1114,20 @@
           "height": 1650
         }
       },
-      "originalSrc": "./assets/uploads/64401869-af1a-4199-880f-244fd744b7ab-web.jpg",
+      "originalSrc": "./assets/uploads/64401869-af1a-4199-880f-244fd744b7ab.jpg",
       "originalType": "image/jpeg"
     },
     {
       "id": "0782c117-ba6c-4b14-9f4e-e721d7dedd8f",
+      "name": "d9abb3200d9175b30197696ccfcd7058.jpg",
+      "type": "image/webp",
+      "createdAt": 1773979231570,
       "title": "",
       "caption": "",
       "alt": "",
       "placement": "gallery",
-      "order": 16,
+      "order": 25,
       "featured": false,
-      "type": "image/webp",
       "src": "./assets/uploads/0782c117-ba6c-4b14-9f4e-e721d7dedd8f-full.webp",
       "variants": {
         "thumb": {
