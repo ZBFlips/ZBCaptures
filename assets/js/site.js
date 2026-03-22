@@ -1388,7 +1388,7 @@ function serviceCardsMarkup() {
   return state.services
     .map(
       (service, index) => `
-        <article class="card card--interactive pricing-card ${service.featured ? "card--featured" : ""}" data-tilt-card>
+        <article class="card card--interactive pricing-card pricing-card--package ${service.featured ? "card--featured" : ""}" data-tilt-card>
           <div class="card__body">
             <div class="card__header">
               <div>
@@ -1524,7 +1524,7 @@ function pricingEstimatorSectionMarkup() {
             </div>
           </form>
         </div>
-        <aside class="card pricing-card pricing-card--summary" data-pricing-output="services" data-tilt-card>
+        <aside class="card pricing-card pricing-card--summary" data-pricing-output="services">
           ${pricingEstimateOutputMarkup(buildPricingEstimate({ packageInterest: "The Standard" }))}
         </aside>
       </div>
@@ -2143,6 +2143,9 @@ function wirePricingMotion() {
     };
 
     reset();
+    card.addEventListener("pointerenter", () => {
+      card.classList.add("is-tilting");
+    });
     card.addEventListener("pointermove", (event) => {
       const bounds = card.getBoundingClientRect();
       const ratioX = (event.clientX - bounds.left) / bounds.width - 0.5;
@@ -2165,6 +2168,7 @@ function wirePricingMotion() {
       if (frame) {
         window.cancelAnimationFrame(frame);
       }
+      card.classList.remove("is-tilting");
       reset();
     });
   });

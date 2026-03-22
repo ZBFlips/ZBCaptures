@@ -794,6 +794,18 @@ img {
   will-change: transform;
 }
 
+.pricing-card.is-tilting {
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.pricing-card--package {
+  transition: transform 150ms linear, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.pricing-card--package.is-tilting {
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+
 .pricing-card::before {
   content: "";
   position: absolute;
@@ -1151,6 +1163,7 @@ img {
 .pricing-estimator__cardInner {
   display: grid;
   gap: 16px;
+  padding: 24px;
 }
 
 .pricing-estimator__label {
@@ -1211,6 +1224,7 @@ img {
 .pricing-estimator__line strong {
   font-weight: 700;
   white-space: nowrap;
+  text-align: right;
 }
 
 .pricing-estimator__notes {
