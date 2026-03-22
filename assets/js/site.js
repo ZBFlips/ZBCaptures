@@ -1122,13 +1122,9 @@ const pricingFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-const ESTIMATOR_SIZE_ADJUSTMENTS = [
-  { max: 1999, amount: 0, label: "Up to 1,999 sq ft" },
-  { max: 2999, amount: 35, label: "2,000 to 2,999 sq ft" },
-  { max: 3999, amount: 75, label: "3,000 to 3,999 sq ft" },
-  { max: 4999, amount: 125, label: "4,000 to 4,999 sq ft" },
-  { max: 6499, amount: 195, label: "5,000 to 6,499 sq ft" },
-];
+const ESTIMATOR_LARGE_PROPERTY_THRESHOLD = 3000;
+const ESTIMATOR_LARGE_PROPERTY_SURCHARGE = 50;
+const ESTIMATOR_LARGE_PROPERTY_REASON = "Properties exceeding 3000sqft include a $50 price increase to account for longer job times.";
 
 const ESTIMATOR_ADD_ON_PRICES = {
   "Drone photos": 75,
@@ -1166,7 +1162,7 @@ function quoteSummaryService(title = "") {
 }
 
 function recommendedPackageForInputs(squareFeet, propertyType = "") {
-  if (propertyType === "Commercial property" || squareFeet > 6499) {
+  if (propertyType === "Commercial property") {
     return "Custom quote";
   }
 
@@ -1190,19 +1186,22 @@ function sizeAdjustmentForSquareFeet(squareFeet) {
     return {
       amount: 0,
       label: "Add square footage for a tighter estimate",
-      custom: false,
+      reason: "",
     };
   }
 
-  const match = ESTIMATOR_SIZE_ADJUSTMENTS.find((band) => squareFeet <= band.max);
-  if (match) {
-    return { amount: match.amount, label: match.label, custom: false };
+  if (squareFeet > ESTIMATOR_LARGE_PROPERTY_THRESHOLD) {
+    return {
+      amount: ESTIMATOR_LARGE_PROPERTY_SURCHARGE,
+      label: "3,000+ sq ft adjustment",
+      reason: ESTIMATOR_LARGE_PROPERTY_REASON,
+    };
   }
 
   return {
     amount: 0,
-    label: "Large-property review",
-    custom: true,
+    label: "Square footage included",
+    reason: "",
   };
 }
 
@@ -1231,7 +1230,6 @@ function buildPricingEstimate(input = {}) {
   const requiresCustomQuote =
     selectedPackage === "Custom quote" ||
     propertyType === "Commercial property" ||
-    sizeAdjustment.custom ||
     outsideRadius ||
     !basePrice;
 
@@ -1249,6 +1247,10 @@ function buildPricingEstimate(input = {}) {
     notes.push(ESTIMATOR_TURNAROUND_NOTES[turnaround]);
   }
 
+  if (sizeAdjustment.reason) {
+    notes.push(sizeAdjustment.reason);
+  }
+
   if (outsideRadius) {
     notes.push(
       outsideDistance
@@ -1258,7 +1260,7 @@ function buildPricingEstimate(input = {}) {
   }
 
   if (!squareFeet) {
-    notes.push("Square footage tightens the estimate and helps place the listing into the right package band.");
+    notes.push("Square footage helps confirm whether a large-property adjustment applies.");
   }
 
   if (requiresCustomQuote) {
@@ -1279,11 +1281,9 @@ function buildPricingEstimate(input = {}) {
           value:
             propertyType === "Commercial property"
               ? "Commercial scope requires manual review"
-              : sizeAdjustment.custom
-                ? "Large-property review recommended"
-                : outsideRadius
-                  ? "Outside standard service radius"
-                  : "Manual review",
+              : outsideRadius
+                ? "Outside standard service radius"
+                : "Manual review",
         },
       ],
       notes,
@@ -1302,10 +1302,10 @@ function buildPricingEstimate(input = {}) {
     },
   ];
 
-  if (squareFeet) {
+  if (sizeAdjustment.amount) {
     breakdown.push({
       label: sizeAdjustment.label,
-      value: sizeAdjustment.amount ? pricingFormatter.format(sizeAdjustment.amount) : "Included",
+      value: pricingFormatter.format(sizeAdjustment.amount),
     });
   }
 
