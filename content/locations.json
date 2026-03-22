@@ -310,8 +310,12 @@
           "answer": "Often they do. Drone coverage can be especially helpful when exterior context, amenity layout, or proximity adds meaningful value to the listing presentation."
         }
       ],
-      "heroMediaId": "",
-      "galleryMediaIds": [],
+      "heroMediaId": "0782c117-ba6c-4b14-9f4e-e721d7dedd8f",
+      "galleryMediaIds": [
+        "040927aa-81b6-4c81-bd9b-ed1cdcc9a87d",
+        "7ee20adb-6cb8-4141-a5a3-5f2252556dbd",
+        "302fa87d-3104-4729-b49e-b45d2581d07a"
+      ],
       "nearbySlugs": [
         "gulf-breeze-fl",
         "navarre-fl",
