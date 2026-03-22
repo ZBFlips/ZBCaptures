@@ -960,7 +960,7 @@ img {
 .location-market-card .card__title,
 .proof-card__title,
 .service-area-tool__title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
 }
 
 .signal-card__label {
