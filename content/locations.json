@@ -14,11 +14,25 @@
       "coverageTitle": "Coverage that matches the kinds of listings Gulf Breeze agents market most often.",
       "coverageLead": "Gulf Breeze listings often need a premium but efficient presentation, especially when the property needs to feel bright, calm, and high-value from the first scroll. The goal here is to keep the presentation clean while still moving fast.",
       "coverageSummary": "Focused on polished residential listings, waterfront homes, and nearby coastal launches.",
-      "coverageAreas": ["Proper Gulf Breeze", "Tiger Point", "Midway", "Pensacola Beach approach corridors"],
+      "coverageAreas": [
+        "Proper Gulf Breeze",
+        "Tiger Point",
+        "Midway",
+        "Pensacola Beach approach corridors"
+      ],
       "highlights": [
-        { "label": "Best for", "value": "Waterfront homes, move-up listings, and polished resale launches" },
-        { "label": "Common need", "value": "Clean imagery that feels premium without overcomplicating the shoot day" },
-        { "label": "Delivery", "value": "Fast turnaround for agents moving quickly toward market" }
+        {
+          "label": "Best for",
+          "value": "Waterfront homes, move-up listings, and polished resale launches"
+        },
+        {
+          "label": "Common need",
+          "value": "Clean imagery that feels premium without overcomplicating the shoot day"
+        },
+        {
+          "label": "Delivery",
+          "value": "Fast turnaround for agents moving quickly toward market"
+        }
       ],
       "fitTitle": "What tends to matter most for Gulf Breeze listings.",
       "fitLead": "The strongest fit is usually a listing that needs to feel elevated, organized, and ready to market across both MLS and agent-led channels.",
@@ -56,9 +70,16 @@
           "answer": "Yes. The workflow is built around MLS-ready photos while still giving agents assets that feel strong enough for Instagram, brokerage marketing, and listing announcements."
         }
       ],
-      "heroMediaId": "",
-      "galleryMediaIds": [],
-      "nearbySlugs": ["navarre-fl", "pace-fl", "orange-beach-al"]
+      "heroMediaId": "a6dc9347-8bb1-45d2-a9ef-7e20d2b70538",
+      "galleryMediaIds": [
+        "c1295aee-fbba-4a63-b620-fa0354cce484",
+        "9e0c87d5-1b2a-487e-aa43-e45e3b00a0f0"
+      ],
+      "nearbySlugs": [
+        "navarre-fl",
+        "pace-fl",
+        "orange-beach-al"
+      ]
     },
     {
       "slug": "navarre-fl",
@@ -74,11 +95,25 @@
       "coverageTitle": "A good fit for listings that need to feel bright, relaxed, and market-ready.",
       "coverageLead": "Navarre often calls for presentation that captures space, light, and lifestyle without feeling overly staged. The focus stays on clean coverage that can move across listing and marketing platforms smoothly.",
       "coverageSummary": "Well suited to residential launches, beach-adjacent properties, and short-term-rental-ready presentations.",
-      "coverageAreas": ["Navarre proper", "Navarre Beach approach areas", "Holley", "East Bay-adjacent residential pockets"],
+      "coverageAreas": [
+        "Navarre proper",
+        "Navarre Beach approach areas",
+        "Holley",
+        "East Bay-adjacent residential pockets"
+      ],
       "highlights": [
-        { "label": "Best for", "value": "Beach-adjacent homes, residential launches, and short-term-rental presentation" },
-        { "label": "Visual priority", "value": "Bright interiors, exterior context, and lifestyle-forward curb appeal" },
-        { "label": "Workflow", "value": "Packages that stay simple while still feeling premium online" }
+        {
+          "label": "Best for",
+          "value": "Beach-adjacent homes, residential launches, and short-term-rental presentation"
+        },
+        {
+          "label": "Visual priority",
+          "value": "Bright interiors, exterior context, and lifestyle-forward curb appeal"
+        },
+        {
+          "label": "Workflow",
+          "value": "Packages that stay simple while still feeling premium online"
+        }
       ],
       "fitTitle": "What usually matters most for Navarre shoots.",
       "fitLead": "This market tends to reward media that feels open, clean, and easy to imagine living or staying in from the very first image set.",
@@ -116,9 +151,16 @@
           "answer": "Same-day availability is offered when the schedule allows, and most standard photo sets are turned around within 24 hours."
         }
       ],
-      "heroMediaId": "",
-      "galleryMediaIds": [],
-      "nearbySlugs": ["gulf-breeze-fl", "pace-fl", "orange-beach-al"]
+      "heroMediaId": "c38c5376-9a75-4319-b2d3-225169ca4cc8",
+      "galleryMediaIds": [
+        "cd877900-442c-42ae-bbed-60d462a72dc8",
+        "952028f8-6a70-400c-b4d0-6b1ef94ac6e1"
+      ],
+      "nearbySlugs": [
+        "gulf-breeze-fl",
+        "pace-fl",
+        "orange-beach-al"
+      ]
     },
     {
       "slug": "pace-fl",
@@ -134,11 +176,25 @@
       "coverageTitle": "Built for the kind of practical, listing-ready presentation Pace properties usually need.",
       "coverageLead": "In Pace, the most effective media usually highlights layout clarity, curb appeal, and the sense that the home is move-in ready. The goal is not to over-style the property. It is to make the listing feel trustworthy and easy to imagine.",
       "coverageSummary": "Strong fit for family homes, newer construction, and standard residential listing launches.",
-      "coverageAreas": ["Central Pace", "Five Points", "Woodbine-adjacent neighborhoods", "Nearby Santa Rosa residential pockets"],
+      "coverageAreas": [
+        "Central Pace",
+        "Five Points",
+        "Woodbine-adjacent neighborhoods",
+        "Nearby Santa Rosa residential pockets"
+      ],
       "highlights": [
-        { "label": "Best for", "value": "Family homes, newer builds, and standard residential launches" },
-        { "label": "What matters", "value": "Room flow, exterior cleanliness, and a practical high-trust first impression" },
-        { "label": "Speed", "value": "Quick delivery that supports a fast listing timeline" }
+        {
+          "label": "Best for",
+          "value": "Family homes, newer builds, and standard residential launches"
+        },
+        {
+          "label": "What matters",
+          "value": "Room flow, exterior cleanliness, and a practical high-trust first impression"
+        },
+        {
+          "label": "Speed",
+          "value": "Quick delivery that supports a fast listing timeline"
+        }
       ],
       "fitTitle": "What Pace agents usually need most from the media.",
       "fitLead": "The common theme here is efficiency with polish. The listing needs to feel ready, attractive, and easy for buyers to understand immediately.",
@@ -178,7 +234,11 @@
       ],
       "heroMediaId": "",
       "galleryMediaIds": [],
-      "nearbySlugs": ["gulf-breeze-fl", "navarre-fl", "orange-beach-al"]
+      "nearbySlugs": [
+        "gulf-breeze-fl",
+        "navarre-fl",
+        "orange-beach-al"
+      ]
     },
     {
       "slug": "orange-beach-al",
@@ -194,11 +254,25 @@
       "coverageTitle": "A strong fit for properties where context and presentation work together.",
       "coverageLead": "Orange Beach properties often rely on more than interior coverage alone. Exterior approach, views, amenities, and the overall setting can all help the listing feel more valuable online, so the media needs to support that broader story.",
       "coverageSummary": "Built for condos, coastal homes, and properties with lifestyle or rental appeal.",
-      "coverageAreas": ["Orange Beach condo corridors", "Coastal residential pockets", "Amenity-driven communities", "Nearby rental-oriented markets"],
+      "coverageAreas": [
+        "Orange Beach condo corridors",
+        "Coastal residential pockets",
+        "Amenity-driven communities",
+        "Nearby rental-oriented markets"
+      ],
       "highlights": [
-        { "label": "Best for", "value": "Condos, coastal homes, and properties with strong lifestyle appeal" },
-        { "label": "Visual priority", "value": "Context, amenities, and a polished first impression across platforms" },
-        { "label": "Marketing fit", "value": "Useful for both MLS and rental-oriented promotional needs" }
+        {
+          "label": "Best for",
+          "value": "Condos, coastal homes, and properties with strong lifestyle appeal"
+        },
+        {
+          "label": "Visual priority",
+          "value": "Context, amenities, and a polished first impression across platforms"
+        },
+        {
+          "label": "Marketing fit",
+          "value": "Useful for both MLS and rental-oriented promotional needs"
+        }
       ],
       "fitTitle": "What usually matters most for Orange Beach listings.",
       "fitLead": "The strongest media here often balances property detail with the broader experience of the location so buyers or guests understand the value quickly.",
@@ -238,7 +312,11 @@
       ],
       "heroMediaId": "",
       "galleryMediaIds": [],
-      "nearbySlugs": ["gulf-breeze-fl", "navarre-fl", "pace-fl"]
+      "nearbySlugs": [
+        "gulf-breeze-fl",
+        "navarre-fl",
+        "pace-fl"
+      ]
     }
   ]
 }
