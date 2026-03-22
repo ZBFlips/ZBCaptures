@@ -909,6 +909,7 @@ img {
 .location-page__introGrid {
   gap: 24px;
   align-items: start;
+  grid-template-columns: minmax(0, 1.32fr) minmax(180px, 0.44fr);
 }
 
 .location-page__coverageCard,
@@ -931,6 +932,9 @@ img {
 
 .location-page__heroCard {
   overflow: hidden;
+  width: 100%;
+  max-width: 320px;
+  justify-self: end;
 }
 
 .location-page__heroButton {
@@ -944,7 +948,8 @@ img {
 
 .location-page__heroImage {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 5 / 4;
+  max-height: 220px;
   object-fit: cover;
 }
 
@@ -2092,6 +2097,11 @@ img {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.gallery-reel__nav:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
 .gallery-order-list {
   display: grid;
   gap: 10px;
@@ -2847,6 +2857,15 @@ img {
   .location-admin-card__header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .location-page__heroCard {
+    max-width: 100%;
+    justify-self: stretch;
+  }
+
+  .location-page__heroImage {
+    max-height: 320px;
   }
 
   .media-row__thumb {

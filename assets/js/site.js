@@ -2783,55 +2783,85 @@ function wirePreviewButtons() {
 }
 
 function wireGalleryReel() {
-  const rail = document.querySelector("[data-gallery-reel-rail]");
-  const prevButton = document.querySelector("[data-gallery-reel-prev]");
-  const nextButton = document.querySelector("[data-gallery-reel-next]");
-  if (!rail || (!prevButton && !nextButton)) {
-    return;
-  }
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const getStep = () => {
-    const item = rail.querySelector(".gallery-reel__item");
-    if (!item) {
-      return rail.clientWidth * 0.85;
-    }
-
-    const itemWidth = item.getBoundingClientRect().width;
-    const gap = parseFloat(getComputedStyle(rail).gap || "0") || 0;
-    return itemWidth + gap;
-  };
-
-  const maxScroll = () => Math.max(rail.scrollWidth - rail.clientWidth - 4, 0);
-
-  const move = (direction) => {
-    const limit = maxScroll();
-    if (limit <= 0) {
+  document.querySelectorAll(".gallery-reel").forEach((reel) => {
+    const rail = reel.querySelector("[data-gallery-reel-rail]");
+    const prevButton = reel.querySelector("[data-gallery-reel-prev]");
+    const nextButton = reel.querySelector("[data-gallery-reel-next]");
+    if (!rail || (!prevButton && !nextButton)) {
       return;
     }
 
-    const step = getStep();
-    const current = rail.scrollLeft;
+    const getStep = () => {
+      const item = rail.querySelector(".gallery-reel__item");
+      if (!item) {
+        return rail.clientWidth * 0.85;
+      }
 
-    if (direction < 0) {
-      if (current <= 0) {
-        rail.scrollTo({ left: limit, behavior: "smooth" });
+      const itemWidth = item.getBoundingClientRect().width;
+      const gap = parseFloat(getComputedStyle(rail).gap || "0") || 0;
+      return Math.max(itemWidth + gap, rail.clientWidth * 0.72);
+    };
+
+    const maxScroll = () => Math.max(rail.scrollWidth - rail.clientWidth - 4, 0);
+
+    const scrollRailTo = (left) => {
+      const target = Math.max(0, Math.min(left, maxScroll()));
+      if (typeof rail.scrollTo === "function") {
+        try {
+          rail.scrollTo({ left: target, behavior: prefersReducedMotion ? "auto" : "smooth" });
+          return;
+        } catch {
+          // Fall through to direct assignment for browsers that do not support scroll options.
+        }
+      }
+
+      rail.scrollLeft = target;
+    };
+
+    const updateButtons = () => {
+      const limit = maxScroll();
+      const current = rail.scrollLeft;
+      if (prevButton) {
+        prevButton.disabled = limit <= 0 || current <= 2;
+      }
+      if (nextButton) {
+        nextButton.disabled = limit <= 0 || current >= limit - 2;
+      }
+    };
+
+    const move = (direction) => {
+      const limit = maxScroll();
+      if (limit <= 0) {
+        updateButtons();
         return;
       }
 
-      rail.scrollTo({ left: Math.max(current - step, 0), behavior: "smooth" });
-      return;
-    }
+      const step = getStep();
+      const current = rail.scrollLeft;
+      scrollRailTo(current + step * direction);
+    };
 
-    if (current >= limit) {
-      rail.scrollTo({ left: 0, behavior: "smooth" });
-      return;
-    }
+    prevButton?.addEventListener("click", () => move(-1));
+    nextButton?.addEventListener("click", () => move(1));
+    rail.addEventListener("scroll", updateButtons, { passive: true });
+    rail.addEventListener(
+      "wheel",
+      (event) => {
+        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX) || maxScroll() <= 0) {
+          return;
+        }
 
-    rail.scrollTo({ left: Math.min(current + step, limit), behavior: "smooth" });
-  };
+        event.preventDefault();
+        rail.scrollLeft += event.deltaY;
+      },
+      { passive: false }
+    );
 
-  prevButton?.addEventListener("click", () => move(-1));
-  nextButton?.addEventListener("click", () => move(1));
+    updateButtons();
+    window.addEventListener("resize", updateButtons);
+  });
 }
 
 function wireTestimonialsCarousel() {
