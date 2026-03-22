@@ -639,6 +639,19 @@ img {
   border-color: transparent;
 }
 
+.button--magnetic {
+  --magnetic-x: 0px;
+  --magnetic-y: 0px;
+  --button-lift: 0px;
+  transform: translate3d(var(--magnetic-x), calc(var(--magnetic-y) + var(--button-lift)), 0);
+  will-change: transform;
+}
+
+.button--magnetic:hover {
+  --button-lift: -1px;
+  transform: translate3d(var(--magnetic-x), calc(var(--magnetic-y) + var(--button-lift)), 0);
+}
+
 .hero__stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -765,6 +778,46 @@ img {
   transform: translateY(-3px);
   border-color: var(--line-strong);
   background: var(--surface-strong);
+}
+
+.pricing-card {
+  --tilt-rotate-x: 0deg;
+  --tilt-rotate-y: 0deg;
+  --tilt-glow-x: 50%;
+  --tilt-glow-y: 50%;
+  --tilt-depth: 0px;
+  --pricing-lift: 0px;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  transform: perspective(1200px) rotateX(var(--tilt-rotate-x)) rotateY(var(--tilt-rotate-y)) translate3d(0, var(--pricing-lift), var(--tilt-depth));
+  transition: transform 220ms ease, border-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
+  will-change: transform;
+}
+
+.pricing-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at var(--tilt-glow-x) var(--tilt-glow-y), rgba(240, 184, 127, 0.16), transparent 32%),
+    radial-gradient(circle at calc(100% - var(--tilt-glow-x)) calc(100% - var(--tilt-glow-y)), rgba(109, 134, 179, 0.14), transparent 38%);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pricing-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.card--interactive.pricing-card:hover {
+  --pricing-lift: -3px;
+  transform: perspective(1200px) rotateX(var(--tilt-rotate-x)) rotateY(var(--tilt-rotate-y)) translate3d(0, var(--pricing-lift), var(--tilt-depth));
+  border-color: rgba(240, 184, 127, 0.32);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  box-shadow: 0 26px 50px rgba(0, 0, 0, 0.18);
 }
 
 .card__media {
@@ -1047,6 +1100,140 @@ img {
 .card__footerText {
   color: rgba(243, 239, 231, 0.86);
   font-size: 0.96rem;
+  line-height: 1.65;
+}
+
+.pricing-estimator-section {
+  background:
+    linear-gradient(180deg, rgba(36, 63, 104, 0.16), rgba(255, 255, 255, 0.03)),
+    linear-gradient(135deg, rgba(240, 184, 127, 0.08), transparent 58%);
+}
+
+.pricing-estimator__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+  gap: 24px;
+  align-items: end;
+}
+
+.pricing-estimator__layout {
+  grid-template-columns: minmax(0, 1.04fr) minmax(320px, 0.96fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.pricing-estimator__form {
+  display: grid;
+  gap: 18px;
+}
+
+.pricing-estimator__actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pricing-card--summary {
+  align-self: start;
+  border-color: rgba(240, 184, 127, 0.24);
+  background:
+    linear-gradient(180deg, rgba(15, 18, 26, 0.96), rgba(10, 12, 18, 0.92)),
+    linear-gradient(135deg, rgba(240, 184, 127, 0.08), transparent 62%);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.pricing-card--summary-compact {
+  background:
+    linear-gradient(180deg, rgba(14, 18, 26, 0.94), rgba(10, 12, 18, 0.9)),
+    linear-gradient(135deg, rgba(109, 134, 179, 0.08), transparent 68%);
+}
+
+.pricing-estimator__cardInner {
+  display: grid;
+  gap: 16px;
+}
+
+.pricing-estimator__label {
+  color: var(--accent-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.pricing-estimator__amount {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4vw, 3.1rem);
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+}
+
+.pricing-estimator__amount--custom {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.68rem 0.95rem;
+  border: 1px solid rgba(240, 184, 127, 0.24);
+  border-radius: 999px;
+  background: rgba(240, 184, 127, 0.08);
+  color: var(--accent);
+  font-size: 0.96rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pricing-estimator__detail {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.pricing-estimator__breakdown {
+  display: grid;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.pricing-estimator__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(243, 239, 231, 0.9);
+}
+
+.pricing-estimator__line:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.pricing-estimator__line strong {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pricing-estimator__notes {
+  display: grid;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pricing-estimator__notes p,
+.pricing-estimator__summary {
+  margin: 0;
+}
+
+.pricing-estimator__notes p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.pricing-estimator__summary {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(243, 239, 231, 0.92);
   line-height: 1.65;
 }
 
@@ -1349,6 +1536,12 @@ img {
   color: var(--text);
 }
 
+.service-area-tool__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .service-area-map {
   width: 100%;
   min-height: 420px;
@@ -1645,6 +1838,12 @@ img {
   border: 1px solid var(--line);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.contact-box.pricing-card {
+  background:
+    linear-gradient(180deg, rgba(14, 18, 26, 0.94), rgba(10, 12, 18, 0.9)),
+    linear-gradient(135deg, rgba(240, 184, 127, 0.06), transparent 72%);
 }
 
 .contact-row {
@@ -2836,6 +3035,8 @@ img {
   .admin-grid--three,
   .hero-upload-grid,
   .services-packages,
+  .pricing-estimator__intro,
+  .pricing-estimator__layout,
   .testimonials-strip__header,
   .proof-layout,
   .trust-layout,
@@ -2855,6 +3056,11 @@ img {
 
   .client-delivery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .service-area-tool__actions .button,
+  .pricing-estimator__actions .button {
+    width: 100%;
   }
 
   .trust-grid,
@@ -3030,6 +3236,10 @@ img {
   .services-packages .card__body,
   .contact-box {
     padding: 18px;
+  }
+
+  .pricing-estimator__amount {
+    font-size: clamp(1.9rem, 10vw, 2.6rem);
   }
 
   .signal-card {

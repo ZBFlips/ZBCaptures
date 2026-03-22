@@ -19,6 +19,11 @@ type Submission = {
   packageInterest: string;
   turnaround: string;
   addOns: string[];
+  estimateLabel: string;
+  estimateTotal: string;
+  estimateSummary: string;
+  serviceAreaStatus: string;
+  serviceAreaDistance: string;
   message: string;
   source: string;
   page: string;
@@ -81,6 +86,11 @@ function buildEmail(submission: Submission, savedAs: string, from: string, to: s
     `Package: ${submission.packageInterest || "-"}`,
     `Turnaround: ${submission.turnaround || "-"}`,
     `Add-ons: ${submission.addOns.length ? submission.addOns.join(", ") : "-"}`,
+    `Estimate label: ${submission.estimateLabel || "-"}`,
+    `Estimate total: ${submission.estimateTotal || "-"}`,
+    `Estimate summary: ${submission.estimateSummary || "-"}`,
+    `Service area status: ${submission.serviceAreaStatus || "-"}`,
+    `Service area distance: ${submission.serviceAreaDistance || "-"}`,
     ``,
     `Message:`,
     submission.message || "-",
@@ -133,6 +143,11 @@ async function parseSubmission(request: Request): Promise<Submission> {
     packageInterest: normalizeField(raw.packageInterest),
     turnaround: normalizeField(raw.turnaround),
     addOns: normalizeList(raw.addOns),
+    estimateLabel: normalizeField(raw.estimateLabel),
+    estimateTotal: normalizeField(raw.estimateTotal),
+    estimateSummary: normalizeField(raw.estimateSummary),
+    serviceAreaStatus: normalizeField(raw.serviceAreaStatus),
+    serviceAreaDistance: normalizeField(raw.serviceAreaDistance),
     message: normalizeField(raw.message),
     source: normalizeField(raw.source) || "ZB Captures website",
     page: normalizeField(raw.page),

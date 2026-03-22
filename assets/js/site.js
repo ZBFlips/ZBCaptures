@@ -1116,6 +1116,261 @@ const contactAddOnOptions = [
   { value: "Twilight images", label: "Twilight images" },
 ];
 
+const pricingFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+const ESTIMATOR_SIZE_ADJUSTMENTS = [
+  { max: 1999, amount: 0, label: "Up to 1,999 sq ft" },
+  { max: 2999, amount: 35, label: "2,000 to 2,999 sq ft" },
+  { max: 3999, amount: 75, label: "3,000 to 3,999 sq ft" },
+  { max: 4999, amount: 125, label: "4,000 to 4,999 sq ft" },
+  { max: 6499, amount: 195, label: "5,000 to 6,499 sq ft" },
+];
+
+const ESTIMATOR_ADD_ON_PRICES = {
+  "Drone photos": 75,
+  "Drone video": 175,
+  "Social reel": 150,
+  "Twilight images": 125,
+};
+
+const ESTIMATOR_PACKAGE_HINTS = {
+  "The Starter": "A lean package for smaller or budget-conscious listing launches.",
+  "The Standard": "A balanced package for most full-property listing presentations.",
+  "The Works": "The full media stack for listings that need the strongest presentation.",
+  "Custom quote": "Used when the property, travel, or scope needs manual review.",
+};
+
+const ESTIMATOR_TURNAROUND_NOTES = {
+  "Same-day if available": "Same-day delivery is confirmed manually based on the live schedule.",
+  "Flexible timeline": "Flexible scheduling helps when a property needs travel coordination or a custom scope.",
+};
+
+function parseCurrencyAmount(value) {
+  const digits = String(value || "").replace(/[^0-9.]/g, "");
+  const amount = Number(digits);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function normalizedSquareFeet(value) {
+  const digits = String(value || "").replace(/[^0-9]/g, "");
+  const amount = Number(digits);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function quoteSummaryService(title = "") {
+  return state.services.find((service) => service.title === title) || null;
+}
+
+function recommendedPackageForInputs(squareFeet, propertyType = "") {
+  if (propertyType === "Commercial property" || squareFeet > 6499) {
+    return "Custom quote";
+  }
+
+  if (squareFeet && squareFeet <= 1999) {
+    return "The Starter";
+  }
+
+  if (squareFeet && squareFeet <= 3999) {
+    return "The Standard";
+  }
+
+  if (squareFeet) {
+    return "The Works";
+  }
+
+  return "The Standard";
+}
+
+function sizeAdjustmentForSquareFeet(squareFeet) {
+  if (!squareFeet) {
+    return {
+      amount: 0,
+      label: "Add square footage for a tighter estimate",
+      custom: false,
+    };
+  }
+
+  const match = ESTIMATOR_SIZE_ADJUSTMENTS.find((band) => squareFeet <= band.max);
+  if (match) {
+    return { amount: match.amount, label: match.label, custom: false };
+  }
+
+  return {
+    amount: 0,
+    label: "Large-property review",
+    custom: true,
+  };
+}
+
+function normalizeAddOnSelections(values = []) {
+  return Array.from(new Set((values || []).map((value) => String(value || "").trim()).filter(Boolean)));
+}
+
+function buildPricingEstimate(input = {}) {
+  const propertyAddress = String(input.propertyAddress || "").trim();
+  const propertyType = String(input.propertyType || "").trim();
+  const squareFeet = normalizedSquareFeet(input.squareFeet);
+  const addOns = normalizeAddOnSelections(input.addOns);
+  const turnaround = String(input.turnaround || "").trim();
+  const suggestedPackage = recommendedPackageForInputs(squareFeet, propertyType);
+  const selectedPackage = String(input.packageInterest || "").trim() || suggestedPackage;
+  const service = quoteSummaryService(selectedPackage);
+  const basePrice = parseCurrencyAmount(service?.price);
+  const sizeAdjustment = sizeAdjustmentForSquareFeet(squareFeet);
+  const addOnLineItems = addOns.map((label) => ({
+    label,
+    amount: ESTIMATOR_ADD_ON_PRICES[label] || 0,
+  }));
+  const addOnTotal = addOnLineItems.reduce((total, item) => total + item.amount, 0);
+  const outsideRadius = String(input.serviceAreaStatus || "").trim() === "outside";
+  const outsideDistance = String(input.serviceAreaDistance || "").trim();
+  const requiresCustomQuote =
+    selectedPackage === "Custom quote" ||
+    propertyType === "Commercial property" ||
+    sizeAdjustment.custom ||
+    outsideRadius ||
+    !basePrice;
+
+  const notes = [];
+
+  if (!String(input.packageInterest || "").trim()) {
+    notes.push(`Suggested package: ${suggestedPackage}.`);
+  }
+
+  if (propertyType === "Luxury listing") {
+    notes.push("Luxury listings often benefit from upgraded coverage, twilight work, or added motion.");
+  }
+
+  if (turnaround && ESTIMATOR_TURNAROUND_NOTES[turnaround]) {
+    notes.push(ESTIMATOR_TURNAROUND_NOTES[turnaround]);
+  }
+
+  if (outsideRadius) {
+    notes.push(
+      outsideDistance
+        ? `This address is about ${outsideDistance} miles from Pensacola, so travel is quoted manually.`
+        : "This address sits outside the standard radius, so travel is quoted manually."
+    );
+  }
+
+  if (!squareFeet) {
+    notes.push("Square footage tightens the estimate and helps place the listing into the right package band.");
+  }
+
+  if (requiresCustomQuote) {
+    return {
+      customQuote: true,
+      selectedPackage,
+      propertyAddress,
+      total: null,
+      totalLabel: "Custom quote recommended",
+      totalDetail: "Travel, scope, or property details need a manual review before quoting accurately.",
+      breakdown: [
+        {
+          label: selectedPackage === "Custom quote" ? "Package selection" : "Starting point",
+          value: selectedPackage,
+        },
+        {
+          label: "Property fit",
+          value:
+            propertyType === "Commercial property"
+              ? "Commercial scope requires manual review"
+              : sizeAdjustment.custom
+                ? "Large-property review recommended"
+                : outsideRadius
+                  ? "Outside standard service radius"
+                  : "Manual review",
+        },
+      ],
+      notes,
+      summary:
+        propertyAddress && outsideRadius
+          ? `${propertyAddress} is outside the standard service radius and should be handled as a custom quote.`
+          : `A custom quote is recommended for this project.`,
+    };
+  }
+
+  const total = basePrice + sizeAdjustment.amount + addOnTotal;
+  const breakdown = [
+    {
+      label: selectedPackage,
+      value: pricingFormatter.format(basePrice),
+    },
+  ];
+
+  if (squareFeet) {
+    breakdown.push({
+      label: sizeAdjustment.label,
+      value: sizeAdjustment.amount ? pricingFormatter.format(sizeAdjustment.amount) : "Included",
+    });
+  }
+
+  addOnLineItems.forEach((item) => {
+    breakdown.push({
+      label: item.label,
+      value: pricingFormatter.format(item.amount),
+    });
+  });
+
+  return {
+    customQuote: false,
+    selectedPackage,
+    propertyAddress,
+    total,
+    totalLabel: "Estimated starting quote",
+    totalDetail: ESTIMATOR_PACKAGE_HINTS[selectedPackage] || "A quick working estimate based on the current package and selections.",
+    breakdown,
+    notes,
+    summary: `${selectedPackage} with the current selections comes to an estimated starting quote of ${pricingFormatter.format(total)}.`,
+  };
+}
+
+function estimatorPrefillUrl(values = {}) {
+  const url = new URL(absoluteSiteUrl("contact.html"));
+  const params = url.searchParams;
+  const setValue = (key, value) => {
+    const text = String(value || "").trim();
+    if (text) {
+      params.set(key, text);
+    }
+  };
+
+  setValue("propertyAddress", values.propertyAddress);
+  setValue("propertyType", values.propertyType);
+  setValue("squareFeet", values.squareFeet);
+  setValue("packageInterest", values.packageInterest);
+  setValue("turnaround", values.turnaround);
+  setValue("serviceAreaStatus", values.serviceAreaStatus);
+  setValue("serviceAreaDistance", values.serviceAreaDistance);
+  setValue("estimateLabel", values.estimateLabel);
+  setValue("estimateTotal", values.estimateTotal);
+  setValue("estimateSummary", values.estimateSummary);
+
+  normalizeAddOnSelections(values.addOns).forEach((value) => params.append("addOns", value));
+  return url.toString();
+}
+
+function contactPrefillFromLocation() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    propertyAddress: params.get("propertyAddress") || "",
+    propertyType: params.get("propertyType") || "",
+    squareFeet: params.get("squareFeet") || "",
+    packageInterest: params.get("packageInterest") || "",
+    turnaround: params.get("turnaround") || "",
+    addOns: params.getAll("addOns"),
+    serviceAreaStatus: params.get("serviceAreaStatus") || "",
+    serviceAreaDistance: params.get("serviceAreaDistance") || "",
+    estimateLabel: params.get("estimateLabel") || "",
+    estimateTotal: params.get("estimateTotal") || "",
+    estimateSummary: params.get("estimateSummary") || "",
+  };
+}
+
 function currentLocationPage() {
   return findLocationPage(currentPageSlug());
 }
@@ -1133,7 +1388,7 @@ function serviceCardsMarkup() {
   return state.services
     .map(
       (service, index) => `
-        <article class="card card--interactive ${service.featured ? "card--featured" : ""}">
+        <article class="card card--interactive pricing-card ${service.featured ? "card--featured" : ""}" data-tilt-card>
           <div class="card__body">
             <div class="card__header">
               <div>
@@ -1156,6 +1411,125 @@ function serviceCardsMarkup() {
       `
     )
     .join("");
+}
+
+function pricingEstimateOutputMarkup(estimate) {
+  const amountMarkup = estimate.customQuote
+    ? `<div class="pricing-estimator__amount pricing-estimator__amount--custom">Custom quote</div>`
+    : `<div class="pricing-estimator__amount">${pricingFormatter.format(estimate.total)}</div>`;
+
+  return `
+    <div class="pricing-estimator__cardInner">
+      <div class="section__eyebrow">Live estimate</div>
+      <div class="pricing-estimator__label">${safeText(estimate.totalLabel)}</div>
+      ${amountMarkup}
+      <p class="pricing-estimator__detail">${safeText(estimate.totalDetail)}</p>
+      <div class="pricing-estimator__breakdown">
+        ${estimate.breakdown
+          .map(
+            (item) => `
+              <div class="pricing-estimator__line">
+                <span>${safeText(item.label)}</span>
+                <strong>${safeText(item.value)}</strong>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+      ${
+        estimate.notes.length
+          ? `
+            <div class="pricing-estimator__notes">
+              ${estimate.notes.map((note) => `<p>${safeText(note)}</p>`).join("")}
+            </div>
+          `
+          : ""
+      }
+      <div class="pricing-estimator__summary">${safeText(estimate.summary)}</div>
+    </div>
+  `;
+}
+
+function pricingEstimatorSectionMarkup() {
+  const packageOptions = [
+    `<option value="">Let the estimator suggest a package</option>`,
+    ...contactPackageOptions.map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`),
+  ].join("");
+
+  return `
+    <section class="section pricing-estimator-section" id="pricing-estimator">
+      <div class="section__eyebrow">Quick quote</div>
+      <div class="pricing-estimator__intro">
+        <div>
+          <h2 class="section__title">Build a working estimate before you book.</h2>
+          <p class="section__lead">Choose the package, square footage, and add-ons you think the listing needs. The estimate updates instantly and can carry straight into the inquiry form.</p>
+        </div>
+        <div class="helper">This is a starting quote. Travel, commercial scopes, and oversized properties still move to a custom review.</div>
+      </div>
+      <div class="section-grid pricing-estimator__layout">
+        <div class="contact-box">
+          <form class="pricing-estimator__form" id="pricing-estimator-form">
+            <div class="form-grid">
+              <div class="field field--wide">
+                <label for="estimate-propertyAddress">Property address</label>
+                <input id="estimate-propertyAddress" name="propertyAddress" autocomplete="street-address" placeholder="Optional, but helpful for travel context" />
+              </div>
+              <div class="field">
+                <label for="estimate-propertyType">Property type</label>
+                <select id="estimate-propertyType" name="propertyType">
+                  <option value="">Select property type</option>
+                  ${contactPropertyTypeOptions
+                    .map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`)
+                    .join("")}
+                </select>
+              </div>
+              <div class="field">
+                <label for="estimate-squareFeet">Approximate square footage</label>
+                <input id="estimate-squareFeet" name="squareFeet" inputmode="numeric" placeholder="2,400" />
+              </div>
+              <div class="field">
+                <label for="estimate-packageInterest">Package</label>
+                <select id="estimate-packageInterest" name="packageInterest">
+                  ${packageOptions}
+                </select>
+              </div>
+              <div class="field">
+                <label for="estimate-turnaround">Turnaround</label>
+                <select id="estimate-turnaround" name="turnaround">
+                  <option value="">Choose a turnaround</option>
+                  ${contactTurnaroundOptions
+                    .map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`)
+                    .join("")}
+                </select>
+              </div>
+              <div class="field field--wide">
+                <span class="field__label">Add-ons</span>
+                <div class="check-grid">
+                  ${contactAddOnOptions
+                    .map(
+                      (option) => `
+                        <label class="check-pill">
+                          <input type="checkbox" name="addOns" value="${safeText(option.value)}" />
+                          <span>${safeText(option.label)}</span>
+                        </label>
+                      `
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </div>
+            <div class="pricing-estimator__actions">
+              <a class="button button--accent button--magnetic" href="${absoluteSiteUrl("contact.html")}" data-estimator-cta data-magnetic>Use this estimate in an inquiry</a>
+              <div class="helper" data-estimator-cta-note>The estimator will carry your current selections into the contact page.</div>
+            </div>
+          </form>
+        </div>
+        <aside class="card pricing-card pricing-card--summary" data-pricing-output="services" data-tilt-card>
+          ${pricingEstimateOutputMarkup(buildPricingEstimate({ packageInterest: "The Standard" }))}
+        </aside>
+      </div>
+    </section>
+  `;
 }
 
 function locationSignalsMarkup(locationPage) {
@@ -1301,6 +1675,14 @@ function clientDeliveryTeaserMarkup() {
   `;
 }
 
+function contactEstimatePanelMarkup() {
+  return `
+    <div class="contact-box pricing-card pricing-card--summary pricing-card--summary-compact" data-pricing-output="contact" data-tilt-card>
+      ${pricingEstimateOutputMarkup(buildPricingEstimate({ packageInterest: "The Standard" }))}
+    </div>
+  `;
+}
+
 function contactMarkup() {
   const contactRecord = contactMedia();
   return `
@@ -1348,8 +1730,10 @@ function contactMarkup() {
             loading: "lazy",
             decoding: "async",
           })}</button></div>` : ""}
+          ${contactEstimatePanelMarkup()}
           <div class="contact-box">
             <form class="form" id="contact-form">
+              <div class="helper" data-contact-prefill-note hidden></div>
               <div class="helper">A few booking details up front make it easier to quote accurately and confirm timing faster.</div>
               <div class="form-grid">
                 <div class="field">
@@ -1431,6 +1815,11 @@ function contactMarkup() {
                 <label for="company">Company</label>
                 <input id="company" name="company" tabindex="-1" autocomplete="off" />
               </div>
+              <input type="hidden" name="estimateLabel" value="" />
+              <input type="hidden" name="estimateTotal" value="" />
+              <input type="hidden" name="estimateSummary" value="" />
+              <input type="hidden" name="serviceAreaStatus" value="" />
+              <input type="hidden" name="serviceAreaDistance" value="" />
               <button class="button button--accent" type="submit" data-contact-submit>Send inquiry</button>
               <div class="helper" data-contact-status>The built-in contact form sends directly from this site. If that service is unavailable, your email app will open as a fallback with the same booking details.</div>
             </form>
@@ -1525,6 +1914,7 @@ function faqMarkup(items = faqItems, options = {}) {
             <button class="button button--accent" type="submit">Check address</button>
           </form>
           <div class="helper" id="service-area-status">Search an address to see whether it falls inside the ${SERVICE_RADIUS_MILES}-mile service radius.</div>
+          <div class="service-area-tool__actions" id="service-area-actions"></div>
           <div class="service-area-map" id="service-area-map" aria-label="Interactive service area map"></div>
           <div class="service-area-tool__legend">
             <span class="service-area-tool__legendItem"><span class="service-area-tool__dot service-area-tool__dot--center"></span>Pensacola center point</span>
@@ -1565,6 +1955,242 @@ function updateServiceAreaStatus(message, tone = "neutral") {
   if (tone === "success") {
     status.classList.add("helper--success");
   }
+}
+
+function updateServiceAreaActions(markup = "") {
+  const actions = document.getElementById("service-area-actions");
+  if (!actions) {
+    return;
+  }
+
+  actions.innerHTML = markup;
+  wirePricingMotion();
+}
+
+function estimateInputFromForm(form) {
+  const formData = new FormData(form);
+  return {
+    propertyAddress: formData.get("propertyAddress")?.toString().trim() || "",
+    propertyType: formData.get("propertyType")?.toString().trim() || "",
+    squareFeet: formData.get("squareFeet")?.toString().trim() || "",
+    packageInterest: formData.get("packageInterest")?.toString().trim() || "",
+    turnaround: formData.get("turnaround")?.toString().trim() || "",
+    addOns: formData.getAll("addOns").map((value) => value.toString().trim()).filter(Boolean),
+    serviceAreaStatus: formData.get("serviceAreaStatus")?.toString().trim() || "",
+    serviceAreaDistance: formData.get("serviceAreaDistance")?.toString().trim() || "",
+  };
+}
+
+function renderPricingEstimateOutput(target, estimate) {
+  if (!target) {
+    return;
+  }
+
+  target.innerHTML = pricingEstimateOutputMarkup(estimate);
+}
+
+function setFormFieldValue(form, name, value) {
+  const control = form.querySelector(`[name="${name}"]`);
+  if (!control) {
+    return;
+  }
+
+  control.value = value;
+}
+
+function setFormCheckboxValues(form, name, values = []) {
+  const selected = new Set(normalizeAddOnSelections(values));
+  form.querySelectorAll(`input[name="${name}"]`).forEach((input) => {
+    input.checked = selected.has(input.value);
+  });
+}
+
+function setHiddenEstimateFields(form, estimate, values = {}) {
+  setFormFieldValue(form, "estimateLabel", estimate.totalLabel || "");
+  setFormFieldValue(form, "estimateTotal", estimate.total ? String(estimate.total) : "");
+  setFormFieldValue(form, "estimateSummary", estimate.summary || "");
+  setFormFieldValue(form, "serviceAreaStatus", values.serviceAreaStatus || "");
+  setFormFieldValue(form, "serviceAreaDistance", values.serviceAreaDistance || "");
+}
+
+function applyContactPrefill(form) {
+  const prefill = contactPrefillFromLocation();
+  if (!Object.values(prefill).some((value) => (Array.isArray(value) ? value.length : String(value || "").trim()))) {
+    return prefill;
+  }
+
+  const fields = ["propertyAddress", "propertyType", "squareFeet", "packageInterest", "turnaround", "serviceAreaStatus", "serviceAreaDistance"];
+  fields.forEach((name) => {
+    if (prefill[name]) {
+      setFormFieldValue(form, name, prefill[name]);
+    }
+  });
+
+  setFormCheckboxValues(form, "addOns", prefill.addOns);
+
+  const note = form.querySelector("[data-contact-prefill-note]");
+  if (note && prefill.serviceAreaStatus) {
+    note.hidden = false;
+    note.classList.remove("helper--warn", "helper--success");
+    if (prefill.serviceAreaStatus === "outside") {
+      note.classList.add("helper--warn");
+      note.textContent = prefill.serviceAreaDistance
+        ? `${prefill.propertyAddress || "This address"} is about ${prefill.serviceAreaDistance} miles from Pensacola, so this inquiry will be handled as a custom quote.`
+        : `${prefill.propertyAddress || "This address"} sits outside the standard service radius, so this inquiry will be handled as a custom quote.`;
+    } else {
+      note.classList.add("helper--success");
+      note.textContent = `${prefill.propertyAddress || "This address"} sits inside the current service radius.`;
+    }
+  }
+
+  const addressField = form.querySelector('[name="propertyAddress"]');
+  if (addressField && prefill.serviceAreaStatus) {
+    addressField.addEventListener("input", () => {
+      if ((addressField.value || "").trim() === prefill.propertyAddress.trim()) {
+        return;
+      }
+
+      setFormFieldValue(form, "serviceAreaStatus", "");
+      setFormFieldValue(form, "serviceAreaDistance", "");
+      if (note) {
+        note.hidden = true;
+        note.textContent = "";
+        note.classList.remove("helper--warn", "helper--success");
+      }
+    });
+  }
+
+  return prefill;
+}
+
+function wireStandalonePricingEstimator() {
+  const form = document.getElementById("pricing-estimator-form");
+  const output = document.querySelector('[data-pricing-output="services"]');
+  if (!form || !output) {
+    return;
+  }
+
+  const cta = form.querySelector("[data-estimator-cta]");
+  const note = form.querySelector("[data-estimator-cta-note]");
+
+  const sync = () => {
+    const values = estimateInputFromForm(form);
+    const estimate = buildPricingEstimate(values);
+    renderPricingEstimateOutput(output, estimate);
+
+    if (cta) {
+      cta.href = estimatorPrefillUrl({
+        ...values,
+        packageInterest: estimate.selectedPackage,
+        estimateLabel: estimate.totalLabel,
+        estimateTotal: estimate.total ? String(estimate.total) : "",
+        estimateSummary: estimate.summary,
+      });
+      cta.textContent = estimate.customQuote ? "Request this as a custom quote" : "Use this estimate in an inquiry";
+    }
+
+    if (note) {
+      note.textContent = estimate.customQuote
+        ? "This will carry the current property details into the contact page as a custom-quote request."
+        : "This will carry the current package, size, add-ons, and estimate into the contact page.";
+    }
+  };
+
+  form.addEventListener("input", sync);
+  form.addEventListener("change", sync);
+  sync();
+}
+
+function wireContactEstimatePanel(form) {
+  const output = document.querySelector('[data-pricing-output="contact"]');
+  if (!output) {
+    return null;
+  }
+
+  const sync = () => {
+    const values = estimateInputFromForm(form);
+    const estimate = buildPricingEstimate(values);
+    renderPricingEstimateOutput(output, estimate);
+    setHiddenEstimateFields(form, estimate, values);
+  };
+
+  form.addEventListener("input", sync);
+  form.addEventListener("change", sync);
+  sync();
+  return sync;
+}
+
+function wirePricingMotion() {
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  if (prefersReducedMotion || coarsePointer) {
+    return;
+  }
+
+  mainEl.querySelectorAll("[data-tilt-card]").forEach((card) => {
+    if (card.dataset.tiltBound === "true") {
+      return;
+    }
+
+    card.dataset.tiltBound = "true";
+    let frame = 0;
+    const reset = () => {
+      card.style.setProperty("--tilt-rotate-x", "0deg");
+      card.style.setProperty("--tilt-rotate-y", "0deg");
+      card.style.setProperty("--tilt-glow-x", "50%");
+      card.style.setProperty("--tilt-glow-y", "50%");
+      card.style.setProperty("--tilt-depth", "0px");
+    };
+
+    reset();
+    card.addEventListener("pointermove", (event) => {
+      const bounds = card.getBoundingClientRect();
+      const ratioX = (event.clientX - bounds.left) / bounds.width - 0.5;
+      const ratioY = (event.clientY - bounds.top) / bounds.height - 0.5;
+
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+
+      frame = window.requestAnimationFrame(() => {
+        card.style.setProperty("--tilt-rotate-x", `${(ratioY * -7).toFixed(2)}deg`);
+        card.style.setProperty("--tilt-rotate-y", `${(ratioX * 9).toFixed(2)}deg`);
+        card.style.setProperty("--tilt-glow-x", `${((ratioX + 0.5) * 100).toFixed(1)}%`);
+        card.style.setProperty("--tilt-glow-y", `${((ratioY + 0.5) * 100).toFixed(1)}%`);
+        card.style.setProperty("--tilt-depth", "10px");
+      });
+    });
+
+    card.addEventListener("pointerleave", () => {
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+      reset();
+    });
+  });
+
+  mainEl.querySelectorAll("[data-magnetic]").forEach((button) => {
+    if (button.dataset.magneticBound === "true") {
+      return;
+    }
+
+    button.dataset.magneticBound = "true";
+    const reset = () => {
+      button.style.setProperty("--magnetic-x", "0px");
+      button.style.setProperty("--magnetic-y", "0px");
+    };
+
+    reset();
+    button.addEventListener("pointermove", (event) => {
+      const bounds = button.getBoundingClientRect();
+      const offsetX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 12;
+      const offsetY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 10;
+      button.style.setProperty("--magnetic-x", `${offsetX.toFixed(2)}px`);
+      button.style.setProperty("--magnetic-y", `${offsetY.toFixed(2)}px`);
+    });
+
+    button.addEventListener("pointerleave", reset);
+  });
 }
 
 async function ensureLeafletAssets() {
@@ -1694,11 +2320,13 @@ async function wireServiceAreaMap() {
       const formData = new FormData(form);
       const address = formData.get("address")?.toString().trim() || "";
       if (!address) {
+        updateServiceAreaActions("");
         updateServiceAreaStatus("Enter an address to check the service radius.", "warn");
         return;
       }
 
       updateServiceAreaStatus("Checking that address against the Pensacola service radius...");
+      updateServiceAreaActions("");
 
       try {
         const match = await lookupAddress(address);
@@ -1725,7 +2353,23 @@ async function wireServiceAreaMap() {
             : `${match.label} is outside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola.`,
           inside ? "success" : "warn"
         );
+
+        if (!inside) {
+          updateServiceAreaActions(
+            `<a class="button button--accent button--magnetic" href="${safeText(
+              estimatorPrefillUrl({
+                propertyAddress: match.label,
+                packageInterest: "Custom quote",
+                serviceAreaStatus: "outside",
+                serviceAreaDistance: distance.toFixed(1),
+                estimateLabel: "Custom quote recommended",
+                estimateSummary: `${match.label} is outside the standard service radius and should be quoted manually.`,
+              })
+            )}" data-magnetic>Request a custom quote for this address</a>`
+          );
+        }
       } catch (error) {
+        updateServiceAreaActions("");
         updateServiceAreaStatus(error.message || "Unable to check that address right now.", "warn");
       }
     });
@@ -1753,6 +2397,8 @@ function servicesPageMarkup() {
         ${serviceCardsMarkup()}
       </div>
     </section>
+
+    ${pricingEstimatorSectionMarkup()}
 
     ${locationMarketsSectionMarkup(featuredLocationPages(), {
       eyebrow: "Location pages",
@@ -2993,7 +3639,10 @@ function wireContactForm() {
     return;
   }
 
+  applyContactPrefill(form);
+  const syncEstimate = wireContactEstimatePanel(form);
   const status = form.querySelector("[data-contact-status]");
+  const prefillNote = form.querySelector("[data-contact-prefill-note]");
   const submitButton = form.querySelector("[data-contact-submit]");
 
   form.addEventListener("submit", async (event) => {
@@ -3011,6 +3660,11 @@ function wireContactForm() {
     const packageInterest = formData.get("packageInterest")?.toString().trim() || "";
     const turnaround = formData.get("turnaround")?.toString().trim() || "";
     const addOns = formData.getAll("addOns").map((value) => value.toString().trim()).filter(Boolean);
+    const estimateLabel = formData.get("estimateLabel")?.toString().trim() || "";
+    const estimateTotal = formData.get("estimateTotal")?.toString().trim() || "";
+    const estimateSummary = formData.get("estimateSummary")?.toString().trim() || "";
+    const serviceAreaStatus = formData.get("serviceAreaStatus")?.toString().trim() || "";
+    const serviceAreaDistance = formData.get("serviceAreaDistance")?.toString().trim() || "";
     const message = formData.get("message")?.toString().trim() || "";
     const company = formData.get("company")?.toString().trim() || "";
     const endpoint = state.settings.contactNotificationEndpoint?.trim() || defaultContactEndpoint();
@@ -3044,6 +3698,11 @@ function wireContactForm() {
           packageInterest,
           turnaround,
           addOns,
+          estimateLabel,
+          estimateTotal,
+          estimateSummary,
+          serviceAreaStatus,
+          serviceAreaDistance,
           message,
           company,
           source: `${state.settings.brandName} website`,
@@ -3058,6 +3717,12 @@ function wireContactForm() {
       }
 
       form.reset();
+      if (prefillNote) {
+        prefillNote.hidden = true;
+        prefillNote.textContent = "";
+        prefillNote.classList.remove("helper--warn", "helper--success");
+      }
+      syncEstimate?.();
       if (status) {
         status.textContent = payload?.message || "Thanks. Your inquiry was sent successfully.";
       }
@@ -3090,6 +3755,11 @@ function wireContactForm() {
         `Package: ${packageInterest || "-"}`,
         `Turnaround: ${turnaround || "-"}`,
         `Add-ons: ${addOns.length ? addOns.join(", ") : "-"}`,
+        `Estimate label: ${estimateLabel || "-"}`,
+        `Estimate total: ${estimateTotal ? pricingFormatter.format(Number(estimateTotal)) : "-"}`,
+        `Estimate summary: ${estimateSummary || "-"}`,
+        `Service area status: ${serviceAreaStatus || "-"}`,
+        `Service area distance: ${serviceAreaDistance ? `${serviceAreaDistance} miles` : "-"}`,
         "",
         "Project details and access notes:",
         message || "-",
@@ -3312,7 +3982,9 @@ function renderPage() {
     wireLazyMediaTransitions();
     wireSectionReveal();
     wireTestimonialsCarousel();
+    wireStandalonePricingEstimator();
     wireServiceAreaMap();
+    wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
     return;
@@ -3333,6 +4005,7 @@ function renderPage() {
     wireLazyMediaTransitions();
     wireSectionReveal();
     wireContactForm();
+    wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
     return;
