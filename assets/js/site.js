@@ -1683,8 +1683,11 @@ function contactEstimatePanelMarkup() {
   `;
 }
 
-function contactMarkup() {
-  const contactRecord = contactMedia();
+function contactMarkup(options = {}) {
+  const showContactImage = options.showContactImage !== false;
+  const showEstimate = options.showEstimate !== false;
+  const showBestFit = options.showBestFit !== false;
+  const contactRecord = showContactImage ? contactMedia() : null;
   return `
     <section class="section contact-section">
       <div class="contact-layout">
@@ -1716,10 +1719,12 @@ function contactMarkup() {
               <div class="contact-value">${safeText(state.settings.responseTime || "Usually replies quickly during business hours.")}</div>
             </div>
           </div>
-          <div class="contact-box">
-            <strong>Best for:</strong>
-            <div class="helper">Property launches, listing refreshes, luxury presentations, and media packages that need a clean, polished web presence.</div>
-          </div>
+          ${showBestFit ? `
+            <div class="contact-box">
+              <strong>Best for:</strong>
+              <div class="helper">Property launches, listing refreshes, luxury presentations, and media packages that need a clean, polished web presence.</div>
+            </div>
+          ` : ""}
         </div>
         <div class="contact-panel">
           ${contactRecord ? `<div class="card"><button class="media-tile__button" data-preview data-id="${contactRecord.id}" type="button" aria-label="Preview ${safeText(contactRecord.title || "contact image")}">${responsivePictureMarkup(contactRecord, {
@@ -1730,7 +1735,7 @@ function contactMarkup() {
             loading: "lazy",
             decoding: "async",
           })}</button></div>` : ""}
-          ${contactEstimatePanelMarkup()}
+          ${showEstimate ? contactEstimatePanelMarkup() : ""}
           <div class="contact-box">
             <form class="form" id="contact-form">
               <div class="helper" data-contact-prefill-note hidden></div>
@@ -2586,7 +2591,16 @@ function locationPageMarkup() {
 }
 
 function homePageMarkup() {
-  return [heroMarkup(), galleryMarkup(), servicesMarkup(), testimonialsMarkup(), trustSectionMarkup(), clientDeliveryTeaserMarkup(), faqMarkup(), contactMarkup()].join("");
+  return [
+    heroMarkup(),
+    galleryMarkup(),
+    servicesMarkup(),
+    testimonialsMarkup(),
+    trustSectionMarkup(),
+    clientDeliveryTeaserMarkup(),
+    faqMarkup(),
+    contactMarkup({ showContactImage: false, showEstimate: false, showBestFit: false }),
+  ].join("");
 }
 
 function serviceSignalsMarkup() {
