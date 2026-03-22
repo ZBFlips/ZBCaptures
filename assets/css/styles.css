@@ -1483,7 +1483,7 @@ img {
 
 .trust-card__title {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.28rem;
   line-height: 1.08;
   letter-spacing: -0.03em;
