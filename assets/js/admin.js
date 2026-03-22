@@ -1006,7 +1006,7 @@ function adminMarkup() {
 
         <section class="admin-panel" id="gallery-order">
           <h2 class="admin-panel__title">Gallery order</h2>
-          <p class="admin-panel__text">Reorder the images that appear on the home page gallery with simple up and down controls. The first 16 image placements are what surface on the page.</p>
+          <p class="admin-panel__text">Reorder the images that appear on the home page gallery with simple up and down controls. The first four images stay in the opening grid, and every remaining gallery image flows into the horizontal strip in this order.</p>
           <div class="admin-toolbar">
             <span class="admin-note" id="gallery-order-status">Use the arrows to move images up or down.</span>
           </div>

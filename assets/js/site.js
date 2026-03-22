@@ -753,8 +753,7 @@ function heroMarkup() {
 function galleryMarkup() {
   const items = featuredMedia();
   const topItems = items.slice(0, 4);
-  const middleItems = items.slice(4, 12);
-  const bottomItems = items.slice(12, 16);
+  const middleItems = items.slice(4);
   const showReelArrows = middleItems.length > 4;
 
   if (!items.length) {
@@ -842,30 +841,6 @@ function galleryMarkup() {
                   .join("")}
               </div>
               ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--next" type="button" data-gallery-reel-next aria-label="Scroll gallery images right">Next</button>` : ""}
-            </div>
-          `
-          : ""}
-        ${bottomItems.length
-          ? `
-            <div class="portfolio-grid gallery-grid">
-              ${bottomItems
-                .map(
-                  (item) => `
-                    <article class="media-tile">
-                      <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                        ${responsivePictureMarkup(item, {
-                          imgClass: "media-tile__image",
-                          alt: item.alt || item.title || item.name || "Portfolio image",
-                          keys: ["thumb", "medium", "full"],
-                          sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
-                          loading: "lazy",
-                          decoding: "async",
-                        })}
-                      </button>
-                    </article>
-                  `
-                )
-                .join("")}
             </div>
           `
           : ""}
@@ -2799,9 +2774,13 @@ function wireGalleryReel() {
         return rail.clientWidth * 0.85;
       }
 
+      const styles = getComputedStyle(rail);
       const itemWidth = item.getBoundingClientRect().width;
-      const gap = parseFloat(getComputedStyle(rail).gap || "0") || 0;
-      return Math.max(itemWidth + gap, rail.clientWidth * 0.72);
+      const gap = parseFloat(styles.gap || "0") || 0;
+      const paddingLeft = parseFloat(styles.paddingLeft || "0") || 0;
+      const paddingRight = parseFloat(styles.paddingRight || "0") || 0;
+      const viewportStep = rail.clientWidth - paddingLeft - paddingRight - gap;
+      return Math.max(itemWidth + gap, viewportStep);
     };
 
     const maxScroll = () => Math.max(rail.scrollWidth - rail.clientWidth - 4, 0);
@@ -2838,8 +2817,8 @@ function wireGalleryReel() {
         return;
       }
 
-      const step = getStep();
       const current = rail.scrollLeft;
+      const step = getStep();
       scrollRailTo(current + step * direction);
     };
 
