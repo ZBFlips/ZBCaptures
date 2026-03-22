@@ -927,7 +927,7 @@ img {
 .location-page__introGrid {
   gap: 24px;
   align-items: start;
-  grid-template-columns: minmax(0, 1.32fr) minmax(180px, 0.44fr);
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
 }
 
 .location-page__coverageCard,
@@ -951,7 +951,7 @@ img {
 .location-page__heroCard {
   overflow: hidden;
   width: 100%;
-  max-width: 320px;
+  max-width: none;
   justify-self: end;
 }
 
@@ -967,7 +967,6 @@ img {
 .location-page__heroImage {
   width: 100%;
   aspect-ratio: 5 / 4;
-  max-height: 220px;
   object-fit: cover;
 }
 

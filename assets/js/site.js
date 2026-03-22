@@ -1800,7 +1800,7 @@ function locationPageMarkup() {
               imgClass: "location-page__heroImage",
               alt: heroRecord.alt || heroRecord.title || `${locationPage.market || locationPage.name || "Location"} photography`,
               keys: ["thumb", "medium", "full"],
-              sizes: "(max-width: 1100px) 100vw, 36vw",
+              sizes: "(max-width: 1100px) 100vw, 33vw",
               loading: "eager",
               decoding: "async",
               fetchpriority: "high",
