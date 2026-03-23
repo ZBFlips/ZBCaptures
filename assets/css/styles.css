@@ -1929,6 +1929,9 @@ img {
 
 .gallery-mobile-strip__button > .responsive-picture,
 .gallery-reel__button > .responsive-picture,
+.best-of-gallery__desktopGrid .media-tile__button > .responsive-picture,
+.best-of-gallery__mobileGrid .media-tile__button > .responsive-picture,
+.services-support__grid .media-tile__button > .responsive-picture,
 .portfolio-grid .media-tile__button > .responsive-picture {
   display: block;
   width: 100%;
@@ -1937,6 +1940,9 @@ img {
 
 .gallery-mobile-strip__button > .responsive-picture > img,
 .gallery-reel__button > .responsive-picture > img,
+.best-of-gallery__desktopGrid .media-tile__button > .responsive-picture > img,
+.best-of-gallery__mobileGrid .media-tile__button > .responsive-picture > img,
+.services-support__grid .media-tile__button > .responsive-picture > img,
 .portfolio-grid .media-tile__button > .responsive-picture > img {
   display: block;
   width: 100%;

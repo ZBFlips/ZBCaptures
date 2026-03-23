@@ -39,10 +39,10 @@ export const DEFAULT_STATE = {
     heroStats: [
       { label: "Turnaround", value: "Same-day or next-day delivery" },
       { label: "Coverage", value: "Interior, exterior, twilight, drone-ready" },
-      { label: "Experience", value: "Designed to feel premium from the first second" },
+      { label: "Experience", value: "Built to feel clear and professional right away" },
     ],
     servicesLead:
-      "I deliver polished, listing-ready media with a guaranteed 24-hour turnaround, giving each property a cleaner first impression and a faster path to market.",
+      "I provide real estate media with a guaranteed 24-hour turnaround, from HDR photos to drone coverage and video, so listings look strong and get to market quickly.",
     homeServicesEyebrow: "Services",
     homeServicesTitle: "High-performance media for premium listings.",
     testimonialsEyebrow: "Client feedback",
@@ -60,7 +60,7 @@ export const DEFAULT_STATE = {
     servicesPageEyebrow: "Services",
     servicesPageTitle: "Elevate Your Listing, Engage Your Buyers.",
     clientDeliveryEyebrow: "Client delivery",
-    clientDeliveryTitle: "A delivery portal that feels polished instead of technical.",
+    clientDeliveryTitle: "A delivery portal that feels refined and easy to use.",
     clientDeliveryLead:
       "Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.",
     faqEyebrow: "FAQ & SERVICE AREA",
@@ -69,7 +69,8 @@ export const DEFAULT_STATE = {
       "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.",
     proofEyebrow: "Why agents book this",
     proofTitle: "Everything is designed to make the listing feel more valuable, not more complicated.",
-    proofLead: "The experience stays clean, fast, and premium, so the focus stays on the property and the confidence it creates for buyers.",
+    proofLead:
+      "Listing photos do a lot of the heavy lifting. Strong images help a property make a better first impression, hold attention longer, and give buyers more confidence in what they are seeing.",
     proofCards: [
       {
         eyebrow: "Faster launch",
@@ -78,13 +79,13 @@ export const DEFAULT_STATE = {
       },
       {
         eyebrow: "Stronger first impression",
-        title: "Premium presentation makes the work feel worth hiring.",
-        text: "The visual hierarchy, pricing clarity, and gallery treatment all reinforce a higher-value service.",
+        title: "The site makes the work feel clear, credible, and worth booking.",
+        text: "The gallery flow, pricing, and overall presentation help the service feel established without overcomplicating it.",
       },
       {
         eyebrow: "Simple handoff",
         title: "Media is easy to review, choose, and share.",
-        text: "The site is set up so the process feels organized instead of technical, which builds trust immediately.",
+        text: "The process is laid out clearly, so reviewing files, choosing images, and sharing them feels straightforward.",
       },
     ],
     contactLead:
@@ -98,7 +99,7 @@ export const DEFAULT_STATE = {
     instagram: "@yourhandle",
     responseTime: "Usually replies within 2 hours during business days.",
     contactNotificationEndpoint: "",
-    footerHeadline: "Pensacola real estate photography and video for clean, market-ready listing launches.",
+    footerHeadline: "Pensacola real estate photography and video for listings that need strong visuals and a fast turnaround.",
     footerNote: "Custom-built and ready for your own domain.",
   },
   services: [

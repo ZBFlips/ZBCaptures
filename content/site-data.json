@@ -27,10 +27,10 @@
       },
       {
         "label": "Experience",
-        "value": "Designed to feel premium from the first second"
+        "value": "Built to feel clear and professional right away"
       }
     ],
-    "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
+    "servicesLead": "I provide real estate media with a guaranteed 24-hour turnaround, from HDR photos to drone coverage and video, so listings look strong and get to market quickly.",
     "homeServicesEyebrow": "Services",
     "homeServicesTitle": "High-performance media for every listing.",
     "testimonialsEyebrow": "Client feedback",
@@ -45,14 +45,14 @@
     "servicesPageEyebrow": "Services",
     "servicesPageTitle": "Elevate Your Listing, Engage Your Buyers.",
     "clientDeliveryEyebrow": "Client delivery",
-    "clientDeliveryTitle": "A delivery portal that feels polished instead of technical.",
+    "clientDeliveryTitle": "A delivery portal that feels refined and easy to use.",
     "clientDeliveryLead": "Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.",
     "faqEyebrow": "FAQ & SERVICE AREA",
     "faqTitle": "Questions agents usually ask before booking.",
     "faqLead": "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.",
     "proofEyebrow": "Why agents book this",
     "proofTitle": "The Impact",
-    "proofLead": "According to eye-tracking data, buyers spend 60% of their time looking at listing photos (compared to 20% at the description). On average, professional photos drive 61% more views to a listing, and reduce time on the market by 32%. Better photos also improve the perceived value of a home, increasing the sale price by up to $11,200 on average.",
+    "proofLead": "Listing photos do a lot of the heavy lifting. Strong images help a property make a better first impression, hold attention longer, and give buyers more confidence in what they are seeing.",
     "proofCards": [
       {
         "eyebrow": "Faster launch",
@@ -61,13 +61,13 @@
       },
       {
         "eyebrow": "Stronger first impression",
-        "title": "Premium presentation makes the work feel worth hiring.",
-        "text": "The visual hierarchy, pricing clarity, and gallery treatment all reinforce a higher-value service."
+        "title": "The site makes the work feel clear, credible, and worth booking.",
+        "text": "The gallery flow, pricing, and overall presentation help the service feel established without overcomplicating it."
       },
       {
         "eyebrow": "Simple handoff",
         "title": "Media is easy to review, choose, and share.",
-        "text": "The site is set up so the process feels organized instead of technical, so you never have to ask any questions."
+        "text": "The process is laid out clearly, so reviewing files, choosing images, and sharing them feels straightforward."
       }
     ],
     "contactLead": "Send a note with the property address, target timeline, and the kind of coverage you need.",
@@ -80,14 +80,14 @@
     "instagram": "@zb.re.media",
     "responseTime": "Usually replies within 2 hours during business days.",
     "contactNotificationEndpoint": "",
-    "footerHeadline": "Pensacola real estate photography and video for clean, market-ready listing launches.",
+    "footerHeadline": "Pensacola real estate photography and video for listings that need strong visuals and a fast turnaround.",
     "footerNote": "Custom-built and ready for your own domain."
   },
   "services": [
     {
       "id": "service-listing",
       "title": "The Starter",
-      "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
+      "description": "This package provides high-quality HDR assets designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
       "bullets": [
         "30 HDR Images",
         "No Drone Images",
@@ -113,7 +113,7 @@
     {
       "id": "service-media",
       "title": "The Works",
-      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social and drone video to create a high-energy, immersive experience that stops the scroll.",
+      "description": "This package combines a full photo set with drone coverage and short-form video, making it the strongest option for listings that need more attention online.",
       "bullets": [
         "45 HDR Images",
         "10 Drone Images",

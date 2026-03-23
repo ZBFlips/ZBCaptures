@@ -387,7 +387,7 @@ function renderFooter() {
       <div class="footer__inner">
         <div class="footer__brand">
           <strong>${safeText(state.settings.brandName)}</strong>
-          <p class="footer__headline">${safeText(state.settings.footerHeadline ?? "Pensacola real estate photography and video for clean, market-ready listing launches.")}</p>
+          <p class="footer__headline">${safeText(state.settings.footerHeadline ?? "Pensacola real estate photography and video for listings that need strong visuals and a fast turnaround.")}</p>
           <p class="footer__copy">${safeText(state.settings.serviceArea)}</p>
           <a class="footer__contact" href="mailto:${safeText(state.settings.email)}">Primary contact: ${safeText(state.settings.email)}</a>
         </div>
@@ -2866,7 +2866,7 @@ function serviceSummary(service, index) {
 
   return index === 0
     ? "Fast, refined coverage for standard listing launches."
-    : "Elevated media that helps the property feel more premium online.";
+    : "Expanded coverage for listings that need more attention online.";
 }
 
 function loadingShellMarkup(currentPage) {
