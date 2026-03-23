@@ -382,6 +382,7 @@ img {
   all: unset;
   display: block;
   width: 100%;
+  height: 100%;
   cursor: pointer;
 }
 
@@ -1800,6 +1801,22 @@ img {
 .portfolio-grid .media-tile__button {
   height: 100%;
   position: relative;
+}
+
+.gallery-mobile-strip__button > .responsive-picture,
+.gallery-reel__button > .responsive-picture,
+.portfolio-grid .media-tile__button > .responsive-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.gallery-mobile-strip__button > .responsive-picture > img,
+.gallery-reel__button > .responsive-picture > img,
+.portfolio-grid .media-tile__button > .responsive-picture > img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .portfolio-grid .media-tile__image,
