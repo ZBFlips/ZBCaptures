@@ -2969,10 +2969,12 @@ img {
 .home-bestof-image-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-auto-rows: max-content;
   gap: 14px;
   max-height: 760px;
   overflow-y: auto;
   padding-right: 4px;
+  align-content: start;
   align-items: start;
 }
 
