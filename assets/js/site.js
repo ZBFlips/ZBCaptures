@@ -822,7 +822,7 @@ function bestOfGalleryMarkup() {
       <div class="best-of-gallery__header">
         <div class="gallery-copy">
           <h2 class="section__title">A curated look at recent work.</h2>
-          <p class="section__lead">The home page stays focused on a small best-of selection. If you want the wider body of work, open the full portfolio.</p>
+          <p class="section__lead">A consistent look across every listing, from smaller homes to larger properties.</p>
         </div>
         <a class="button" href="${absoluteSiteUrl("portfolio.html")}">View full portfolio</a>
       </div>
