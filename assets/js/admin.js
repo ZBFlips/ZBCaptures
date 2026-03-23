@@ -1607,7 +1607,7 @@ function renderHomeBestOfEditor() {
             `
             : `<div class="location-picker__empty">No portfolio images matched that search. Try a different title, filename, or clear the search.</div>`
         }
-      </div>
+      </section>
     </div>
   `;
 
