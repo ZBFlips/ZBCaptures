@@ -830,7 +830,7 @@ function bestOfGalleryMarkup() {
         ${desktopItems
           .map((item) =>
             imageTileMarkup(item, {
-              sizes: "(max-width: 1100px) 31vw, 30vw",
+              sizes: "(max-width: 1400px) 16vw, 15vw",
             })
           )
           .join("")}
