@@ -1,5 +1,5 @@
 import { decryptPortalPayload } from "./portal-utils.js";
-import { DEFAULT_STATE, hasSavedState, loadState, listMedia } from "./storage.js";
+import { DEFAULT_STATE } from "./storage.js";
 import { loadUnlockedCloudPortal, unlockCloudPortal } from "./client-delivery-api.js";
 
 const page = document.body.dataset.page;
@@ -70,7 +70,7 @@ const SERVICE_RADIUS_METERS = SERVICE_RADIUS_MILES * 1609.344;
 const LEAFLET_CSS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 const LEAFLET_JS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
-let state = loadState();
+let state = mergePublishedState(DEFAULT_STATE);
 let mediaCache = [];
 let objectUrls = [];
 let activePortalData = null;
@@ -170,28 +170,6 @@ function mergePublishedState(published) {
     services: Array.isArray(published?.services) ? published.services : DEFAULT_STATE.services,
     clientPortals: Array.isArray(published?.clientPortals) ? published.clientPortals : DEFAULT_STATE.clientPortals,
   };
-}
-
-function mergeMediaRecords(localMedia, publishedMedia) {
-  const merged = [];
-  const seen = new Set();
-
-  for (const item of localMedia || []) {
-    merged.push(item);
-    if (item?.id) {
-      seen.add(item.id);
-    }
-  }
-
-  for (const item of publishedMedia || []) {
-    if (item?.id && seen.has(item.id)) {
-      continue;
-    }
-
-    merged.push(item);
-  }
-
-  return merged;
 }
 
 async function loadPublishedSiteData() {
@@ -3845,14 +3823,6 @@ function wireContactForm() {
   });
 }
 
-async function loadMedia() {
-  mediaCache = await listMedia();
-  objectUrls = mediaCache
-    .filter((item) => item.blob)
-    .map((item) => ({ id: item.id, url: URL.createObjectURL(item.blob) }));
-  return mediaCache;
-}
-
 function clearClientPortalState() {
   activePortalData = null;
   activePortalMedia = [];
@@ -4100,33 +4070,14 @@ function renderPage() {
 }
 
 async function bootstrap() {
-  const published = await loadPublishedSiteData();
-  locationPages = await loadLocationPagesData();
-  const localMedia = await loadMedia();
-  const localState = loadState();
-  const hasLocalDraft = hasSavedState() || localMedia.length > 0;
+  const [published, loadedLocationPages] = await Promise.all([
+    loadPublishedSiteData(),
+    loadLocationPagesData(),
+  ]);
 
-  if (hasLocalDraft) {
-    const baseState = mergePublishedState(published || DEFAULT_STATE);
-    state = {
-      ...baseState,
-      ...localState,
-      settings: {
-        ...baseState.settings,
-        ...(localState.settings || {}),
-      },
-      services: Array.isArray(localState.services) ? localState.services : baseState.services,
-      clientPortals: mergeClientPortals(localState.clientPortals || [], published?.clientPortals || []),
-    };
-
-    mediaCache = mergeMediaRecords(localMedia, Array.isArray(published?.media) ? published.media : []);
-  } else if (published) {
-    state = mergePublishedState(published);
-    mediaCache = Array.isArray(published.media) ? published.media : [];
-  } else {
-    state = localState;
-    await loadMedia();
-  }
+  locationPages = loadedLocationPages;
+  state = mergePublishedState(published || DEFAULT_STATE);
+  mediaCache = Array.isArray(published?.media) ? published.media : [];
 
   renderPage();
 
