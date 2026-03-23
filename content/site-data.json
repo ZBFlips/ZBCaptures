@@ -3,14 +3,15 @@
     "brandName": "ZB Captures",
     "brandTag": "",
     "location": "Serving luxury, commercial, and residential listings",
-    "heroKicker": "Pensacola real estate photography",
-    "heroHeadline": "Market-ready media for listings that need to move fast.",
-    "heroLead": "Photography, drone coverage, and video for listings that need strong visuals, quick turnaround, and files delivered in a way that is easy to use.",
+    "heroKicker": "Premium Real Estate Media, 24-Hour Turnaround, Guaranteed.",
+    "heroHeadline": "Turn your listing into a sale.",
+    "heroLead": "High-end media designed to capture attention, move quickly, and give your listings a competitive edge.",
+    "homeHeroSubnote": "Serving Pensacola and nearby Gulf Coast markets with fast turnaround and a clean delivery process.",
     "featuredFrameTitle": "Highlighted Photo",
     "featuredFrameLead": "A single image can carry the whole listing.",
     "featuredFrameMediaId": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
     "heroCtas": {
-      "primaryLabel": "View packages",
+      "primaryLabel": "Explore services",
       "primaryHref": "./services.html",
       "secondaryLabel": "Start a project",
       "secondaryHref": "./contact.html"
@@ -26,13 +27,32 @@
       },
       {
         "label": "Experience",
-        "value": "A clean, professional first impression"
+        "value": "Designed to feel premium from the first second"
       }
     ],
-    "servicesLead": "I offer real estate photography, drone coverage, and video with a 24-hour turnaround and flexible packages based on what the property needs. Whether it is a smaller listing or a larger one that needs more coverage, the goal is the same: deliver clean, professional media that helps it show well online.",
+    "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
+    "homeServicesEyebrow": "Services",
+    "homeServicesTitle": "High-performance media for every listing.",
+    "testimonialsEyebrow": "Client feedback",
+    "testimonialsTitle": "Real feedback from past clients.",
+    "testimonialsLead": "These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.",
+    "trustEyebrow": "Trust & process",
+    "trustTitle": "Fast turnaround, clean delivery, and a process that stays easy.",
+    "trustLead": "The goal is simple: make the property look strong, get the files back quickly, and keep the booking-to-delivery flow clear for agents and clients.",
+    "homeCtaEyebrow": "Start a project",
+    "homeCtaTitle": "Ready when the next listing is.",
+    "homeCtaLead": "If you already know the address, timeline, or package you need, send it through and I will follow up with availability and the best fit.",
+    "servicesPageEyebrow": "Services",
+    "servicesPageTitle": "Elevate Your Listing, Engage Your Buyers.",
+    "clientDeliveryEyebrow": "Client delivery",
+    "clientDeliveryTitle": "A delivery portal that feels polished instead of technical.",
+    "clientDeliveryLead": "Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.",
+    "faqEyebrow": "FAQ & SERVICE AREA",
+    "faqTitle": "Questions agents usually ask before booking.",
+    "faqLead": "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.",
     "proofEyebrow": "Why agents book this",
     "proofTitle": "The Impact",
-    "proofLead": "Buyers spend far more time looking at listing photos than reading the description, which is a big reason the visuals matter so much. Strong real estate media can help a listing get more attention, create a better first impression, and support a faster sale. Good photos will not do all the work on their own, but they can make a real difference in how the property is seen online.",
+    "proofLead": "According to eye-tracking data, buyers spend 60% of their time looking at listing photos (compared to 20% at the description). On average, professional photos drive 61% more views to a listing, and reduce time on the market by 32%. Better photos also improve the perceived value of a home, increasing the sale price by up to $11,200 on average.",
     "proofCards": [
       {
         "eyebrow": "Faster launch",
@@ -41,30 +61,33 @@
       },
       {
         "eyebrow": "Stronger first impression",
-        "title": "A strong presentation helps the service feel professional.",
-        "text": "Clear pricing, a clean layout, and the gallery help show the quality of the work."
+        "title": "Premium presentation makes the work feel worth hiring.",
+        "text": "The visual hierarchy, pricing clarity, and gallery treatment all reinforce a higher-value service."
       },
       {
         "eyebrow": "Simple handoff",
         "title": "Media is easy to review, choose, and share.",
-        "text": "The process is straightforward, so it is easy to review the media, make selections, and share files without digging through extra steps."
+        "text": "The site is set up so the process feels organized instead of technical, so you never have to ask any questions."
       }
     ],
     "contactLead": "Send a note with the property address, target timeline, and the kind of coverage you need.",
+    "contactEyebrow": "Contact",
+    "contactTitle": "Let's turn the next property into something memorable.",
     "videoEmbedUrl": "",
-    "serviceArea": "Pensacola, FL and surrounding Gulf Coast markets within roughly 120 miles.",
+    "serviceArea": "Pensacola, FL",
     "email": "zacbrannen@gmail.com",
     "phone": "(850) 736-1946",
     "instagram": "@zb.re.media",
     "responseTime": "Usually replies within 2 hours during business days.",
     "contactNotificationEndpoint": "",
-    "footerNote": "Website custom built by ZB Captures."
+    "footerHeadline": "Pensacola real estate photography and video for clean, market-ready listing launches.",
+    "footerNote": "Custom-built and ready for your own domain."
   },
   "services": [
     {
       "id": "service-listing",
       "title": "The Starter",
-      "description": "This package provides high-quality HDR assets designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
+      "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
       "bullets": [
         "30 HDR Images",
         "No Drone Images",
@@ -77,7 +100,7 @@
     {
       "id": "service-luxury",
       "title": "The Standard",
-      "description": "By adding dedicated drone photos to the interior set, this tier gives buyers a better sense of the property's exterior layout and surrounding curb appeal.",
+      "description": "By adding dedicated drone photos to the interior set, this tier gives buyers a better sense of the property’s exterior layout and surrounding curb appeal.",
       "bullets": [
         "35 HDR Images",
         "5 Drone Images",
@@ -90,7 +113,7 @@
     {
       "id": "service-media",
       "title": "The Works",
-      "description": "This package combines a full photo set with drone coverage and short-form video, making it the strongest option for listings that need more attention online.",
+      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social and drone video to create a high-energy, immersive experience that stops the scroll.",
       "bullets": [
         "45 HDR Images",
         "10 Drone Images",
@@ -313,38 +336,38 @@
       "originalType": "image/jpeg"
     },
     {
-      "id": "0b912644-3256-418a-8d59-331088303e63",
-      "name": "Interior (4).jpg",
+      "id": "c1295aee-fbba-4a63-b620-fa0354cce484",
+      "name": "8-006_7604 Dewey Jernigan Rd.jpg",
       "type": "image/webp",
-      "createdAt": 1774196822504,
-      "title": "Interior (4)",
+      "createdAt": 1773979295631,
+      "title": "",
       "caption": "",
-      "alt": "Interior (4).jpg",
+      "alt": "",
       "placement": "gallery",
       "order": 1,
       "featured": false,
-      "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-full.webp",
+      "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-full.webp",
       "variants": {
         "thumb": {
-          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-thumb.webp",
+          "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-thumb.webp",
           "type": "image/webp",
           "width": 640,
           "height": 427
         },
         "medium": {
-          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-medium.webp",
+          "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-medium.webp",
           "type": "image/webp",
           "width": 1280,
           "height": 853
         },
         "full": {
-          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-full.webp",
+          "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-full.webp",
           "type": "image/webp",
           "width": 2200,
           "height": 1467
         }
       },
-      "originalSrc": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63.jpg",
+      "originalSrc": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484.jpg",
       "originalType": "image/jpeg"
     },
     {
@@ -663,38 +686,38 @@
       "originalType": "image/jpeg"
     },
     {
-      "id": "c1295aee-fbba-4a63-b620-fa0354cce484",
-      "name": "8-006_7604 Dewey Jernigan Rd.jpg",
+      "id": "0b912644-3256-418a-8d59-331088303e63",
+      "name": "Interior (4).jpg",
       "type": "image/webp",
-      "createdAt": 1773979295631,
-      "title": "",
+      "createdAt": 1774196822504,
+      "title": "Interior (4)",
       "caption": "",
-      "alt": "",
+      "alt": "Interior (4).jpg",
       "placement": "gallery",
       "order": 11,
       "featured": false,
-      "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-full.webp",
+      "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-full.webp",
       "variants": {
         "thumb": {
-          "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-thumb.webp",
+          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-thumb.webp",
           "type": "image/webp",
           "width": 640,
           "height": 427
         },
         "medium": {
-          "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-medium.webp",
+          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-medium.webp",
           "type": "image/webp",
           "width": 1280,
           "height": 853
         },
         "full": {
-          "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-full.webp",
+          "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-full.webp",
           "type": "image/webp",
           "width": 2200,
           "height": 1467
         }
       },
-      "originalSrc": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484.jpg",
+      "originalSrc": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63.jpg",
       "originalType": "image/jpeg"
     },
     {
@@ -1118,6 +1141,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-03-22T19:22:19.586Z"
+  "savedAt": "2026-03-23T18:13:41.983Z"
 }
-
