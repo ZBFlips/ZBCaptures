@@ -5,7 +5,7 @@
     "location": "Serving luxury, commercial, and residential listings",
     "heroKicker": "Pensacola real estate photography",
     "heroHeadline": "Market-ready media for listings that need to move fast.",
-    "heroLead": "Photography, drone coverage, and video built for polished launches, quick turnaround, and a clean handoff once the property is ready to go live.",
+    "heroLead": "Photography, drone coverage, and video for listings that need strong visuals, quick turnaround, and files delivered in a way that is easy to use.",
     "featuredFrameTitle": "Highlighted Photo",
     "featuredFrameLead": "A single image can carry the whole listing.",
     "featuredFrameMediaId": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
@@ -26,13 +26,13 @@
       },
       {
         "label": "Experience",
-        "value": "Designed to feel premium from the first second"
+        "value": "A clean, professional first impression"
       }
     ],
-    "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
+    "servicesLead": "I offer real estate photography, drone coverage, and video with a 24-hour turnaround and flexible packages based on what the property needs. Whether it is a smaller listing or a larger one that needs more coverage, the goal is the same: deliver clean, professional media that helps it show well online.",
     "proofEyebrow": "Why agents book this",
     "proofTitle": "The Impact",
-    "proofLead": "According to eye-tracking data, buyers spend 60% of their time looking at listing photos (compared to 20% at the description). On average, professional photos drive 61% more views to a listing, and reduce time on the market by 32%. Better photos also improve the perceived value of a home, increasing the sale price by up to $11,200 on average.",
+    "proofLead": "Buyers spend far more time looking at listing photos than reading the description, which is a big reason the visuals matter so much. Strong real estate media can help a listing get more attention, create a better first impression, and support a faster sale. Good photos will not do all the work on their own, but they can make a real difference in how the property is seen online.",
     "proofCards": [
       {
         "eyebrow": "Faster launch",
@@ -47,7 +47,7 @@
       {
         "eyebrow": "Simple handoff",
         "title": "Media is easy to review, choose, and share.",
-        "text": "The site is set up so the process feels organized instead of technical, so you never have to ask any questions."
+        "text": "The process is straightforward, so it is easy to review the media, make selections, and share files without digging through extra steps."
       }
     ],
     "contactLead": "Send a note with the property address, target timeline, and the kind of coverage you need.",
