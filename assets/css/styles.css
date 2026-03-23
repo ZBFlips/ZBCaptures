@@ -2968,11 +2968,12 @@ img {
 
 .home-bestof-image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 14px;
   max-height: 760px;
   overflow-y: auto;
   padding-right: 4px;
+  align-items: start;
 }
 
 .home-bestof-image-grid::-webkit-scrollbar {
@@ -2995,6 +2996,7 @@ img {
   overflow: hidden;
   background: rgba(255, 255, 255, 0.03);
   transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
+  align-self: start;
 }
 
 .home-bestof-candidate:hover {
@@ -3025,14 +3027,13 @@ img {
   position: relative;
   display: grid;
   place-items: center;
-  aspect-ratio: 4 / 3;
   padding: 10px;
   background: rgba(255, 255, 255, 0.04);
 }
 
 .home-bestof-candidate__thumb {
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
   display: block;
   border-radius: 12px;
@@ -3816,10 +3817,6 @@ img {
   .home-bestof-slot-grid,
   .home-bestof-image-grid {
     grid-template-columns: 1fr;
-  }
-
-  .home-bestof-candidate__media {
-    aspect-ratio: 4 / 3;
   }
 
   .hero__stats {
