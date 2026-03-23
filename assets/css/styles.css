@@ -944,7 +944,10 @@ img {
 }
 
 .services-home__package .card__price {
+  font-family: var(--font-body);
   font-size: clamp(1.7rem, 2.3vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
 }
 
 .services-home__package .card__text {
