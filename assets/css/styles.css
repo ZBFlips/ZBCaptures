@@ -1090,8 +1090,26 @@ img {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
+.location-market-grid--directory {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
 .location-market-card {
   min-height: 100%;
+}
+
+.location-markets--directory .location-market-card .card__body {
+  padding: 18px;
+}
+
+.location-markets--directory .location-market-card .card__title {
+  font-size: clamp(1.3rem, 1.5vw, 1.7rem);
+}
+
+.location-markets--directory .location-market-card .card__text {
+  max-width: none;
+  font-size: 0.96rem;
+  line-height: 1.6;
 }
 
 .location-market-card .card__body {

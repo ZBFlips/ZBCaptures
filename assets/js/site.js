@@ -216,7 +216,11 @@ function footerNavItems() {
 }
 
 function featuredLocationPages(limit = 4, excludeSlug = "") {
-  return locationPages.filter((item) => item?.slug && item.slug !== excludeSlug).slice(0, limit);
+  return allLocationPages(excludeSlug).slice(0, limit);
+}
+
+function allLocationPages(excludeSlug = "") {
+  return locationPages.filter((item) => item?.slug && item.slug !== excludeSlug);
 }
 
 function findLocationPage(slug = currentPageSlug()) {
@@ -1096,7 +1100,7 @@ const ESTIMATOR_ADD_ON_PRICES = {
   "Drone photos": 75,
   "Drone video": 175,
   "Social reel": 150,
-  "Twilight images": 125,
+  "Twilight images": 20,
 };
 
 const ESTIMATOR_PACKAGE_HINTS = {
@@ -1531,13 +1535,15 @@ function locationMarketsSectionMarkup(records, options = {}) {
   const lead =
     options.lead ||
     "Each location page focuses on the kinds of listings, booking patterns, and marketing needs that show up most often in that market.";
+  const sectionClass = options.sectionClass ? ` ${safeText(options.sectionClass)}` : "";
+  const gridClass = options.gridClass ? ` ${safeText(options.gridClass)}` : "";
 
   return `
-    <section class="section location-markets">
+    <section class="section location-markets${sectionClass}">
       <div class="section__eyebrow">${safeText(eyebrow)}</div>
       <h2 class="section__title">${safeText(title)}</h2>
       <p class="section__lead">${safeText(lead)}</p>
-      <div class="section-grid grid--cards location-market-grid">
+      <div class="section-grid grid--cards location-market-grid${gridClass}">
         ${items
           .map(
             (item) => `
@@ -2450,11 +2456,13 @@ function servicesPageMarkup() {
 
     ${pricingEstimatorSectionMarkup()}
 
-    ${locationMarketsSectionMarkup(featuredLocationPages(), {
+    ${locationMarketsSectionMarkup(allLocationPages(), {
       eyebrow: "Location pages",
       title: "Browse the nearby markets I actively serve.",
       lead:
-        "These pages are built to speak to the kinds of listings and booking patterns that show up in each Gulf Coast market, while keeping the same packages and delivery workflow."
+        "These pages are built to speak to the kinds of listings and booking patterns that show up in each Gulf Coast market, while keeping the same packages and delivery workflow.",
+      sectionClass: "location-markets--directory",
+      gridClass: "location-market-grid--directory",
     })}
 
     ${agentProofMarkup()}
