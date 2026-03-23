@@ -744,7 +744,7 @@ function galleryMarkup() {
     <section class="section">
       <div class="section__eyebrow">Selected work</div>
       <div class="gallery-copy">
-        <h2 class="section__title">What to expect after the shoot.</h2>
+        <h2 class="section__title">What you can expect after the shoot.</h2>
         <p class="section__lead">Consistent quality across every property, no matter the size.</p>
       </div>
       <div class="gallery-mobile-strip" aria-label="Portfolio gallery">
