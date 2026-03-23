@@ -301,8 +301,8 @@ img {
 
 .services-home__layout {
   display: grid;
-  grid-template-columns: minmax(320px, 0.95fr) minmax(0, 2.05fr);
-  gap: 28px;
+  grid-template-columns: minmax(300px, 0.86fr) minmax(0, 2.14fr);
+  gap: 32px;
   align-items: start;
 }
 
@@ -764,12 +764,14 @@ img {
 }
 
 .services-home__cards {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(250px, 1fr));
+  gap: 20px;
   align-self: start;
   margin-top: 0;
 }
 
-.services-home__cards .card {
+.services-home__cards .card,
+.services-home__package {
   min-height: 100%;
 }
 
@@ -931,29 +933,33 @@ img {
   line-height: 1.7;
 }
 
-.services-home__cards .card__body {
-  padding: 24px 24px 28px;
+.services-home__package .card__body {
+  padding: 28px 28px 32px;
 }
 
-.services-home__cards .card__title {
-  font-size: clamp(1.5rem, 2vw, 2.05rem);
-  line-height: 1.04;
+.services-home__package .card__title {
+  font-size: clamp(1.65rem, 2.2vw, 2.25rem);
+  line-height: 1.02;
 }
 
-.services-home__cards .card__text {
-  margin-top: 14px;
-  font-size: 1.02rem;
-  line-height: 1.78;
+.services-home__package .card__price {
+  font-size: clamp(1.7rem, 2.3vw, 2.2rem);
 }
 
-.services-home__cards .card__meta {
-  margin-top: 18px;
+.services-home__package .card__text {
+  margin-top: 16px;
+  font-size: 1.05rem;
+  line-height: 1.82;
+}
+
+.services-home__package .card__meta {
+  margin-top: 20px;
   gap: 12px;
 }
 
-.services-home__cards .pill {
-  padding: 0.62rem 0.92rem;
-  font-size: 0.9rem;
+.services-home__package .pill {
+  padding: 0.68rem 0.98rem;
+  font-size: 0.94rem;
   font-weight: 600;
 }
 

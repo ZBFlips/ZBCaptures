@@ -922,7 +922,7 @@ function servicesMarkup() {
           ${state.services
             .map(
               (service, index) => `
-                <article class="card card--interactive ${service.featured ? "card--featured" : ""}">
+                <article class="card card--interactive pricing-card pricing-card--package services-home__package ${service.featured ? "card--featured" : ""}" data-tilt-card>
                   <div class="card__body">
                     <div class="card__header">
                       <div>
