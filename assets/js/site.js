@@ -887,7 +887,7 @@ function videoMarkup() {
     return `
       <section class="section video-panel">
         <div class="section__eyebrow">Motion</div>
-        <h2 class="section__title">A moving piece that breaks the grid.</h2>
+        <h2 class="section__title">A closer look at the property in motion.</h2>
         <iframe src="${safeText(embedUrl)}" title="Video embed" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </section>
     `;
@@ -1028,7 +1028,7 @@ const trustPillars = [
   },
   {
     eyebrow: "Easy handoff",
-    title: "A client portal that feels polished and simple.",
+    title: "A client portal that feels refined and simple.",
     text: "Finished shoots can be delivered through a clean download portal so agents are not chasing files across email threads.",
   },
 ];
@@ -1042,7 +1042,7 @@ const homeProcessSteps = [
   {
     step: "02",
     title: "Shoot, edit, and turn it around fast",
-    text: "The workflow is built around quick scheduling, polished photography, and fast delivery once the property is ready.",
+    text: "The workflow is built around quick scheduling, edited photos, and fast delivery once the property is ready.",
   },
   {
     step: "03",
@@ -1628,7 +1628,7 @@ function clientDeliveryTeaserMarkup() {
       <div class="section__eyebrow">${safeText(state.settings.clientDeliveryEyebrow ?? "Client delivery")}</div>
       <div class="grid--split section-grid">
         <div>
-          <h2 class="section__title">${safeText(state.settings.clientDeliveryTitle ?? "A delivery portal that feels polished instead of technical.")}</h2>
+          <h2 class="section__title">${safeText(state.settings.clientDeliveryTitle ?? "A delivery portal that feels refined and easy to use.")}</h2>
           <p class="section__lead">${safeText(state.settings.clientDeliveryLead ?? "Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.")}</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("client-access.html")}">Open client access</a>
@@ -1746,7 +1746,7 @@ function contactMarkup(options = {}) {
           ${showBestFit ? `
             <div class="contact-box">
               <strong>Best for:</strong>
-              <div class="helper">Property launches, listing refreshes, luxury presentations, and media packages that need a clean, polished web presence.</div>
+              <div class="helper">Property launches, listing refreshes, luxury presentations, and media packages that need strong listing photos and video.</div>
             </div>
           ` : ""}
         </div>
@@ -2704,7 +2704,7 @@ function serviceSummary(service, index) {
   }
 
   return index === 0
-    ? "Fast, polished coverage for standard listing launches."
+    ? "Fast, refined coverage for standard listing launches."
     : "Elevated media that helps the property feel more premium online.";
 }
 

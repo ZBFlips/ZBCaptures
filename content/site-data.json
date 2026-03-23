@@ -41,8 +41,8 @@
       },
       {
         "eyebrow": "Stronger first impression",
-        "title": "Premium presentation makes the work feel worth hiring.",
-        "text": "The visual hierarchy, pricing clarity, and gallery treatment all reinforce a higher-value service."
+        "title": "A strong presentation helps the service feel professional.",
+        "text": "Clear pricing, a clean layout, and the gallery help show the quality of the work."
       },
       {
         "eyebrow": "Simple handoff",
@@ -64,7 +64,7 @@
     {
       "id": "service-listing",
       "title": "The Starter",
-      "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
+      "description": "This package provides high-quality HDR assets designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
       "bullets": [
         "30 HDR Images",
         "No Drone Images",
@@ -90,7 +90,7 @@
     {
       "id": "service-media",
       "title": "The Works",
-      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social and drone video to create a high-energy, immersive experience that stops the scroll.",
+      "description": "This package combines a full photo set with drone coverage and short-form video, making it the strongest option for listings that need more attention online.",
       "bullets": [
         "45 HDR Images",
         "10 Drone Images",
