@@ -2644,16 +2644,6 @@ function servicesPageMarkup() {
 
 function portfolioPageMarkup() {
   return `
-    <section class="section services-page__intro portfolio-page__intro">
-      <div class="section__eyebrow">Portfolio</div>
-      <h1 class="section__title">The full gallery in one place.</h1>
-      <p class="section__lead">This is where the wider body of work lives, so the home page can stay focused on a tight best-of selection.</p>
-      <div class="section__actions">
-        <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
-        <a class="button" href="${absoluteSiteUrl("services.html")}">View packages</a>
-      </div>
-    </section>
-
     ${portfolioGalleryMarkup()}
 
     ${homeContactCtaMarkup()}
