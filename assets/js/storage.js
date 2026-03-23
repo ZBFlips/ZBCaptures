@@ -35,6 +35,7 @@ export const DEFAULT_STATE = {
       secondaryLabel: "Start a project",
       secondaryHref: "./contact.html",
     },
+    homeBestOfMediaIds: [],
     heroStats: [
       { label: "Turnaround", value: "Same-day or next-day delivery" },
       { label: "Coverage", value: "Interior, exterior, twilight, drone-ready" },

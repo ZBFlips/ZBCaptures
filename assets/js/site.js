@@ -85,6 +85,9 @@ let serviceAreaCircle = null;
 let serviceAreaMarker = null;
 let serviceAreaSearchCache = new Map();
 let nominatimLastRequestAt = 0;
+const HOME_BEST_OF_DESKTOP_COUNT = 6;
+const HOME_BEST_OF_MOBILE_COUNT = 4;
+const SERVICES_SUPPORT_IMAGE_COUNT = 3;
 
 if (mainEl) {
   mainEl.innerHTML = loadingShellMarkup(page);
@@ -202,6 +205,7 @@ async function loadLocationPagesData() {
 function headerNavItems() {
   return [
     { href: absoluteSiteUrl("index.html"), label: "Home" },
+    { href: absoluteSiteUrl("portfolio.html"), label: "Portfolio" },
     { href: absoluteSiteUrl("services.html"), label: "Services" },
     { href: absoluteSiteUrl("contact.html"), label: "Contact" },
     { href: absoluteSiteUrl("admin.html"), label: "Admin" },
@@ -427,11 +431,55 @@ function heroRevealMedia() {
   return mediaCache.find((item) => !item.portalId && item.placement === "reveal") || null;
 }
 
-function featuredMedia() {
+function sortPublicImageRecords(left, right) {
+  return (left.order || 0) - (right.order || 0) || String(left.title || left.name || left.id).localeCompare(String(right.title || right.name || right.id));
+}
+
+function portfolioImages() {
   return mediaCache
     .filter((item) => !item.portalId)
+    .filter((item) => !item.type || String(item.type).startsWith("image/"))
     .filter((item) => item.placement === "gallery" || item.placement === "featured")
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
+    .sort(sortPublicImageRecords);
+}
+
+function homeBestOfImages(limit = HOME_BEST_OF_DESKTOP_COUNT) {
+  const availableItems = portfolioImages();
+  const availableIds = new Set(availableItems.map((item) => item.id));
+  const configuredIds = Array.isArray(state.settings.homeBestOfMediaIds)
+    ? state.settings.homeBestOfMediaIds.map((id) => String(id || "").trim()).filter(Boolean)
+    : [];
+  const selected = [];
+  const seen = new Set();
+
+  for (const id of configuredIds) {
+    const record = publicImageRecordById(id);
+    if (!record || seen.has(record.id) || !availableIds.has(record.id)) {
+      continue;
+    }
+
+    seen.add(record.id);
+    selected.push(record);
+    if (selected.length >= limit) {
+      break;
+    }
+  }
+
+  return selected.length ? selected : availableItems.slice(0, limit);
+}
+
+function servicesSupportImages(limit = SERVICES_SUPPORT_IMAGE_COUNT) {
+  const explicitItems = mediaCache
+    .filter((item) => !item.portalId)
+    .filter((item) => !item.type || String(item.type).startsWith("image/"))
+    .filter((item) => item.placement === "services")
+    .sort(sortPublicImageRecords);
+
+  if (explicitItems.length) {
+    return explicitItems.slice(0, limit);
+  }
+
+  return portfolioImages().slice(0, limit);
 }
 
 function featuredFrameMedia() {
@@ -443,7 +491,7 @@ function featuredFrameMedia() {
     }
   }
 
-  return featuredMedia().find((item) => !item.type || String(item.type).startsWith("image/")) || null;
+  return portfolioImages()[0] || null;
 }
 
 function contactMedia() {
@@ -573,6 +621,34 @@ function responsivePictureMarkup(record, options = {}) {
   return sourceMarkup
     ? `<picture${pictureAttr}>${sourceMarkup}<img${classAttr} src="${safeText(fallbackSrc)}" alt="${safeText(alt)}"${loadingAttr}${decodingAttr}${fetchpriorityAttr} /></picture>`
     : `<img${classAttr} src="${safeText(fallbackSrc)}" alt="${safeText(alt)}"${loadingAttr}${decodingAttr}${fetchpriorityAttr} />`;
+}
+
+function imageTileMarkup(item, options = {}) {
+  const {
+    articleClass = "media-tile",
+    buttonClass = "media-tile__button",
+    imageClass = "media-tile__image",
+    alt = item.alt || item.title || item.name || "Portfolio image",
+    keys = ["thumb", "medium", "full"],
+    sizes = "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
+    loading = "lazy",
+    decoding = "async",
+  } = options;
+
+  return `
+    <article class="${safeText(articleClass)}">
+      <button class="${safeText(buttonClass)}" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
+        ${responsivePictureMarkup(item, {
+          imgClass: imageClass,
+          alt,
+          keys,
+          sizes,
+          loading,
+          decoding,
+        })}
+      </button>
+    </article>
+  `;
 }
 
 function wireLazyMediaTransitions() {
@@ -726,49 +802,93 @@ function heroMarkup() {
   `;
 }
 
-function galleryMarkup() {
-  const items = featuredMedia();
-  const topItems = items.slice(0, 4);
-  const bottomStart = items.length > 8 ? items.length - 4 : 4;
-  const middleItems = items.slice(4, bottomStart);
-  const bottomItems = items.slice(bottomStart);
-  const showReelArrows = middleItems.length > 4;
+function bestOfGalleryMarkup() {
+  const desktopItems = homeBestOfImages(HOME_BEST_OF_DESKTOP_COUNT);
+  const mobileItems = desktopItems.slice(0, HOME_BEST_OF_MOBILE_COUNT);
 
-  if (!items.length) {
+  if (!desktopItems.length) {
     return `
       <section class="section">
-        <div class="section__eyebrow">Selected work</div>
+        <div class="section__eyebrow">Best of the portfolio</div>
         <h2 class="section__title">Add uploads in the admin panel to populate the portfolio.</h2>
-        <p class="section__lead">The site is already wired to show images by placement. Upload media, choose gallery or featured, and it will appear here automatically.</p>
+        <p class="section__lead">The home page is now set up for a curated best-of section. Upload gallery images, then choose the six you want to feature on desktop.</p>
       </section>
     `;
   }
 
   return `
-    <section class="section">
-      <div class="section__eyebrow">Selected work</div>
+    <section class="section best-of-gallery">
+      <div class="section__eyebrow">Best of the portfolio</div>
+      <div class="best-of-gallery__header">
+        <div class="gallery-copy">
+          <h2 class="section__title">A curated look at recent work.</h2>
+          <p class="section__lead">The home page stays focused on a small best-of selection. If you want the wider body of work, open the full portfolio.</p>
+        </div>
+        <a class="button" href="${absoluteSiteUrl("portfolio.html")}">View full portfolio</a>
+      </div>
+      <div class="best-of-gallery__desktopGrid" aria-label="Best of portfolio">
+        ${desktopItems
+          .map((item) =>
+            imageTileMarkup(item, {
+              sizes: "(max-width: 1100px) 31vw, 30vw",
+            })
+          )
+          .join("")}
+      </div>
+      <div class="best-of-gallery__mobileGrid" aria-label="Best of portfolio">
+        ${mobileItems
+          .map((item) =>
+            imageTileMarkup(item, {
+              sizes: "44vw",
+            })
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function portfolioGalleryMarkup(options = {}) {
+  const items = portfolioImages();
+  const topItems = items.slice(0, 4);
+  const bottomStart = items.length > 8 ? items.length - 4 : 4;
+  const middleItems = items.slice(4, bottomStart);
+  const bottomItems = items.slice(bottomStart);
+  const showReelArrows = middleItems.length > 4;
+  const eyebrow = options.eyebrow || "Portfolio";
+  const title = options.title || "Browse the full gallery.";
+  const lead =
+    options.lead ||
+    "This page keeps the wider body of work in one place so the home page can stay curated and quick to scan.";
+
+  if (!items.length) {
+    return `
+      <section class="section">
+        <div class="section__eyebrow">${safeText(eyebrow)}</div>
+        <h2 class="section__title">Add uploads in the admin panel to populate the portfolio.</h2>
+        <p class="section__lead">Upload gallery images, set their order, and the full portfolio page will populate automatically.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="section portfolio-page__gallery">
+      <div class="section__eyebrow">${safeText(eyebrow)}</div>
       <div class="gallery-copy">
-        <h2 class="section__title">What you can expect after the shoot.</h2>
-        <p class="section__lead">Consistent quality across every property, no matter the size.</p>
+        <h2 class="section__title">${safeText(title)}</h2>
+        <p class="section__lead">${safeText(lead)}</p>
       </div>
       <div class="gallery-mobile-strip" aria-label="Portfolio gallery">
         <div class="gallery-mobile-strip__rail">
           ${items
-            .map(
-              (item) => `
-                <article class="gallery-mobile-strip__item">
-                  <button class="gallery-mobile-strip__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                    ${responsivePictureMarkup(item, {
-                      imgClass: "gallery-mobile-strip__image",
-                      alt: item.alt || item.title || item.name || "Portfolio image",
-                      keys: ["thumb", "medium"],
-                      sizes: "72vw",
-                      loading: "lazy",
-                      decoding: "async",
-                    })}
-                  </button>
-                </article>
-              `
+            .map((item) =>
+              imageTileMarkup(item, {
+                articleClass: "gallery-mobile-strip__item",
+                buttonClass: "gallery-mobile-strip__button",
+                imageClass: "gallery-mobile-strip__image",
+                keys: ["thumb", "medium"],
+                sizes: "72vw",
+              })
             )
             .join("")}
         </div>
@@ -776,49 +896,30 @@ function galleryMarkup() {
       <div class="gallery-stack">
         <div class="portfolio-grid gallery-grid">
           ${topItems
-            .map(
-              (item) => `
-                <article class="media-tile">
-                  <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                    ${responsivePictureMarkup(item, {
-                      imgClass: "media-tile__image",
-                      alt: item.alt || item.title || item.name || "Portfolio image",
-                      keys: ["thumb", "medium", "full"],
-                      sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
-                      loading: "lazy",
-                      decoding: "async",
-                    })}
-                  </button>
-                </article>
-              `
+            .map((item) =>
+              imageTileMarkup(item, {
+                sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
+              })
             )
             .join("")}
         </div>
         ${middleItems.length
           ? `
             <div class="gallery-reel ${showReelArrows ? "gallery-reel--arrows" : ""}">
-              ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--prev" type="button" data-gallery-reel-prev aria-label="Scroll gallery images left">Previous</button>` : ""}
-              <div class="gallery-reel__rail" aria-label="Additional gallery images" data-gallery-reel-rail>
+              ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--prev" type="button" data-gallery-reel-prev aria-label="Scroll portfolio images left">Previous</button>` : ""}
+              <div class="gallery-reel__rail" aria-label="Additional portfolio images" data-gallery-reel-rail>
                 ${middleItems
-                  .map(
-                    (item) => `
-                      <article class="gallery-reel__item">
-                        <button class="gallery-reel__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                          ${responsivePictureMarkup(item, {
-                            imgClass: "gallery-reel__image",
-                            alt: item.alt || item.title || item.name || "Portfolio image",
-                            keys: ["thumb", "medium", "full"],
-                            sizes: "(max-width: 720px) 72vw, (max-width: 1100px) 46vw, 340px",
-                            loading: "lazy",
-                            decoding: "async",
-                          })}
-                        </button>
-                      </article>
-                    `
+                  .map((item) =>
+                    imageTileMarkup(item, {
+                      articleClass: "gallery-reel__item",
+                      buttonClass: "gallery-reel__button",
+                      imageClass: "gallery-reel__image",
+                      sizes: "(max-width: 720px) 72vw, (max-width: 1100px) 46vw, 340px",
+                    })
                   )
                   .join("")}
               </div>
-              ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--next" type="button" data-gallery-reel-next aria-label="Scroll gallery images right">Next</button>` : ""}
+              ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--next" type="button" data-gallery-reel-next aria-label="Scroll portfolio images right">Next</button>` : ""}
             </div>
           `
           : ""}
@@ -826,26 +927,44 @@ function galleryMarkup() {
           ? `
             <div class="portfolio-grid gallery-grid gallery-grid--lower">
               ${bottomItems
-                .map(
-                  (item) => `
-                    <article class="media-tile">
-                      <button class="media-tile__button" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
-                        ${responsivePictureMarkup(item, {
-                          imgClass: "media-tile__image",
-                          alt: item.alt || item.title || item.name || "Portfolio image",
-                          keys: ["thumb", "medium", "full"],
-                          sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
-                          loading: "lazy",
-                          decoding: "async",
-                        })}
-                      </button>
-                    </article>
-                  `
+                .map((item) =>
+                  imageTileMarkup(item, {
+                    sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
+                  })
                 )
                 .join("")}
             </div>
           `
           : ""}
+      </div>
+    </section>
+  `;
+}
+
+function servicesSupportMarkup() {
+  const items = servicesSupportImages();
+  if (!items.length) {
+    return "";
+  }
+
+  return `
+    <section class="section services-support">
+      <div class="section__eyebrow">Recent work</div>
+      <div class="services-support__header">
+        <div>
+          <h2 class="section__title">A few supporting images from recent shoots.</h2>
+          <p class="section__lead">The services page keeps this section compact. The full gallery lives on the portfolio page.</p>
+        </div>
+        <a class="button" href="${absoluteSiteUrl("portfolio.html")}">Open portfolio</a>
+      </div>
+      <div class="services-support__grid" aria-label="Supporting portfolio images">
+        ${items
+          .map((item) =>
+            imageTileMarkup(item, {
+              sizes: "(max-width: 720px) 46vw, (max-width: 1100px) 33vw, 24vw",
+            })
+          )
+          .join("")}
       </div>
     </section>
   `;
@@ -2499,6 +2618,8 @@ function servicesPageMarkup() {
       </div>
     </section>
 
+    ${servicesSupportMarkup()}
+
     ${pricingEstimatorSectionMarkup()}
 
     ${locationMarketsSectionMarkup(allLocationPages(), {
@@ -2518,6 +2639,24 @@ function servicesPageMarkup() {
     ${videoMarkup()}
 
     ${faqMarkup()}
+  `;
+}
+
+function portfolioPageMarkup() {
+  return `
+    <section class="section services-page__intro portfolio-page__intro">
+      <div class="section__eyebrow">Portfolio</div>
+      <h1 class="section__title">The full gallery in one place.</h1>
+      <p class="section__lead">This is where the wider body of work lives, so the home page can stay focused on a tight best-of selection.</p>
+      <div class="section__actions">
+        <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
+        <a class="button" href="${absoluteSiteUrl("services.html")}">View packages</a>
+      </div>
+    </section>
+
+    ${portfolioGalleryMarkup()}
+
+    ${homeContactCtaMarkup()}
   `;
 }
 
@@ -2690,7 +2829,7 @@ function locationPageMarkup() {
 function homePageMarkup() {
   return [
     heroMarkup(),
-    galleryMarkup(),
+    bestOfGalleryMarkup(),
     servicesMarkup(),
     testimonialsMarkup(),
     trustSectionMarkup(),
@@ -2809,6 +2948,13 @@ function pageSeoConfig() {
         description:
           "Real estate photography services in Pensacola, Florida with MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video for Zillow, Homes.com, Redfin, Airbnb, and VRBO listings.",
         path: "services.html",
+      };
+    case "portfolio":
+      return {
+        title: "Portfolio | ZB Captures Real Estate Photography",
+        description:
+          "Browse the full ZB Captures portfolio with real estate photography from Pensacola and nearby Gulf Coast markets.",
+        path: "portfolio.html",
       };
     case "contact":
       return {
@@ -4086,6 +4232,17 @@ function renderPage() {
     wireStandalonePricingEstimator();
     wireServiceAreaMap();
     wirePricingMotion();
+    wirePreviewButtons();
+    wireLightbox();
+    return;
+  }
+
+  if (page === "portfolio") {
+    clearClientPortalState();
+    mainEl.innerHTML = portfolioPageMarkup();
+    wireLazyMediaTransitions();
+    wireSectionReveal();
+    wireGalleryReel();
     wirePreviewButtons();
     wireLightbox();
     return;

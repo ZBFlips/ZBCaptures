@@ -51,6 +51,8 @@ const PUBLIC_IMAGE_VARIANTS = [
 ];
 const PUBLIC_IMAGE_VARIANT_TYPE = "image/webp";
 const PUBLIC_IMAGE_VARIANT_EXTENSION = "webp";
+const HOME_BEST_OF_LIMIT = 6;
+const HOME_BEST_OF_MOBILE_LIMIT = 4;
 
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
@@ -818,6 +820,19 @@ function siteCopySectionMarkup() {
   `;
 }
 
+function homeBestOfSectionMarkup() {
+  return `
+    <section class="admin-panel" id="home-bestof">
+      <h2 class="admin-panel__title">Home best-of</h2>
+      <p class="admin-panel__text">Choose up to six images for the curated home gallery. Desktop shows six images, and mobile uses the first four.</p>
+      <div class="admin-toolbar">
+        <span class="admin-note" id="home-bestof-status">Select up to six portfolio images and arrange them in the order you want them to appear on the home page.</span>
+      </div>
+      <div class="home-bestof-admin" id="home-bestof-editor"></div>
+    </section>
+  `;
+}
+
 async function refreshCloudPortals() {
   try {
     const cloudPortals = await listCloudPortals();
@@ -900,6 +915,7 @@ function renderHeader() {
         </a>
         <nav class="nav" aria-label="Admin navigation">
           <a href="./index.html">Preview site</a>
+          <a href="./portfolio.html">Portfolio page</a>
           <a href="./services.html">Services page</a>
           <a href="./client-access.html">Client access</a>
           ${isAdminUnlocked() ? `<button type="button" data-lock-admin>Lock admin</button>` : ""}
@@ -1000,7 +1016,8 @@ function adminMarkup() {
         <button type="button" class="is-active" data-jump="#site-copy">Site copy</button>
         <button type="button" data-jump="#hero">Hero media</button>
         <button type="button" data-jump="#portfolio">Portfolio</button>
-        <button type="button" data-jump="#gallery-order">Gallery order</button>
+        <button type="button" data-jump="#home-bestof">Home best-of</button>
+        <button type="button" data-jump="#gallery-order">Portfolio order</button>
         <button type="button" data-jump="#locations">Location pages</button>
         <button type="button" data-jump="#client-delivery">Client delivery</button>
         <button type="button" data-jump="#services">Services</button>
@@ -1074,7 +1091,7 @@ function adminMarkup() {
 
         <section class="admin-panel" id="portfolio">
           <h2 class="admin-panel__title">Portfolio</h2>
-          <p class="admin-panel__text">Upload gallery images, assign featured work, or attach a video. The media library below lets you edit everything in one place.</p>
+          <p class="admin-panel__text">Upload gallery images, manage the full portfolio library, and attach a video. The curated home-page picks are controlled in the Home best-of section right below this.</p>
           <form class="admin-grid" id="upload-form">
             <div class="field" style="grid-column: 1 / -1;">
               <label for="file">Images or video</label>
@@ -1117,11 +1134,13 @@ function adminMarkup() {
           <div class="media-list" id="media-list"></div>
         </section>
 
+        ${homeBestOfSectionMarkup()}
+
         <section class="admin-panel" id="gallery-order">
-          <h2 class="admin-panel__title">Gallery order</h2>
-          <p class="admin-panel__text">Reorder the images that appear on the home page gallery with simple up and down controls. The first four images stay in the opening grid, the middle images flow into the horizontal strip, and the last four images fill the closing grid.</p>
+          <h2 class="admin-panel__title">Portfolio order</h2>
+          <p class="admin-panel__text">Reorder the full portfolio with simple up and down controls. This order drives the dedicated portfolio page and acts as the fallback order for the home best-of picker.</p>
           <div class="admin-toolbar">
-            <span class="admin-note" id="gallery-order-status">Use the arrows to move images up or down.</span>
+            <span class="admin-note" id="gallery-order-status">Use the arrows to move images up or down in the full portfolio.</span>
           </div>
           <div class="gallery-order-list" id="gallery-order-list"></div>
         </section>
@@ -1407,6 +1426,121 @@ function galleryOrderItems() {
     .filter((item) => !item.type || String(item.type).startsWith("image/"))
     .filter((item) => item.placement === "gallery" || item.placement === "featured")
     .sort((a, b) => (a.order || 0) - (b.order || 0) || (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+function homeBestOfCandidateItems() {
+  return galleryOrderItems();
+}
+
+function normalizedHomeBestOfIds() {
+  const candidateIds = new Set(homeBestOfCandidateItems().map((item) => item.id));
+  const source = Array.isArray(state.settings.homeBestOfMediaIds) ? state.settings.homeBestOfMediaIds : [];
+  const unique = [];
+  const seen = new Set();
+
+  for (const rawId of source) {
+    const id = String(rawId || "").trim();
+    if (!id || seen.has(id) || !candidateIds.has(id)) {
+      continue;
+    }
+
+    seen.add(id);
+    unique.push(id);
+    if (unique.length >= HOME_BEST_OF_LIMIT) {
+      break;
+    }
+  }
+
+  return unique;
+}
+
+function updateHomeBestOfStatus(message) {
+  const status = document.getElementById("home-bestof-status");
+  if (status) {
+    status.textContent = message;
+  }
+}
+
+function renderHomeBestOfEditor() {
+  const target = document.getElementById("home-bestof-editor");
+  if (!target) {
+    return;
+  }
+
+  const candidates = homeBestOfCandidateItems();
+  const selectedIds = normalizedHomeBestOfIds();
+  const selectedSet = new Set(selectedIds);
+  const selectedItems = selectedIds.map((id) => publicImageRecordById(id)).filter(Boolean);
+
+  if (!candidates.length) {
+    target.innerHTML = `<div class="admin-note">Upload gallery or featured images in the Portfolio section first. Those become the candidates for the home-page best-of selection.</div>`;
+    return;
+  }
+
+  target.innerHTML = `
+    <div class="home-bestof-admin__grid">
+      <div class="location-picker">
+        <div class="section__eyebrow">Home page picks</div>
+        <p class="admin-note">The home page uses up to ${HOME_BEST_OF_LIMIT} images on desktop. On mobile, it shows the first ${HOME_BEST_OF_MOBILE_LIMIT} only.</p>
+        ${
+          selectedItems.length
+            ? `
+              <div class="location-selection-list">
+                ${selectedItems
+                  .map(
+                    (item, index) => `
+                      <article class="location-selection-item">
+                        <img class="location-selection-item__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Home best-of image")}" />
+                        <div class="location-selection-item__meta">
+                          <div class="location-selection-item__title">
+                            <strong>${safeText(item.title || item.name || "Untitled")}</strong>
+                            <span>#${index + 1}</span>
+                          </div>
+                          <div class="location-selection-item__sub">${safeText(item.placement || "gallery")}</div>
+                        </div>
+                        <div class="location-selection-item__actions">
+                          <button class="button ghost" type="button" data-home-bestof-move="up" data-home-bestof-id="${safeText(item.id)}" ${index === 0 ? "disabled" : ""}>Up</button>
+                          <button class="button ghost" type="button" data-home-bestof-move="down" data-home-bestof-id="${safeText(item.id)}" ${index === selectedItems.length - 1 ? "disabled" : ""}>Down</button>
+                          <button class="button ghost danger" type="button" data-home-bestof-remove="${safeText(item.id)}">Remove</button>
+                        </div>
+                      </article>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+            : `<div class="location-picker__empty">No home-page picks selected yet. Add up to six images from the portfolio list on the right.</div>`
+        }
+      </div>
+
+      <div class="location-picker">
+        <div class="section__eyebrow">Available portfolio images</div>
+        <p class="admin-note">These come from the full portfolio library. Add the images you want the home page to feature.</p>
+        <div class="location-media-picker">
+          ${candidates
+            .map((item) => {
+              const isSelected = selectedSet.has(item.id);
+              const limitReached = !isSelected && selectedItems.length >= HOME_BEST_OF_LIMIT;
+              const actionLabel = isSelected ? "Selected" : limitReached ? "Max 6 selected" : "Add to home";
+
+              return `
+                <article class="location-media-option ${isSelected ? "is-selected" : ""}">
+                  <img class="location-media-option__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Portfolio image")}" />
+                  <div class="location-media-option__body">
+                    <strong>${safeText(item.title || item.name || "Untitled image")}</strong>
+                    <span>${safeText(item.placement || "gallery")}</span>
+                  </div>
+                  <div class="location-media-option__actions">
+                    <button class="button ghost" type="button" data-home-bestof-add="${safeText(item.id)}" ${isSelected || limitReached ? "disabled" : ""}>${safeText(actionLabel)}</button>
+                  </div>
+                </article>
+              `;
+            })
+            .join("")}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderGalleryOrderEditor() {
@@ -2684,6 +2818,69 @@ function wireGalleryOrderEditor() {
   });
 }
 
+function wireHomeBestOfEditor() {
+  const target = document.getElementById("home-bestof-editor");
+  if (!target) {
+    return;
+  }
+
+  target.addEventListener("click", async (event) => {
+    const addButton = event.target.closest("[data-home-bestof-add]");
+    if (addButton) {
+      const mediaId = addButton.dataset.homeBestofAdd;
+      const currentIds = normalizedHomeBestOfIds();
+      if (!mediaId || currentIds.includes(mediaId)) {
+        return;
+      }
+
+      if (currentIds.length >= HOME_BEST_OF_LIMIT) {
+        updateHomeBestOfStatus(`The home page is capped at ${HOME_BEST_OF_LIMIT} best-of images.`);
+        return;
+      }
+
+      state.settings.homeBestOfMediaIds = [...currentIds, mediaId];
+      saveState(state);
+      updateHomeBestOfStatus("Added that image to the home-page best-of selection.");
+      await syncAndRender();
+      return;
+    }
+
+    const removeButton = event.target.closest("[data-home-bestof-remove]");
+    if (removeButton) {
+      const mediaId = removeButton.dataset.homeBestofRemove;
+      state.settings.homeBestOfMediaIds = normalizedHomeBestOfIds().filter((id) => id !== mediaId);
+      saveState(state);
+      updateHomeBestOfStatus("Removed that image from the home-page best-of selection.");
+      await syncAndRender();
+      return;
+    }
+
+    const moveButton = event.target.closest("[data-home-bestof-move]");
+    if (moveButton) {
+      const mediaId = moveButton.dataset.homeBestofId;
+      const direction = moveButton.dataset.homeBestofMove === "up" ? -1 : 1;
+      const currentIds = normalizedHomeBestOfIds();
+      const index = currentIds.findIndex((id) => id === mediaId);
+      if (index < 0) {
+        return;
+      }
+
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= currentIds.length) {
+        return;
+      }
+
+      const reordered = [...currentIds];
+      const [moved] = reordered.splice(index, 1);
+      reordered.splice(nextIndex, 0, moved);
+      state.settings.homeBestOfMediaIds = reordered;
+      saveState(state);
+      updateHomeBestOfStatus("Updated the home-page best-of order.");
+      await syncAndRender();
+    }
+  });
+}
+
 function wireLocationPagesEditor() {
   const target = document.getElementById("location-pages-list");
   if (!target) {
@@ -3403,6 +3600,7 @@ async function syncAndRender() {
   wireHeaderActions();
   syncCopyFormsFromState();
   renderFeaturedFrameOptions();
+  renderHomeBestOfEditor();
   renderGalleryOrderEditor();
   renderLocationPagesEditor();
   renderClientPortalsEditor();
@@ -3587,6 +3785,7 @@ async function bootstrap() {
   wireHeroUploads();
   wireUploadForm();
   wireServicesEditor();
+  wireHomeBestOfEditor();
   wireGalleryOrderEditor();
   wireLocationPagesEditor();
   wireClientPortalsEditor();

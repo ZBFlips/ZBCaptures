@@ -8,6 +8,7 @@ const siteOrigin = "https://zbcaptures.pages.dev";
 
 const requiredFiles = [
   "index.html",
+  "portfolio.html",
   "services.html",
   "contact.html",
   "admin.html",
@@ -105,6 +106,7 @@ async function writeSitemap(locationPages) {
   const today = new Date().toISOString().slice(0, 10);
   const urls = [
     `${siteOrigin}/`,
+    `${siteOrigin}/portfolio.html`,
     `${siteOrigin}/services.html`,
     `${siteOrigin}/contact.html`,
     ...locationPages.map((item) => `${siteOrigin}/locations/${item.slug}/`),
