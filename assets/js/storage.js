@@ -24,6 +24,8 @@ export const DEFAULT_STATE = {
     heroHeadline: "Market-ready media for listings that need to move fast.",
     heroLead:
       "Photography, drone coverage, and video built for polished launches, quick turnaround, and a clean handoff once the property is ready to go live.",
+    homeHeroSubnote:
+      "Serving Pensacola and nearby Gulf Coast markets with fast turnaround and a clean delivery process.",
     featuredFrameTitle: "Selected work",
     featuredFrameLead: "A single image can carry the whole listing.",
     featuredFrameMediaId: "",
@@ -40,6 +42,30 @@ export const DEFAULT_STATE = {
     ],
     servicesLead:
       "I deliver polished, listing-ready media with a guaranteed 24-hour turnaround, giving each property a cleaner first impression and a faster path to market.",
+    homeServicesEyebrow: "Services",
+    homeServicesTitle: "High-performance media for premium listings.",
+    testimonialsEyebrow: "Client feedback",
+    testimonialsTitle: "Real feedback from past clients.",
+    testimonialsLead:
+      "These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.",
+    trustEyebrow: "Trust & process",
+    trustTitle: "Fast turnaround, clean delivery, and a process that stays easy.",
+    trustLead:
+      "The goal is simple: make the property look strong, get the files back quickly, and keep the booking-to-delivery flow clear for agents and clients.",
+    homeCtaEyebrow: "Start a project",
+    homeCtaTitle: "Ready when the next listing is.",
+    homeCtaLead:
+      "If you already know the address, timeline, or package you need, send it through and I will follow up with availability and the best fit.",
+    servicesPageEyebrow: "Services",
+    servicesPageTitle: "Elevate Your Listing, Engage Your Buyers.",
+    clientDeliveryEyebrow: "Client delivery",
+    clientDeliveryTitle: "A delivery portal that feels polished instead of technical.",
+    clientDeliveryLead:
+      "Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.",
+    faqEyebrow: "FAQ & SERVICE AREA",
+    faqTitle: "Questions agents usually ask before booking.",
+    faqLead:
+      "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.",
     proofEyebrow: "Why agents book this",
     proofTitle: "Everything is designed to make the listing feel more valuable, not more complicated.",
     proofLead: "The experience stays clean, fast, and premium, so the focus stays on the property and the confidence it creates for buyers.",
@@ -62,6 +88,8 @@ export const DEFAULT_STATE = {
     ],
     contactLead:
       "Send a note with the property address, target timeline, and the kind of coverage you need.",
+    contactEyebrow: "Contact",
+    contactTitle: "Let's turn the next property into something memorable.",
     videoEmbedUrl: "",
     serviceArea: "Metro area / surrounding listings",
     email: "hello@example.com",
@@ -69,6 +97,7 @@ export const DEFAULT_STATE = {
     instagram: "@yourhandle",
     responseTime: "Usually replies within 2 hours during business days.",
     contactNotificationEndpoint: "",
+    footerHeadline: "Pensacola real estate photography and video for clean, market-ready listing launches.",
     footerNote: "Custom-built and ready for your own domain.",
   },
   services: [

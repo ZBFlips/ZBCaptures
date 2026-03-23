@@ -2638,6 +2638,30 @@ img {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.copy-editor__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.copy-card {
+  height: 100%;
+}
+
+.copy-card__title {
+  margin: 0;
+  font-size: 1.22rem;
+  letter-spacing: -0.03em;
+}
+
+.copy-card .admin-note {
+  margin: 10px 0 0;
+}
+
+.copy-card .admin-grid {
+  margin-top: 16px;
+}
+
 .hero-upload-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3147,6 +3171,7 @@ img {
   .form-grid,
   .admin-grid,
   .admin-grid--three,
+  .copy-editor__grid,
   .hero-upload-grid,
   .services-packages,
   .pricing-estimator__intro,

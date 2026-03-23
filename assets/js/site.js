@@ -401,7 +401,7 @@ function renderFooter() {
       <div class="footer__inner">
         <div class="footer__brand">
           <strong>${safeText(state.settings.brandName)}</strong>
-          <p class="footer__headline">Pensacola real estate photography and video for clean, market-ready listing launches.</p>
+          <p class="footer__headline">${safeText(state.settings.footerHeadline ?? "Pensacola real estate photography and video for clean, market-ready listing launches.")}</p>
           <p class="footer__copy">${safeText(state.settings.serviceArea)}</p>
           <a class="footer__contact" href="mailto:${safeText(state.settings.email)}">Primary contact: ${safeText(state.settings.email)}</a>
         </div>
@@ -736,7 +736,7 @@ function heroMarkup() {
               <a class="button button--accent" href="${absoluteSiteUrl(state.settings.heroCtas.primaryHref)}">${safeText(state.settings.heroCtas.primaryLabel)}</a>
               <a class="button" href="${absoluteSiteUrl(state.settings.heroCtas.secondaryHref)}">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
             </div>
-            <p class="hero__subnote">Serving Pensacola and nearby Gulf Coast markets with fast turnaround and a clean delivery process.</p>
+            <p class="hero__subnote">${safeText(state.settings.homeHeroSubnote ?? "Serving Pensacola and nearby Gulf Coast markets with fast turnaround and a clean delivery process.")}</p>
           </div>
         </div>
       </div>
@@ -907,10 +907,10 @@ function videoMarkup() {
 function servicesMarkup() {
   return `
     <section class="section">
-      <div class="section__eyebrow">Services</div>
+      <div class="section__eyebrow">${safeText(state.settings.homeServicesEyebrow ?? "Services")}</div>
       <div class="services-home__layout">
         <div class="services-home__intro">
-          <h2 class="section__title">High-performance media for premium listings.</h2>
+          <h2 class="section__title">${safeText(state.settings.homeServicesTitle ?? "High-performance media for premium listings.")}</h2>
           <p class="section__lead">${safeText(state.settings.servicesLead)}</p>
           ${serviceSignalsMarkup()}
           <div class="section__actions">
@@ -1591,11 +1591,11 @@ function locationMarketsSectionMarkup(records, options = {}) {
 function testimonialsMarkup() {
   return `
     <section class="section testimonials-strip">
-      <div class="section__eyebrow">Client feedback</div>
+      <div class="section__eyebrow">${safeText(state.settings.testimonialsEyebrow ?? "Client feedback")}</div>
       <div class="testimonials-strip__header">
         <div>
-          <h2 class="section__title">Real feedback from past clients.</h2>
-          <p class="section__lead">These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.</p>
+          <h2 class="section__title">${safeText(state.settings.testimonialsTitle ?? "Real feedback from past clients.")}</h2>
+          <p class="section__lead">${safeText(state.settings.testimonialsLead ?? "These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.")}</p>
         </div>
         <div class="testimonials-strip__badge">
           <strong>${testimonials.length}</strong>
@@ -1625,11 +1625,11 @@ function testimonialsMarkup() {
 function clientDeliveryTeaserMarkup() {
   return `
     <section class="section">
-      <div class="section__eyebrow">Client delivery</div>
+      <div class="section__eyebrow">${safeText(state.settings.clientDeliveryEyebrow ?? "Client delivery")}</div>
       <div class="grid--split section-grid">
         <div>
-          <h2 class="section__title">A delivery portal that feels polished instead of technical.</h2>
-          <p class="section__lead">Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.</p>
+          <h2 class="section__title">${safeText(state.settings.clientDeliveryTitle ?? "A delivery portal that feels polished instead of technical.")}</h2>
+          <p class="section__lead">${safeText(state.settings.clientDeliveryLead ?? "Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.")}</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("client-access.html")}">Open client access</a>
             <a class="button" href="${absoluteSiteUrl("contact.html")}">Book your appointment</a>
@@ -1668,9 +1668,9 @@ function homeContactCtaMarkup() {
     <section class="section contact-section">
       <div class="section-grid grid--split">
         <div>
-          <div class="section__eyebrow">Start a project</div>
-          <h2 class="section__title">Ready when the next listing is.</h2>
-          <p class="section__lead">If you already know the address, timeline, or package you need, send it through and I will follow up with availability and the best fit.</p>
+          <div class="section__eyebrow">${safeText(state.settings.homeCtaEyebrow ?? "Start a project")}</div>
+          <h2 class="section__title">${safeText(state.settings.homeCtaTitle ?? "Ready when the next listing is.")}</h2>
+          <p class="section__lead">${safeText(state.settings.homeCtaLead ?? "If you already know the address, timeline, or package you need, send it through and I will follow up with availability and the best fit.")}</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Go to the inquiry form</a>
             <a class="button" href="mailto:${safeText(state.settings.email)}">Email directly</a>
@@ -1717,8 +1717,8 @@ function contactMarkup(options = {}) {
       <div class="contact-layout">
         <div class="contact-panel">
           <div>
-            <div class="section__eyebrow">Contact</div>
-            <h2 class="section__title">Let's turn the next property into something memorable.</h2>
+            <div class="section__eyebrow">${safeText(state.settings.contactEyebrow ?? "Contact")}</div>
+            <h2 class="section__title">${safeText(state.settings.contactTitle ?? "Let's turn the next property into something memorable.")}</h2>
             <p class="section__lead">${safeText(state.settings.contactLead)}</p>
           </div>
           <div class="contact-box">
@@ -1862,11 +1862,11 @@ function contactMarkup(options = {}) {
 function trustSectionMarkup() {
   return `
     <section class="section trust-section">
-      <div class="section__eyebrow">Trust & process</div>
+      <div class="section__eyebrow">${safeText(state.settings.trustEyebrow ?? "Trust & process")}</div>
       <div class="trust-layout">
         <div class="trust-layout__copy">
-          <h2 class="section__title">Fast turnaround, clean delivery, and a process that stays easy.</h2>
-          <p class="section__lead">The goal is simple: make the property look strong, get the files back quickly, and keep the booking-to-delivery flow clear for agents and clients.</p>
+          <h2 class="section__title">${safeText(state.settings.trustTitle ?? "Fast turnaround, clean delivery, and a process that stays easy.")}</h2>
+          <p class="section__lead">${safeText(state.settings.trustLead ?? "The goal is simple: make the property look strong, get the files back quickly, and keep the booking-to-delivery flow clear for agents and clients.")}</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
             <a class="button" href="${absoluteSiteUrl("services.html")}">See packages</a>
@@ -1943,10 +1943,11 @@ function trustSectionMarkup() {
 }
 
 function faqMarkup(items = faqItems, options = {}) {
-  const eyebrow = options.eyebrow || "FAQ & SERVICE AREA";
-  const title = options.title || "Questions agents usually ask before booking.";
+  const eyebrow = options.eyebrow || state.settings.faqEyebrow || "FAQ & SERVICE AREA";
+  const title = options.title || state.settings.faqTitle || "Questions agents usually ask before booking.";
   const lead =
     options.lead ||
+    state.settings.faqLead ||
     "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.";
 
   return `
@@ -2453,8 +2454,8 @@ async function wireServiceAreaMap() {
 function servicesPageMarkup() {
   return `
     <section class="section services-page__intro">
-      <div class="section__eyebrow">Services</div>
-      <h1 class="section__title">Elevate Your Listing, Engage Your Buyers.</h1>
+      <div class="section__eyebrow">${safeText(state.settings.servicesPageEyebrow ?? "Services")}</div>
+      <h1 class="section__title">${safeText(state.settings.servicesPageTitle ?? "Elevate Your Listing, Engage Your Buyers.")}</h1>
       <p class="section__lead">${safeText(state.settings.servicesLead)}</p>
       ${serviceSignalsMarkup()}
       <div class="section__actions">

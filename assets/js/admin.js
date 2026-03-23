@@ -688,6 +688,136 @@ function portalStatusMessage() {
     : "Client delivery is still waiting for the Cloudflare R2/D1 bindings. Finish the setup steps before sharing portals.";
 }
 
+const SITE_COPY_GROUPS = [
+  {
+    id: "copy-home-hero",
+    eyebrow: "Homepage",
+    title: "Hero copy",
+    description: "These are the main lines visitors see first on the home page.",
+    fields: [
+      { name: "heroKicker", label: "Kicker" },
+      { name: "heroHeadline", label: "Headline" },
+      { name: "heroLead", label: "Lead", type: "textarea", wide: true, rows: 4 },
+      { name: "homeHeroSubnote", label: "Subnote", type: "textarea", wide: true, rows: 3 },
+    ],
+  },
+  {
+    id: "copy-home-sections",
+    eyebrow: "Homepage",
+    title: "Section intros",
+    description: "This covers the key headings and intros beneath the hero.",
+    fields: [
+      { name: "homeServicesEyebrow", label: "Services eyebrow" },
+      { name: "homeServicesTitle", label: "Services title", type: "textarea", wide: true, rows: 2 },
+      { name: "testimonialsEyebrow", label: "Testimonials eyebrow" },
+      { name: "testimonialsTitle", label: "Testimonials title", type: "textarea", wide: true, rows: 2 },
+      { name: "testimonialsLead", label: "Testimonials intro", type: "textarea", wide: true, rows: 4 },
+    ],
+  },
+  {
+    id: "copy-trust-cta",
+    eyebrow: "Homepage",
+    title: "Trust and final CTA",
+    description: "Use this for the trust section and the booking prompt near the bottom of the home page.",
+    fields: [
+      { name: "trustEyebrow", label: "Trust eyebrow" },
+      { name: "trustTitle", label: "Trust title", type: "textarea", wide: true, rows: 2 },
+      { name: "trustLead", label: "Trust lead", type: "textarea", wide: true, rows: 4 },
+      { name: "homeCtaEyebrow", label: "Final CTA eyebrow" },
+      { name: "homeCtaTitle", label: "Final CTA title", type: "textarea", wide: true, rows: 2 },
+      { name: "homeCtaLead", label: "Final CTA lead", type: "textarea", wide: true, rows: 4 },
+    ],
+  },
+  {
+    id: "copy-services",
+    eyebrow: "Services page",
+    title: "Services and FAQ copy",
+    description: "These fields control the shared services page intro, the client delivery explainer, and the FAQ section heading.",
+    fields: [
+      { name: "servicesPageEyebrow", label: "Page eyebrow" },
+      { name: "servicesPageTitle", label: "Page title", type: "textarea", wide: true, rows: 2 },
+      { name: "servicesLead", label: "Shared services lead", type: "textarea", wide: true, rows: 4 },
+      { name: "clientDeliveryEyebrow", label: "Client delivery eyebrow" },
+      { name: "clientDeliveryTitle", label: "Client delivery title", type: "textarea", wide: true, rows: 2 },
+      { name: "clientDeliveryLead", label: "Client delivery lead", type: "textarea", wide: true, rows: 4 },
+      { name: "faqEyebrow", label: "FAQ eyebrow" },
+      { name: "faqTitle", label: "FAQ title", type: "textarea", wide: true, rows: 2 },
+      { name: "faqLead", label: "FAQ lead", type: "textarea", wide: true, rows: 4 },
+    ],
+  },
+  {
+    id: "copy-contact-footer",
+    eyebrow: "Contact and footer",
+    title: "Closing copy",
+    description: "These fields control the contact page intro and the short footer line across the site.",
+    fields: [
+      { name: "contactEyebrow", label: "Contact eyebrow" },
+      { name: "contactTitle", label: "Contact title", type: "textarea", wide: true, rows: 2 },
+      { name: "contactLead", label: "Contact lead", type: "textarea", wide: true, rows: 4 },
+      { name: "footerHeadline", label: "Footer headline", type: "textarea", wide: true, rows: 3 },
+    ],
+  },
+];
+
+const SITE_COPY_FIELD_NAMES = SITE_COPY_GROUPS.flatMap((group) => group.fields.map((field) => field.name));
+
+function formTextValue(formData, name, fallback = "") {
+  const value = formData.get(name);
+  return value === null ? fallback : value.toString();
+}
+
+function settingDraftValue(name) {
+  return state.settings[name] ?? DEFAULT_STATE.settings[name] ?? "";
+}
+
+function copyFieldMarkup(field) {
+  const className = field.wide ? "field field--wide" : "field";
+  const value = safeText(settingDraftValue(field.name));
+
+  return `
+    <div class="${className}">
+      <label for="${safeText(field.name)}">${safeText(field.label)}</label>
+      ${
+        field.type === "textarea"
+          ? `<textarea id="${safeText(field.name)}" name="${safeText(field.name)}" rows="${field.rows || 3}">${value}</textarea>`
+          : `<input id="${safeText(field.name)}" name="${safeText(field.name)}" value="${value}" />`
+      }
+    </div>
+  `;
+}
+
+function siteCopySectionMarkup() {
+  return `
+    <section class="admin-panel" id="site-copy">
+      <h2 class="admin-panel__title">Site copy</h2>
+      <p class="admin-panel__text">Edit the main headings and supporting text across the public pages in one place. Repeating content like service cards and proof cards still lives in its own editor further down.</p>
+      <div class="admin-toolbar">
+        <span class="admin-note" id="site-copy-status">Copy changes autosave in this browser and are included when you click Save changes.</span>
+      </div>
+      <form id="site-copy-form">
+        <div class="copy-editor__grid">
+          ${SITE_COPY_GROUPS
+            .map(
+              (group) => `
+                <article class="card copy-card" id="${safeText(group.id)}">
+                  <div class="card__body">
+                    <div class="section__eyebrow">${safeText(group.eyebrow)}</div>
+                    <h3 class="copy-card__title">${safeText(group.title)}</h3>
+                    <p class="admin-note">${safeText(group.description)}</p>
+                    <div class="admin-grid">
+                      ${group.fields.map((field) => copyFieldMarkup(field)).join("")}
+                    </div>
+                  </div>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
+      </form>
+    </section>
+  `;
+}
+
 async function refreshCloudPortals() {
   try {
     const cloudPortals = await listCloudPortals();
@@ -867,12 +997,14 @@ function adminMarkup() {
   return `
     <section class="admin-shell">
       <aside class="admin-nav">
-        <button type="button" class="is-active" data-jump="#hero">Hero</button>
+        <button type="button" class="is-active" data-jump="#site-copy">Site copy</button>
+        <button type="button" data-jump="#hero">Hero media</button>
         <button type="button" data-jump="#portfolio">Portfolio</button>
         <button type="button" data-jump="#gallery-order">Gallery order</button>
         <button type="button" data-jump="#locations">Location pages</button>
         <button type="button" data-jump="#client-delivery">Client delivery</button>
         <button type="button" data-jump="#services">Services</button>
+        <button type="button" data-jump="#proof">Proof</button>
         <button type="button" data-jump="#settings">Settings</button>
       </aside>
 
@@ -880,7 +1012,7 @@ function adminMarkup() {
         <div class="admin-banner">
           <div>
             <h1 class="admin-panel__title">Admin dashboard</h1>
-            <p class="admin-panel__text">Edit the hero, gallery, services, and contact details here. Use the save button below to write everything to the site files so uploads and text changes stay put.</p>
+            <p class="admin-panel__text">Handle the site copy, media, service cards, and client delivery workflow here. Use the save button below to write everything to the project files so your edits stick.</p>
           </div>
           <div class="admin-toolbar admin-toolbar--banner">
             <button class="button button--accent" type="button" id="save-all">Save changes</button>
@@ -888,9 +1020,11 @@ function adminMarkup() {
           </div>
         </div>
 
+        ${siteCopySectionMarkup()}
+
         <section class="admin-panel" id="hero">
-          <h2 class="admin-panel__title">Hero and header</h2>
-          <p class="admin-panel__text">Use this area for the header logo, the daytime and night hero images, and the featured frame copy on the homepage.</p>
+          <h2 class="admin-panel__title">Hero media and header</h2>
+          <p class="admin-panel__text">Use this area for the header logo plus the daytime and night hero images. The headline and paragraph copy now live in the Site copy section above.</p>
           <form class="hero-upload-grid" data-header-logo-upload>
             <div class="hero-upload-card">
               <div class="section__eyebrow">Header logo image</div>
@@ -934,27 +1068,6 @@ function adminMarkup() {
                 <input id="hero-night-alt" data-hero-alt type="text" placeholder="Nighttime home exterior" />
               </div>
               <button class="button button--accent" type="submit">Upload night reveal</button>
-            </form>
-          </div>
-
-          <div class="hero-copy-card" style="margin-top: 14px;">
-            <div class="section__eyebrow">Featured frame copy</div>
-            <p class="admin-note">This text appears in the smaller feature card inside the hero area.</p>
-            <form class="admin-grid" id="featured-frame-form">
-              <div class="field">
-                <label for="featuredFrameTitle">Title</label>
-                <input id="featuredFrameTitle" name="featuredFrameTitle" value="${safeText(state.settings.featuredFrameTitle || "Selected work")}" />
-              </div>
-              <div class="field" style="grid-column: 1 / -1;">
-                <label for="featuredFrameLead">Subtext</label>
-                <textarea id="featuredFrameLead" name="featuredFrameLead">${safeText(state.settings.featuredFrameLead || "A single image can carry the whole listing.")}</textarea>
-              </div>
-              <div class="field" style="grid-column: 1 / -1;">
-                <label for="featuredFrameMediaId">Featured frame image</label>
-                <select id="featuredFrameMediaId" name="featuredFrameMediaId">
-                  <option value="">Auto-pick first gallery image</option>
-                </select>
-              </div>
             </form>
           </div>
         </section>
@@ -1098,10 +1211,10 @@ function adminMarkup() {
             <button class="button ghost" type="button" id="reset-demo">Reset to defaults</button>
             <button class="button ghost" type="button" id="export-data">Export JSON</button>
           </div>
-          <h1 class="admin-panel__title">Site settings</h1>
-          <p class="admin-panel__text">Edit the words that show up across the site. The logo section above controls the top-left header mark, while this text is used for the footer and fallback branding.</p>
+          <h1 class="admin-panel__title">Business details and setup</h1>
+          <p class="admin-panel__text">Keep the contact details, fallback branding, and technical settings here. The public-facing copy now lives in the Site copy section above.</p>
 
-          <form class="admin-grid" id="brand-form">
+          <form class="admin-grid" id="settings-form">
             <div class="field">
               <label for="brandName">Footer / fallback name</label>
               <input id="brandName" name="brandName" value="${safeText(state.settings.brandName)}" />
@@ -1109,26 +1222,6 @@ function adminMarkup() {
             <div class="field">
               <label for="brandTag">Brand tag</label>
               <input id="brandTag" name="brandTag" value="${safeText(state.settings.brandTag)}" />
-            </div>
-            <div class="field">
-              <label for="heroKicker">Hero kicker</label>
-              <input id="heroKicker" name="heroKicker" value="${safeText(state.settings.heroKicker)}" />
-            </div>
-            <div class="field">
-              <label for="heroHeadline">Hero headline</label>
-              <input id="heroHeadline" name="heroHeadline" value="${safeText(state.settings.heroHeadline)}" />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="heroLead">Hero lead</label>
-              <textarea id="heroLead" name="heroLead">${safeText(state.settings.heroLead)}</textarea>
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="servicesLead">Services lead</label>
-              <textarea id="servicesLead" name="servicesLead">${safeText(state.settings.servicesLead)}</textarea>
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="contactLead">Contact lead</label>
-              <textarea id="contactLead" name="contactLead">${safeText(state.settings.contactLead)}</textarea>
             </div>
             <div class="field">
               <label for="serviceArea">Service area</label>
@@ -1241,17 +1334,12 @@ async function uploadMediaFiles(files, { placement, title, caption = "", alt, or
   }
 }
 
-function setStateFromForm(form) {
+function setBusinessSettingsFromForm(form) {
   const formData = new FormData(form);
   state.settings = {
     ...state.settings,
     brandName: formData.get("brandName")?.toString() || DEFAULT_STATE.settings.brandName,
     brandTag: formData.get("brandTag")?.toString() || "",
-    heroKicker: formData.get("heroKicker")?.toString() || "",
-    heroHeadline: formData.get("heroHeadline")?.toString() || "",
-    heroLead: formData.get("heroLead")?.toString() || "",
-    servicesLead: formData.get("servicesLead")?.toString() || "",
-    contactLead: formData.get("contactLead")?.toString() || "",
     serviceArea: formData.get("serviceArea")?.toString() || "",
     videoEmbedUrl: formData.get("videoEmbedUrl")?.toString() || "",
     email: formData.get("email")?.toString() || "",
@@ -1260,6 +1348,18 @@ function setStateFromForm(form) {
     instagram: formData.get("instagram")?.toString() || "",
     responseTime: formData.get("responseTime")?.toString() || "",
   };
+  saveState(state);
+}
+
+function setSiteCopyFromForm(form) {
+  const formData = new FormData(form);
+  const nextSettings = { ...state.settings };
+
+  SITE_COPY_FIELD_NAMES.forEach((name) => {
+    nextSettings[name] = formTextValue(formData, name, nextSettings[name] ?? DEFAULT_STATE.settings[name] ?? "");
+  });
+
+  state.settings = nextSettings;
   saveState(state);
 }
 
@@ -1740,10 +1840,31 @@ async function renderMediaList() {
     : `<div class="admin-note">${portalItemCount ? "Only client delivery uploads exist right now. Manage those in the Client delivery section." : "No uploads yet. Use the upload form above to add your first images."}</div>`;
 }
 
-function wireBrandForm() {
-  const form = document.getElementById("brand-form");
+function wireSiteCopyForm() {
+  const form = document.getElementById("site-copy-form");
+  if (!form) {
+    return;
+  }
+
+  const status = document.getElementById("site-copy-status");
   form.addEventListener("input", () => {
-    setStateFromForm(form);
+    setSiteCopyFromForm(form);
+    if (status) {
+      status.textContent = "Copy changes autosaved in this browser.";
+    }
+  });
+}
+
+function wireSettingsForm() {
+  const form = document.getElementById("settings-form");
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("input", () => {
+    setBusinessSettingsFromForm(form);
+    renderHeader();
+    wireHeaderActions();
     renderFooter();
   });
 }
@@ -1835,10 +1956,80 @@ function renderFeaturedFrameOptions() {
   select.innerHTML = options;
 }
 
+function syncCopyFormsFromState() {
+  const siteCopyForm = document.getElementById("site-copy-form");
+  if (siteCopyForm) {
+    SITE_COPY_FIELD_NAMES.forEach((name) => {
+      const field = siteCopyForm.elements.namedItem(name);
+      if (field && "value" in field) {
+        field.value = settingDraftValue(name);
+      }
+    });
+  }
+
+  const settingsForm = document.getElementById("settings-form");
+  if (settingsForm) {
+    [
+      "brandName",
+      "brandTag",
+      "serviceArea",
+      "videoEmbedUrl",
+      "email",
+      "contactNotificationEndpoint",
+      "phone",
+      "instagram",
+      "responseTime",
+    ].forEach((name) => {
+      const field = settingsForm.elements.namedItem(name);
+      if (field && "value" in field) {
+        field.value = state.settings[name] ?? DEFAULT_STATE.settings[name] ?? "";
+      }
+    });
+  }
+
+  const proofForm = document.getElementById("proof-form");
+  if (proofForm) {
+    const values = {
+      proofEyebrow: state.settings.proofEyebrow ?? DEFAULT_STATE.settings.proofEyebrow ?? "",
+      proofTitle: state.settings.proofTitle ?? DEFAULT_STATE.settings.proofTitle ?? "",
+      proofLead: state.settings.proofLead ?? DEFAULT_STATE.settings.proofLead ?? "",
+    };
+
+    Object.entries(values).forEach(([name, value]) => {
+      const field = proofForm.elements.namedItem(name);
+      if (field && "value" in field) {
+        field.value = value;
+      }
+    });
+
+    const proofCards = Array.isArray(state.settings.proofCards) ? state.settings.proofCards : DEFAULT_STATE.settings.proofCards;
+    proofCards.forEach((card, index) => {
+      const cardIndex = index + 1;
+      const pairs = {
+        [`proofCard${cardIndex}Eyebrow`]: card?.eyebrow || "",
+        [`proofCard${cardIndex}Title`]: card?.title || "",
+        [`proofCard${cardIndex}Text`]: card?.text || "",
+      };
+
+      Object.entries(pairs).forEach(([name, value]) => {
+        const field = proofForm.elements.namedItem(name);
+        if (field && "value" in field) {
+          field.value = value;
+        }
+      });
+    });
+  }
+}
+
 function syncSettingsFromForms() {
-  const brandForm = document.getElementById("brand-form");
-  if (brandForm) {
-    setStateFromForm(brandForm);
+  const siteCopyForm = document.getElementById("site-copy-form");
+  if (siteCopyForm) {
+    setSiteCopyFromForm(siteCopyForm);
+  }
+
+  const settingsForm = document.getElementById("settings-form");
+  if (settingsForm) {
+    setBusinessSettingsFromForm(settingsForm);
   }
 
   const featuredFrameForm = document.getElementById("featured-frame-form");
@@ -3210,6 +3401,7 @@ async function syncAndRender() {
   renderHeader();
   renderFooter();
   wireHeaderActions();
+  syncCopyFormsFromState();
   renderFeaturedFrameOptions();
   renderGalleryOrderEditor();
   renderLocationPagesEditor();
@@ -3388,7 +3580,8 @@ async function bootstrap() {
   mainEl.innerHTML = adminMarkup();
   wireHeaderActions();
   wireHeaderLogoUpload();
-  wireBrandForm();
+  wireSiteCopyForm();
+  wireSettingsForm();
   wireFeaturedFrameForm();
   wireProofForm();
   wireHeroUploads();
