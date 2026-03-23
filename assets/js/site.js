@@ -1535,8 +1535,53 @@ function locationMarketsSectionMarkup(records, options = {}) {
   const lead =
     options.lead ||
     "Each location page focuses on the kinds of listings, booking patterns, and marketing needs that show up most often in that market.";
-  const sectionClass = options.sectionClass ? ` ${safeText(options.sectionClass)}` : "";
-  const gridClass = options.gridClass ? ` ${safeText(options.gridClass)}` : "";
+  const sectionClassName = String(options.sectionClass || "").trim();
+  const gridClassName = String(options.gridClass || "").trim();
+  const sectionClass = sectionClassName ? ` ${sectionClassName}` : "";
+  const gridClass = gridClassName ? ` ${gridClassName}` : "";
+  const layout = options.layout === "reel" ? "reel" : "grid";
+  const showReelArrows = layout === "reel" && items.length > Number(options.reelVisibleCount || 6);
+
+  if (layout === "reel") {
+    return `
+      <section class="section location-markets${sectionClass}">
+        <div class="section__eyebrow">${safeText(eyebrow)}</div>
+        <h2 class="section__title">${safeText(title)}</h2>
+        <p class="section__lead">${safeText(lead)}</p>
+        <div class="gallery-reel location-market-reel ${showReelArrows ? "gallery-reel--arrows" : ""}">
+          ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--prev" type="button" data-gallery-reel-prev aria-label="Scroll location pages left">Previous</button>` : ""}
+          <div class="gallery-reel__rail location-market-reel__rail" aria-label="${safeText(title)}" data-gallery-reel-rail>
+            ${items
+              .map(
+                (item) => `
+                  <article class="gallery-reel__item location-market-reel__item">
+                    <a class="card card--interactive location-market-card" href="${locationPageHref(item)}">
+                      <div class="card__body">
+                        <div class="card__eyebrow">${safeText(item.market || item.name || item.slug)}</div>
+                        <h3 class="card__title">${safeText(item.name || item.market || item.slug)}</h3>
+                        <p class="card__text">${safeText(item.cardLead || item.lead || item.coverageSummary || "")}</p>
+                        ${
+                          item.coverageSummary
+                            ? `
+                              <div class="card__footer">
+                                <span class="card__footerLabel">Coverage</span>
+                                <div class="card__footerText">${safeText(item.coverageSummary)}</div>
+                              </div>
+                            `
+                            : ""
+                        }
+                      </div>
+                    </a>
+                  </article>
+                `
+              )
+              .join("")}
+          </div>
+          ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--next" type="button" data-gallery-reel-next aria-label="Scroll location pages right">Next</button>` : ""}
+        </div>
+      </section>
+    `;
+  }
 
   return `
     <section class="section location-markets${sectionClass}">
@@ -2461,8 +2506,9 @@ function servicesPageMarkup() {
       title: "Browse the nearby markets I actively serve.",
       lead:
         "These pages are built to speak to the kinds of listings and booking patterns that show up in each Gulf Coast market, while keeping the same packages and delivery workflow.",
-      sectionClass: "location-markets--directory",
-      gridClass: "location-market-grid--directory",
+      sectionClass: "location-markets--carousel",
+      layout: "reel",
+      reelVisibleCount: 6,
     })}
 
     ${agentProofMarkup()}
@@ -4036,6 +4082,7 @@ function renderPage() {
     wireLazyMediaTransitions();
     wireSectionReveal();
     wireTestimonialsCarousel();
+    wireGalleryReel();
     wireStandalonePricingEstimator();
     wireServiceAreaMap();
     wirePricingMotion();

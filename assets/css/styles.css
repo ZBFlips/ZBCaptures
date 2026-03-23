@@ -1090,26 +1090,58 @@ img {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
-.location-market-grid--directory {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
 .location-market-card {
   min-height: 100%;
 }
 
-.location-markets--directory .location-market-card .card__body {
+.location-markets--carousel .location-market-card .card__body {
   padding: 18px;
 }
 
-.location-markets--directory .location-market-card .card__title {
-  font-size: clamp(1.3rem, 1.5vw, 1.7rem);
+.location-markets--carousel .location-market-card .card__title {
+  font-size: clamp(1.15rem, 1.35vw, 1.45rem);
+  line-height: 1.08;
 }
 
-.location-markets--directory .location-market-card .card__text {
+.location-markets--carousel .location-market-card .card__text {
   max-width: none;
-  font-size: 0.96rem;
-  line-height: 1.6;
+  font-size: 0.92rem;
+  line-height: 1.58;
+}
+
+.location-market-reel {
+  margin-top: 18px;
+}
+
+.location-market-reel__rail {
+  gap: 12px;
+}
+
+.location-market-reel__item {
+  flex: 0 0 calc((100% - 60px) / 6);
+  min-width: 0;
+}
+
+.location-market-reel__item .location-market-card {
+  min-height: 100%;
+}
+
+@media (max-width: 1280px) {
+  .location-market-reel__item {
+    flex-basis: calc((100% - 36px) / 4);
+  }
+}
+
+@media (max-width: 840px) {
+  .location-market-reel__item {
+    flex-basis: calc((100% - 12px) / 2);
+  }
+}
+
+@media (max-width: 560px) {
+  .location-market-reel__item {
+    flex-basis: 100%;
+  }
 }
 
 .location-market-card .card__body {
