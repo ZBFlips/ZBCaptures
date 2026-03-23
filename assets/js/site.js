@@ -4046,6 +4046,7 @@ function renderPage() {
     wireTestimonialsCarousel();
     wireGalleryReel();
     wireServiceAreaMap();
+    wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
     return;
