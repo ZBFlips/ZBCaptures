@@ -53,6 +53,8 @@ const PUBLIC_IMAGE_VARIANT_TYPE = "image/webp";
 const PUBLIC_IMAGE_VARIANT_EXTENSION = "webp";
 const HOME_BEST_OF_LIMIT = 6;
 const HOME_BEST_OF_MOBILE_LIMIT = 4;
+let homeBestOfActiveSlot = 0;
+let homeBestOfSearchQuery = "";
 
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
@@ -1454,6 +1456,16 @@ function normalizedHomeBestOfIds() {
   return unique;
 }
 
+function homeBestOfSlotIds() {
+  const selectedIds = normalizedHomeBestOfIds();
+  return Array.from({ length: HOME_BEST_OF_LIMIT }, (_, index) => selectedIds[index] || "");
+}
+
+function persistHomeBestOfSlots(slotIds) {
+  state.settings.homeBestOfMediaIds = slotIds.map((id) => String(id || "").trim()).filter(Boolean).slice(0, HOME_BEST_OF_LIMIT);
+  saveState(state);
+}
+
 function updateHomeBestOfStatus(message) {
   const status = document.getElementById("home-bestof-status");
   if (status) {
@@ -1468,9 +1480,19 @@ function renderHomeBestOfEditor() {
   }
 
   const candidates = homeBestOfCandidateItems();
-  const selectedIds = normalizedHomeBestOfIds();
-  const selectedSet = new Set(selectedIds);
-  const selectedItems = selectedIds.map((id) => publicImageRecordById(id)).filter(Boolean);
+  const slotIds = homeBestOfSlotIds();
+  const selectedCount = slotIds.filter(Boolean).length;
+  const selectedSet = new Set(slotIds.filter(Boolean));
+  homeBestOfActiveSlot = Math.min(Math.max(homeBestOfActiveSlot, 0), HOME_BEST_OF_LIMIT - 1);
+  const query = homeBestOfSearchQuery.trim().toLowerCase();
+  const filteredCandidates = candidates.filter((item) => {
+    if (!query) {
+      return true;
+    }
+
+    const haystack = [item.title, item.name, item.alt, item.caption, item.placement].filter(Boolean).join(" ").toLowerCase();
+    return haystack.includes(query);
+  });
 
   if (!candidates.length) {
     target.innerHTML = `<div class="admin-note">Upload gallery or featured images in the Portfolio section first. Those become the candidates for the home-page best-of selection.</div>`;
@@ -1479,68 +1501,120 @@ function renderHomeBestOfEditor() {
 
   target.innerHTML = `
     <div class="home-bestof-admin__grid">
-      <div class="location-picker">
-        <div class="section__eyebrow">Home page picks</div>
-        <p class="admin-note">The home page uses up to ${HOME_BEST_OF_LIMIT} images on desktop. On mobile, it shows the first ${HOME_BEST_OF_MOBILE_LIMIT} only.</p>
-        ${
-          selectedItems.length
-            ? `
-              <div class="location-selection-list">
-                ${selectedItems
-                  .map(
-                    (item, index) => `
-                      <article class="location-selection-item">
-                        <img class="location-selection-item__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Home best-of image")}" />
-                        <div class="location-selection-item__meta">
-                          <div class="location-selection-item__title">
-                            <strong>${safeText(item.title || item.name || "Untitled")}</strong>
-                            <span>#${index + 1}</span>
-                          </div>
-                          <div class="location-selection-item__sub">${safeText(item.placement || "gallery")}</div>
-                        </div>
-                        <div class="location-selection-item__actions">
-                          <button class="button ghost" type="button" data-home-bestof-move="up" data-home-bestof-id="${safeText(item.id)}" ${index === 0 ? "disabled" : ""}>Up</button>
-                          <button class="button ghost" type="button" data-home-bestof-move="down" data-home-bestof-id="${safeText(item.id)}" ${index === selectedItems.length - 1 ? "disabled" : ""}>Down</button>
-                          <button class="button ghost danger" type="button" data-home-bestof-remove="${safeText(item.id)}">Remove</button>
-                        </div>
-                      </article>
-                    `
-                  )
-                  .join("")}
-              </div>
-            `
-            : `<div class="location-picker__empty">No home-page picks selected yet. Add up to six images from the portfolio list on the right.</div>`
-        }
-      </div>
-
-      <div class="location-picker">
-        <div class="section__eyebrow">Available portfolio images</div>
-        <p class="admin-note">These come from the full portfolio library. Add the images you want the home page to feature.</p>
-        <div class="location-media-picker">
-          ${candidates
-            .map((item) => {
-              const isSelected = selectedSet.has(item.id);
-              const limitReached = !isSelected && selectedItems.length >= HOME_BEST_OF_LIMIT;
-              const actionLabel = isSelected ? "Selected" : limitReached ? "Max 6 selected" : "Add to home";
+      <section class="home-bestof-panel">
+        <div class="home-bestof-panel__header">
+          <div>
+            <div class="section__eyebrow">Home page slots</div>
+            <p class="admin-note">Desktop uses six images. Mobile uses the first ${HOME_BEST_OF_MOBILE_LIMIT}. Click a slot, then choose an image from the grid.</p>
+          </div>
+          <div class="home-bestof-panel__count">${selectedCount}/${HOME_BEST_OF_LIMIT} filled</div>
+        </div>
+        <div class="home-bestof-slot-grid">
+          ${slotIds
+            .map((slotId, index) => {
+              const item = slotId ? publicImageRecordById(slotId) : null;
+              const isActive = index === homeBestOfActiveSlot;
+              const canMoveLeft = Boolean(item) && index > 0;
+              const canMoveRight = Boolean(item) && index < selectedCount - 1;
 
               return `
-                <article class="location-media-option ${isSelected ? "is-selected" : ""}">
-                  <img class="location-media-option__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Portfolio image")}" />
-                  <div class="location-media-option__body">
-                    <strong>${safeText(item.title || item.name || "Untitled image")}</strong>
-                    <span>${safeText(item.placement || "gallery")}</span>
-                  </div>
-                  <div class="location-media-option__actions">
-                    <button class="button ghost" type="button" data-home-bestof-add="${safeText(item.id)}" ${isSelected || limitReached ? "disabled" : ""}>${safeText(actionLabel)}</button>
+                <article class="home-bestof-slot ${isActive ? "is-active" : ""} ${item ? "is-filled" : ""}">
+                  <button class="home-bestof-slot__surface" type="button" data-home-bestof-slot="${index}">
+                    <div class="home-bestof-slot__meta">
+                      <span class="home-bestof-slot__label">Slot ${index + 1}</span>
+                      <span class="home-bestof-slot__badge ${index < HOME_BEST_OF_MOBILE_LIMIT ? "" : "home-bestof-slot__badge--muted"}">${index < HOME_BEST_OF_MOBILE_LIMIT ? "Mobile" : "Desktop"}</span>
+                    </div>
+                    ${
+                      item
+                        ? `
+                          <img class="home-bestof-slot__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Home best-of image")}" />
+                          <div class="home-bestof-slot__text">
+                            <strong>${safeText(item.title || item.name || "Untitled image")}</strong>
+                            <span>${safeText(item.placement || "gallery")}</span>
+                          </div>
+                        `
+                        : `
+                          <div class="home-bestof-slot__empty">
+                            <span>Empty slot</span>
+                            <small>Choose this slot, then pick an image below.</small>
+                          </div>
+                        `
+                    }
+                  </button>
+                  <div class="home-bestof-slot__actions">
+                    <button class="button ghost" type="button" data-home-bestof-shift="left" data-home-bestof-slot-index="${index}" ${canMoveLeft ? "" : "disabled"}>Left</button>
+                    <button class="button ghost" type="button" data-home-bestof-shift="right" data-home-bestof-slot-index="${index}" ${canMoveRight ? "" : "disabled"}>Right</button>
+                    <button class="button ghost danger" type="button" data-home-bestof-clear-slot="${index}" ${item ? "" : "disabled"}>Clear</button>
                   </div>
                 </article>
               `;
             })
             .join("")}
         </div>
+      </section>
+
+      <section class="home-bestof-panel">
+        <div class="home-bestof-library__summary">
+          <div>
+            <div class="section__eyebrow">Portfolio image grid</div>
+            <p class="admin-note">Slot ${homeBestOfActiveSlot + 1} is active. Click any image to place it there. If that image is already in another slot, it will swap positions.</p>
+          </div>
+          <label class="home-bestof-search">
+            <span>Search images</span>
+            <input type="search" data-home-bestof-search placeholder="Search by title or filename" />
+          </label>
+        </div>
+        <div class="home-bestof-library__meta">
+          <span class="admin-note">${filteredCandidates.length} image${filteredCandidates.length === 1 ? "" : "s"} shown from the portfolio library.</span>
+        </div>
+        ${
+          filteredCandidates.length
+            ? `
+              <div class="home-bestof-image-grid">
+                ${filteredCandidates
+                  .map((item) => {
+                    const selectedIndex = slotIds.findIndex((id) => id === item.id);
+                    const isSelected = selectedSet.has(item.id);
+                    const isActiveSelection = selectedIndex === homeBestOfActiveSlot;
+                    const actionText = isActiveSelection
+                      ? `Already in slot ${selectedIndex + 1}`
+                      : selectedIndex >= 0
+                        ? `Move from slot ${selectedIndex + 1} to slot ${homeBestOfActiveSlot + 1}`
+                        : `Use in slot ${homeBestOfActiveSlot + 1}`;
+
+                    return `
+                      <article class="home-bestof-candidate ${isSelected ? "is-selected" : ""} ${isActiveSelection ? "is-active" : ""}">
+                        <button class="home-bestof-candidate__button" type="button" data-home-bestof-pick="${safeText(item.id)}" ${isActiveSelection ? "disabled" : ""}>
+                          <div class="home-bestof-candidate__media">
+                            <img class="home-bestof-candidate__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Portfolio image")}" />
+                            ${
+                              isSelected
+                                ? `<span class="home-bestof-candidate__slotTag">Slot ${selectedIndex + 1}${selectedIndex < HOME_BEST_OF_MOBILE_LIMIT ? " • Mobile" : ""}</span>`
+                                : ""
+                            }
+                          </div>
+                          <div class="home-bestof-candidate__body">
+                            <strong>${safeText(item.title || item.name || "Untitled image")}</strong>
+                            <span>${safeText(item.placement || "gallery")}</span>
+                          </div>
+                          <div class="home-bestof-candidate__action">${safeText(actionText)}</div>
+                        </button>
+                      </article>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            `
+            : `<div class="location-picker__empty">No portfolio images matched that search. Try a different title, filename, or clear the search.</div>`
+        }
       </div>
     </div>
   `;
+
+  const searchInput = target.querySelector("[data-home-bestof-search]");
+  if (searchInput) {
+    searchInput.value = homeBestOfSearchQuery;
+  }
 }
 
 function renderGalleryOrderEditor() {
@@ -2824,59 +2898,92 @@ function wireHomeBestOfEditor() {
     return;
   }
 
-  target.addEventListener("click", async (event) => {
-    const addButton = event.target.closest("[data-home-bestof-add]");
-    if (addButton) {
-      const mediaId = addButton.dataset.homeBestofAdd;
-      const currentIds = normalizedHomeBestOfIds();
-      if (!mediaId || currentIds.includes(mediaId)) {
-        return;
-      }
-
-      if (currentIds.length >= HOME_BEST_OF_LIMIT) {
-        updateHomeBestOfStatus(`The home page is capped at ${HOME_BEST_OF_LIMIT} best-of images.`);
-        return;
-      }
-
-      state.settings.homeBestOfMediaIds = [...currentIds, mediaId];
-      saveState(state);
-      updateHomeBestOfStatus("Added that image to the home-page best-of selection.");
-      await syncAndRender();
+  target.addEventListener("input", (event) => {
+    const searchField = event.target.closest("[data-home-bestof-search]");
+    if (!searchField) {
       return;
     }
 
-    const removeButton = event.target.closest("[data-home-bestof-remove]");
-    if (removeButton) {
-      const mediaId = removeButton.dataset.homeBestofRemove;
-      state.settings.homeBestOfMediaIds = normalizedHomeBestOfIds().filter((id) => id !== mediaId);
-      saveState(state);
-      updateHomeBestOfStatus("Removed that image from the home-page best-of selection.");
-      await syncAndRender();
+    homeBestOfSearchQuery = searchField.value || "";
+    renderHomeBestOfEditor();
+  });
+
+  target.addEventListener("click", (event) => {
+    const slotButton = event.target.closest("[data-home-bestof-slot]");
+    if (slotButton) {
+      const slotIndex = Number(slotButton.dataset.homeBestofSlot);
+      if (!Number.isFinite(slotIndex)) {
+        return;
+      }
+
+      homeBestOfActiveSlot = Math.min(Math.max(slotIndex, 0), HOME_BEST_OF_LIMIT - 1);
+      renderHomeBestOfEditor();
+      updateHomeBestOfStatus(`Slot ${homeBestOfActiveSlot + 1} is active. Click an image below to place it there.`);
       return;
     }
 
-    const moveButton = event.target.closest("[data-home-bestof-move]");
-    if (moveButton) {
-      const mediaId = moveButton.dataset.homeBestofId;
-      const direction = moveButton.dataset.homeBestofMove === "up" ? -1 : 1;
-      const currentIds = normalizedHomeBestOfIds();
-      const index = currentIds.findIndex((id) => id === mediaId);
-      if (index < 0) {
+    const pickButton = event.target.closest("[data-home-bestof-pick]");
+    if (pickButton) {
+      const mediaId = pickButton.dataset.homeBestofPick;
+      const slotIds = homeBestOfSlotIds();
+      const targetSlot = Math.min(Math.max(homeBestOfActiveSlot, 0), HOME_BEST_OF_LIMIT - 1);
+      const existingSlot = slotIds.findIndex((id) => id === mediaId);
+      if (!mediaId) {
         return;
       }
 
-      const nextIndex = index + direction;
-      if (nextIndex < 0 || nextIndex >= currentIds.length) {
+      if (existingSlot === targetSlot) {
+        updateHomeBestOfStatus(`That image is already in slot ${targetSlot + 1}.`);
         return;
       }
 
-      const reordered = [...currentIds];
-      const [moved] = reordered.splice(index, 1);
-      reordered.splice(nextIndex, 0, moved);
-      state.settings.homeBestOfMediaIds = reordered;
-      saveState(state);
+      const displacedId = slotIds[targetSlot];
+      if (existingSlot >= 0) {
+        slotIds[existingSlot] = displacedId || "";
+      }
+      slotIds[targetSlot] = mediaId;
+      persistHomeBestOfSlots(slotIds);
+      renderHomeBestOfEditor();
+      updateHomeBestOfStatus(existingSlot >= 0 ? `Moved that image into slot ${targetSlot + 1}.` : `Placed that image into slot ${targetSlot + 1}.`);
+      return;
+    }
+
+    const clearButton = event.target.closest("[data-home-bestof-clear-slot]");
+    if (clearButton) {
+      const slotIndex = Number(clearButton.dataset.homeBestofClearSlot);
+      if (!Number.isFinite(slotIndex)) {
+        return;
+      }
+
+      const slotIds = homeBestOfSlotIds();
+      if (!slotIds[slotIndex]) {
+        return;
+      }
+
+      slotIds[slotIndex] = "";
+      persistHomeBestOfSlots(slotIds);
+      homeBestOfActiveSlot = Math.min(slotIndex, HOME_BEST_OF_LIMIT - 1);
+      renderHomeBestOfEditor();
+      updateHomeBestOfStatus("Cleared that home-page slot.");
+      return;
+    }
+
+    const shiftButton = event.target.closest("[data-home-bestof-shift]");
+    if (shiftButton) {
+      const slotIndex = Number(shiftButton.dataset.homeBestofSlotIndex);
+      const direction = shiftButton.dataset.homeBestofShift === "left" ? -1 : 1;
+      const slotIds = homeBestOfSlotIds();
+      const selectedCount = slotIds.filter(Boolean).length;
+      const nextIndex = slotIndex + direction;
+      if (!Number.isFinite(slotIndex) || nextIndex < 0 || nextIndex >= selectedCount) {
+        return;
+      }
+
+      [slotIds[slotIndex], slotIds[nextIndex]] = [slotIds[nextIndex], slotIds[slotIndex]];
+      persistHomeBestOfSlots(slotIds);
+      homeBestOfActiveSlot = nextIndex;
+      renderHomeBestOfEditor();
       updateHomeBestOfStatus("Updated the home-page best-of order.");
-      await syncAndRender();
     }
   });
 }
