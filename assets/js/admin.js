@@ -63,6 +63,7 @@ let homeBestOfActiveSlot = 0;
 let homeBestOfSearchQuery = "";
 let mediaLibrarySearchQuery = "";
 let mediaLibraryScope = "portfolio";
+let mediaEditorActiveId = "";
 
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
@@ -2071,8 +2072,59 @@ function updatePortalCardUi(portalId) {
   }
 }
 
-function mediaEditorRow(item, options = {}) {
-  const url = mediaPreviewUrl(item);
+function mediaPlacementOptionsMarkup(selected = "gallery") {
+  return `
+    <option value="gallery" ${selected === "gallery" ? "selected" : ""}>Gallery</option>
+    <option value="featured" ${selected === "featured" ? "selected" : ""}>Featured</option>
+    <option value="logo" ${selected === "logo" ? "selected" : ""}>Header logo</option>
+    <option value="hero" ${selected === "hero" ? "selected" : ""}>Daytime background</option>
+    <option value="reveal" ${selected === "reveal" ? "selected" : ""}>Night reveal</option>
+    <option value="services" ${selected === "services" ? "selected" : ""}>Services</option>
+    <option value="contact" ${selected === "contact" ? "selected" : ""}>Contact</option>
+    <option value="video" ${selected === "video" ? "selected" : ""}>Video</option>
+    <option value="hidden" ${selected === "hidden" ? "selected" : ""}>Hidden</option>
+  `;
+}
+
+function mediaLibraryCardMarkup(item, options = {}) {
+  const isActive = mediaEditorActiveId === item.id;
+  const isPortfolioItem = isPortfolioMedia(item);
+  const portfolioPosition = Number(options.portfolioPosition || 0);
+  const title = item.title || item.name || "Untitled image";
+  const tags = normalizePortfolioTags(item.portfolioTags);
+  const placementLabel = item.placement || "hidden";
+
+  return `
+    <article class="media-library-card ${isActive ? "is-active" : ""}">
+      <button class="media-library-card__button" type="button" data-media-editor-open="${item.id}">
+        <div class="media-library-card__media">
+          ${
+            isImageMedia(item)
+              ? `<img class="media-library-card__thumb" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || title)}" />`
+              : `<div class="media-library-card__thumb media-library-card__thumb--video">Video</div>`
+          }
+          <span class="media-library-card__badge">${safeText(isPortfolioItem && portfolioPosition ? `Portfolio #${portfolioPosition}` : placementLabel)}</span>
+        </div>
+        <div class="media-library-card__body">
+          <strong>${safeText(title)}</strong>
+          <span>${safeText(placementLabel)}</span>
+          ${
+            tags.length
+              ? `<div class="media-library-card__tags">${tags.map((tag) => `<span>${safeText(tag)}</span>`).join("")}</div>`
+              : ""
+          }
+        </div>
+        <div class="media-library-card__action">Edit details</div>
+      </button>
+    </article>
+  `;
+}
+
+function mediaEditorModalMarkup(item, options = {}) {
+  if (!item) {
+    return "";
+  }
+
   const workflow = mediaWorkflowMarkup(item);
   const actions = mediaActionsMarkup(item);
   const isPortfolioItem = isPortfolioMedia(item);
@@ -2080,73 +2132,83 @@ function mediaEditorRow(item, options = {}) {
   const portfolioTotal = Number(options.portfolioTotal || 0);
   const canMoveUp = isPortfolioItem && portfolioPosition > 1;
   const canMoveDown = isPortfolioItem && portfolioPosition > 0 && portfolioPosition < portfolioTotal;
-  const tagMarkup = isImageMedia(item)
-    ? portfolioTagsInputMarkup(item.portfolioTags, { fieldName: "portfolioTags" })
-    : `<div class="admin-note">Portfolio tags apply to images only.</div>`;
+  const preview = isImageMedia(item)
+    ? `<img class="media-editor-modal__previewImage" src="${mediaPreviewUrl(item)}" alt="${safeText(item.alt || item.title || "Upload")}" />`
+    : `<div class="media-editor-modal__previewImage media-editor-modal__previewImage--video">Video</div>`;
 
   return `
-    <article class="media-row" data-media-row="${item.id}">
-      <img class="media-row__thumb" src="${url}" alt="${safeText(item.alt || item.title || "Upload")}" />
-      <div class="media-row__meta">
-        <div class="media-row__title">
-          <strong>${safeText(item.title || "Untitled")}</strong>
-          <span class="media-row__id">${safeText(item.id)}</span>
+    <div class="media-editor-modal" data-media-editor-modal>
+      <button class="media-editor-modal__backdrop" type="button" data-media-editor-close aria-label="Close media editor"></button>
+      <div class="media-editor-modal__dialog" role="dialog" aria-modal="true" aria-label="Edit media details">
+        <div class="media-editor-modal__header">
+          <div>
+            <div class="section__eyebrow">Edit portfolio media</div>
+            <h3 class="media-editor-modal__title">${safeText(item.title || item.name || "Untitled image")}</h3>
+            <div class="media-editor-modal__meta">
+              <span>${safeText(item.name || item.id)}</span>
+              <span>${safeText(item.id)}</span>
+            </div>
+          </div>
+          <button class="button ghost" type="button" data-media-editor-close>Close</button>
         </div>
-        <div class="field">
-          <label>Caption</label>
-          <textarea data-media-field="caption" data-media-id="${item.id}">${safeText(item.caption || "")}</textarea>
-        </div>
-        <div class="field">
-          <label>Alt</label>
-          <input data-media-field="alt" data-media-id="${item.id}" value="${safeText(item.alt || "")}" />
-        </div>
-        <div data-media-workflow="${item.id}">
-          ${workflow}
-        </div>
-      </div>
-      <div class="field">
-        <label>Title</label>
-        <input data-media-field="title" data-media-id="${item.id}" value="${safeText(item.title || "")}" />
-      </div>
-      <div class="field">
-        <label>Placement</label>
-        <select data-media-field="placement" data-media-id="${item.id}">
-          <option value="gallery" ${item.placement === "gallery" ? "selected" : ""}>Gallery</option>
-          <option value="featured" ${item.placement === "featured" ? "selected" : ""}>Featured</option>
-          <option value="logo" ${item.placement === "logo" ? "selected" : ""}>Header logo</option>
-          <option value="hero" ${item.placement === "hero" ? "selected" : ""}>Daytime background</option>
-          <option value="reveal" ${item.placement === "reveal" ? "selected" : ""}>Night reveal</option>
-          <option value="services" ${item.placement === "services" ? "selected" : ""}>Services</option>
-          <option value="contact" ${item.placement === "contact" ? "selected" : ""}>Contact</option>
-          <option value="video" ${item.placement === "video" ? "selected" : ""}>Video</option>
-          <option value="hidden" ${item.placement === "hidden" ? "selected" : ""}>Hidden</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Order</label>
-        <input data-media-field="order" data-media-id="${item.id}" type="number" value="${Number.isFinite(item.order) ? item.order : 0}" />
-      </div>
-      <div class="field media-row__portfolio">
-        <label>Portfolio tags</label>
-        ${tagMarkup}
-        ${
-          isPortfolioItem
-            ? `
-              <div class="media-row__orderGroup">
-                <div class="media-row__orderStatus">Portfolio position #${portfolioPosition} of ${portfolioTotal}</div>
-                <div class="media-row__orderButtons">
-                  <button class="button ghost" type="button" data-media-order-move="up" data-media-order-id="${item.id}" ${canMoveUp ? "" : "disabled"}>Up</button>
-                  <button class="button ghost" type="button" data-media-order-move="down" data-media-order-id="${item.id}" ${canMoveDown ? "" : "disabled"}>Down</button>
-                </div>
+        <div class="media-editor-modal__content" data-media-row="${item.id}">
+          <div class="media-editor-modal__preview">
+            ${preview}
+            <div data-media-workflow="${item.id}">
+              ${workflow}
+            </div>
+          </div>
+          <div class="media-editor-modal__form">
+            <div class="admin-grid">
+              <div class="field">
+                <label>Title</label>
+                <input data-media-field="title" data-media-id="${item.id}" value="${safeText(item.title || "")}" />
               </div>
-            `
-            : `<div class="admin-note">Switch this image to Gallery or Featured if it should appear in the public portfolio.</div>`
-        }
+              <div class="field">
+                <label>Placement</label>
+                <select data-media-field="placement" data-media-id="${item.id}">
+                  ${mediaPlacementOptionsMarkup(item.placement)}
+                </select>
+              </div>
+              <div class="field" style="grid-column: 1 / -1;">
+                <label>Caption</label>
+                <textarea data-media-field="caption" data-media-id="${item.id}">${safeText(item.caption || "")}</textarea>
+              </div>
+              <div class="field" style="grid-column: 1 / -1;">
+                <label>Alt text</label>
+                <input data-media-field="alt" data-media-id="${item.id}" value="${safeText(item.alt || "")}" />
+              </div>
+              <div class="field">
+                <label>Order</label>
+                <input data-media-field="order" data-media-id="${item.id}" type="number" value="${Number.isFinite(item.order) ? item.order : 0}" />
+              </div>
+              <div class="field field--wide">
+                <span class="field__label">Portfolio tags</span>
+                ${isImageMedia(item) ? portfolioTagsInputMarkup(item.portfolioTags, { fieldName: "portfolioTags" }) : `<div class="admin-note">Portfolio tags apply to images only.</div>`}
+              </div>
+            </div>
+            <div class="media-editor-modal__portfolio">
+              ${
+                isPortfolioItem
+                  ? `
+                    <div class="media-row__orderGroup">
+                      <div class="media-row__orderStatus">Portfolio position #${portfolioPosition} of ${portfolioTotal}</div>
+                      <div class="media-row__orderButtons">
+                        <button class="button ghost" type="button" data-media-order-move="up" data-media-order-id="${item.id}" ${canMoveUp ? "" : "disabled"}>Move up</button>
+                        <button class="button ghost" type="button" data-media-order-move="down" data-media-order-id="${item.id}" ${canMoveDown ? "" : "disabled"}>Move down</button>
+                      </div>
+                    </div>
+                  `
+                  : `<div class="admin-note">Switch this image to Gallery or Featured if it should appear in the public portfolio.</div>`
+              }
+            </div>
+            <div class="media-actions" data-media-actions="${item.id}">
+              ${actions}
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="media-actions" data-media-actions="${item.id}">
-        ${actions}
-      </div>
-    </article>
+    </div>
   `;
 }
 
@@ -2157,6 +2219,7 @@ async function renderMediaList() {
   const filteredItems = mediaLibraryItems(publicItems);
   const portfolioItems = galleryOrderItems();
   const portfolioPositionById = new Map(portfolioItems.map((item, index) => [item.id, index + 1]));
+  const activeItem = publicItems.find((item) => item.id === mediaEditorActiveId) || null;
   const toolbarMarkup = `
     <div class="media-library-toolbar">
       <div class="media-library-toolbar__controls">
@@ -2182,17 +2245,24 @@ async function renderMediaList() {
     </div>
   `;
 
+  const libraryMarkup = filteredItems.length
+    ? `<div class="media-library-grid">
+        ${filteredItems
+          .map((item) =>
+            mediaLibraryCardMarkup(item, {
+              portfolioPosition: portfolioPositionById.get(item.id) || 0,
+            })
+          )
+          .join("")}
+      </div>`
+    : `<div class="admin-note">No media matched the current library filter. Try a different search or switch the dropdown above.</div>`;
+  const modalMarkup = mediaEditorModalMarkup(activeItem, {
+    portfolioPosition: activeItem ? portfolioPositionById.get(activeItem.id) || 0 : 0,
+    portfolioTotal: portfolioItems.length,
+  });
+
   target.innerHTML = publicItems.length
-    ? `${toolbarMarkup}${filteredItems.length
-        ? filteredItems
-            .map((item) =>
-              mediaEditorRow(item, {
-                portfolioPosition: portfolioPositionById.get(item.id) || 0,
-                portfolioTotal: portfolioItems.length,
-              })
-            )
-            .join("")
-        : `<div class="admin-note">No media matched the current library filter. Try a different search or switch the dropdown above.</div>`}`
+    ? `${toolbarMarkup}${libraryMarkup}${modalMarkup}`
     : `<div class="admin-note">${portalItemCount ? "Only client delivery uploads exist right now. Manage those in the Client delivery section." : "No uploads yet. Use the upload form above to add your first images."}</div>`;
 }
 
@@ -3521,8 +3591,8 @@ function wireMediaListEvents() {
       return;
     }
 
-    const field = event.target.closest('[data-media-field="placement"]');
-    if (!field) {
+    const field = event.target.closest("[data-media-field]");
+    if (!field || field.dataset.mediaField !== "placement") {
       return;
     }
 
@@ -3530,6 +3600,20 @@ function wireMediaListEvents() {
   });
 
   target.addEventListener("click", async (event) => {
+    const openButton = event.target.closest("[data-media-editor-open]");
+    if (openButton) {
+      mediaEditorActiveId = openButton.dataset.mediaEditorOpen || "";
+      renderMediaList();
+      return;
+    }
+
+    const closeButton = event.target.closest("[data-media-editor-close]");
+    if (closeButton || event.target.matches("[data-media-editor-modal]")) {
+      mediaEditorActiveId = "";
+      renderMediaList();
+      return;
+    }
+
     const orderButton = event.target.closest("[data-media-order-move]");
     if (orderButton) {
       const targetId = orderButton.dataset.mediaOrderId;
@@ -3617,6 +3701,10 @@ function wireMediaListEvents() {
       rowUrls.delete(deleteButton.dataset.mediaDelete);
     }
 
+    if (mediaEditorActiveId === deleteButton.dataset.mediaDelete) {
+      mediaEditorActiveId = "";
+    }
+
     await deleteMedia(deleteButton.dataset.mediaDelete);
     await syncAndRender();
   });
@@ -3628,6 +3716,15 @@ function wireMediaListEvents() {
     }
 
     mediaLibrarySearchQuery = searchField.value || "";
+    renderMediaList();
+  });
+
+  target.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !mediaEditorActiveId) {
+      return;
+    }
+
+    mediaEditorActiveId = "";
     renderMediaList();
   });
 }
@@ -3904,6 +4001,9 @@ function wireJumpLinks() {
 async function syncAndRender() {
   state = loadState();
   await refreshMedia();
+  if (mediaEditorActiveId && !media.some((item) => !item.portalId && item.id === mediaEditorActiveId)) {
+    mediaEditorActiveId = "";
+  }
   renderHeader();
   renderFooter();
   wireHeaderActions();
