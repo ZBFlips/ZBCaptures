@@ -440,6 +440,7 @@ function portfolioImages() {
     .filter((item) => !item.portalId)
     .filter((item) => !item.type || String(item.type).startsWith("image/"))
     .filter((item) => item.placement === "gallery" || item.placement === "featured")
+    .filter((item) => hasDisplayableImageSource(item))
     .sort(sortPublicImageRecords);
 }
 
@@ -587,6 +588,62 @@ function mediaOriginalUrlFor(record) {
   }
 
   return mediaUrlFor(record, "full") || mediaUrlFor(record);
+}
+
+function isDisplayableImageUrl(value = "") {
+  const url = String(value || "").trim();
+  if (!url) {
+    return false;
+  }
+
+  const normalized = url.toLowerCase();
+  if (normalized.startsWith("blob:") || normalized.startsWith("data:image/")) {
+    return true;
+  }
+
+  if (/\.(avif|gif|jpe?g|png|svg|webp)(?:[?#].*)?$/i.test(normalized)) {
+    return true;
+  }
+
+  try {
+    const parsed = new URL(url, window.location.href);
+    return /\.(avif|gif|jpe?g|png|svg|webp)$/i.test(String(parsed.pathname || "").toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
+function lightboxSourceCandidates(record) {
+  const unique = [];
+  const seen = new Set();
+  const addCandidate = (value) => {
+    const url = String(value || "").trim();
+    if (!url) {
+      return;
+    }
+
+    const absolute = absoluteSiteUrl(url);
+    if (!isDisplayableImageUrl(absolute) || seen.has(absolute)) {
+      return;
+    }
+
+    seen.add(absolute);
+    unique.push(absolute);
+  };
+
+  addCandidate(mediaVariant(record, "full")?.src);
+  addCandidate(mediaVariant(record, "medium")?.src);
+  addCandidate(mediaVariant(record, "thumb")?.src);
+  addCandidate(record?.src);
+  addCandidate(record?.previewUrl);
+  addCandidate(record?.downloadUrl);
+  addCandidate(record?.originalSrc);
+
+  return unique;
+}
+
+function hasDisplayableImageSource(record) {
+  return lightboxSourceCandidates(record).length > 0;
 }
 
 function responsiveImageSourceMarkup(record, keys, sizes) {
@@ -813,7 +870,8 @@ function renderLightboxRecord(record) {
     return;
   }
 
-  const url = mediaUrlFor(record);
+  const candidates = lightboxSourceCandidates(record);
+  const fallbackUrl = mediaUrlFor(record);
   const isPortalRecord = Boolean(record.portalId || record.downloadUrl || activePortalMedia.some((item) => item.id === record.id));
   const safeTitle = isPortalRecord
     ? String(record.title || "").trim()
@@ -822,7 +880,24 @@ function renderLightboxRecord(record) {
       : "";
   const safeCaption = String(record.caption || "").trim();
   const captionText = [safeTitle, safeCaption].filter(Boolean).join(" - ");
-  lightboxImage.src = mediaOriginalUrlFor(record) || url;
+  lightboxImage.onload = null;
+  lightboxImage.onerror = null;
+  lightboxImage.removeAttribute("src");
+  if (candidates.length) {
+    let candidateIndex = 0;
+    lightboxImage.onerror = () => {
+      candidateIndex += 1;
+      if (candidateIndex < candidates.length) {
+        lightboxImage.src = candidates[candidateIndex];
+        return;
+      }
+
+      lightboxImage.onerror = null;
+    };
+    lightboxImage.src = candidates[candidateIndex];
+  } else {
+    lightboxImage.src = fallbackUrl || "";
+  }
   lightboxImage.alt = record.alt || record.title || record.name || "Portfolio image";
   lightboxCaption.textContent = captionText;
   lightboxCaption.hidden = !captionText;
