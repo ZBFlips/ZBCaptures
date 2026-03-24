@@ -633,10 +633,11 @@ function imageTileMarkup(item, options = {}) {
     sizes = "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
     loading = "lazy",
     decoding = "async",
+    extraAttributes = "",
   } = options;
 
   return `
-    <article class="${safeText(articleClass)}">
+    <article class="${safeText(articleClass)}"${extraAttributes ? ` ${extraAttributes}` : ""}>
       <button class="${safeText(buttonClass)}" data-preview data-id="${item.id}" type="button" aria-label="Preview ${safeText(item.title || item.name || "image")}">
         ${responsivePictureMarkup(item, {
           imgClass: imageClass,
@@ -649,6 +650,70 @@ function imageTileMarkup(item, options = {}) {
       </button>
     </article>
   `;
+}
+
+const PORTFOLIO_FILTERS = [
+  { key: "all", label: "All work" },
+  { key: "interior", label: "Interiors" },
+  { key: "exterior", label: "Exteriors" },
+  { key: "drone", label: "Drone" },
+  { key: "twilight", label: "Twilight" },
+];
+
+function portfolioFilterText(item = {}) {
+  return [item.title, item.caption, item.alt, item.name]
+    .map((value) => String(value || "").trim().toLowerCase())
+    .filter(Boolean)
+    .join(" ");
+}
+
+function portfolioCategoriesFor(item = {}) {
+  const text = portfolioFilterText(item);
+  const categories = new Set();
+  const hasInteriorCue = /\b(interior|kitchen|bed(room)?|bath(room)?|living|dining|office|foyer|laundry|closet|hall|stair|loft|great room|ceiling)\b/i.test(text);
+  const hasDroneCue = /\b(drone|aerial|bird'?s[- ]eye)\b/i.test(text);
+  const hasTwilightCue = /\b(twilight|sunset|dusk|night)\b/i.test(text);
+  const hasAddressCue =
+    /\b(front beach|hidden|revana|florala|dewey|sixth)\b/i.test(text) ||
+    /\b(?:rd|road|st|street|ave|avenue|dr|drive|blvd|boulevard|ln|lane|way|court|ct|unit)\b/i.test(text) ||
+    /\b\d{3,5}\b/.test(text);
+  const hasExteriorCue =
+    hasDroneCue ||
+    /\b(exterior|front|rear|back|entry|entrance|outside|yard|porch|patio|deck|balcony|curb|driveway|garage|roof|facade|elevation|pool|beach|view)\b/i.test(text) ||
+    (hasAddressCue && !hasInteriorCue);
+
+  if (hasInteriorCue) {
+    categories.add("interior");
+  }
+  if (hasExteriorCue) {
+    categories.add("exterior");
+  }
+  if (hasDroneCue) {
+    categories.add("drone");
+  }
+  if (hasTwilightCue) {
+    categories.add("twilight");
+  }
+
+  return Array.from(categories);
+}
+
+function portfolioFilterDefinitions(items = []) {
+  const counts = Object.fromEntries(PORTFOLIO_FILTERS.map((filter) => [filter.key, 0]));
+  counts.all = items.length;
+
+  items.forEach((item) => {
+    portfolioCategoriesFor(item).forEach((key) => {
+      counts[key] = (counts[key] || 0) + 1;
+    });
+  });
+
+  return PORTFOLIO_FILTERS
+    .map((filter) => ({
+      ...filter,
+      count: counts[filter.key] || 0,
+    }))
+    .filter((filter) => filter.key === "all" || filter.count > 0);
 }
 
 function wireLazyMediaTransitions() {
@@ -850,16 +915,12 @@ function bestOfGalleryMarkup() {
 
 function portfolioGalleryMarkup(options = {}) {
   const items = portfolioImages();
-  const topItems = items.slice(0, 4);
-  const bottomStart = items.length > 8 ? items.length - 4 : 4;
-  const middleItems = items.slice(4, bottomStart);
-  const bottomItems = items.slice(bottomStart);
-  const showReelArrows = middleItems.length > 4;
+  const filters = portfolioFilterDefinitions(items);
   const eyebrow = options.eyebrow || "Portfolio";
   const title = options.title || "Browse the full gallery.";
   const lead =
     options.lead ||
-    "This page keeps the wider body of work in one place so the home page can stay curated and quick to scan.";
+    "Use the quick filters to jump between interiors, exteriors, drone work, and twilight coverage.";
 
   if (!items.length) {
     return `
@@ -878,64 +939,40 @@ function portfolioGalleryMarkup(options = {}) {
         <h2 class="section__title">${safeText(title)}</h2>
         <p class="section__lead">${safeText(lead)}</p>
       </div>
-      <div class="gallery-mobile-strip" aria-label="Portfolio gallery">
-        <div class="gallery-mobile-strip__rail">
-          ${items
-            .map((item) =>
-              imageTileMarkup(item, {
-                articleClass: "gallery-mobile-strip__item",
-                buttonClass: "gallery-mobile-strip__button",
-                imageClass: "gallery-mobile-strip__image",
-                keys: ["thumb", "medium"],
-                sizes: "72vw",
-              })
+      <div class="portfolio-filter-bar" data-portfolio-filter-root>
+        <div class="portfolio-filter-bar__row" aria-label="Portfolio filters">
+          ${filters
+            .map(
+              (filter, index) => `
+                <button
+                  class="portfolio-filter ${index === 0 ? "is-active" : ""}"
+                  type="button"
+                  data-portfolio-filter="${safeText(filter.key)}"
+                  aria-pressed="${index === 0 ? "true" : "false"}"
+                >
+                  <span>${safeText(filter.label)}</span>
+                  <span class="portfolio-filter__count">${filter.count}</span>
+                </button>
+              `
             )
             .join("")}
         </div>
+        <div class="portfolio-filter-bar__count" data-portfolio-count>${items.length} images shown</div>
       </div>
-      <div class="gallery-stack">
-        <div class="portfolio-grid gallery-grid">
-          ${topItems
-            .map((item) =>
-              imageTileMarkup(item, {
-                sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
-              })
-            )
-            .join("")}
-        </div>
-        ${middleItems.length
-          ? `
-            <div class="gallery-reel ${showReelArrows ? "gallery-reel--arrows" : ""}">
-              ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--prev" type="button" data-gallery-reel-prev aria-label="Scroll portfolio images left">Previous</button>` : ""}
-              <div class="gallery-reel__rail" aria-label="Additional portfolio images" data-gallery-reel-rail>
-                ${middleItems
-                  .map((item) =>
-                    imageTileMarkup(item, {
-                      articleClass: "gallery-reel__item",
-                      buttonClass: "gallery-reel__button",
-                      imageClass: "gallery-reel__image",
-                      sizes: "(max-width: 720px) 72vw, (max-width: 1100px) 46vw, 340px",
-                    })
-                  )
-                  .join("")}
-              </div>
-              ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--next" type="button" data-gallery-reel-next aria-label="Scroll portfolio images right">Next</button>` : ""}
-            </div>
-          `
-          : ""}
-        ${bottomItems.length
-          ? `
-            <div class="portfolio-grid gallery-grid gallery-grid--lower">
-              ${bottomItems
-                .map((item) =>
-                  imageTileMarkup(item, {
-                    sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 50vw, 30vw",
-                  })
-                )
-                .join("")}
-            </div>
-          `
-          : ""}
+      <div class="portfolio-grid portfolio-gallery__grid" aria-label="Portfolio gallery">
+        ${items
+          .map((item) => {
+            const categories = portfolioCategoriesFor(item);
+            const filterTokens = categories.length ? categories.join(" ") : "uncategorized";
+            return imageTileMarkup(item, {
+              sizes: "(max-width: 720px) 92vw, (max-width: 1100px) 48vw, 24vw",
+              extraAttributes: `data-portfolio-item data-portfolio-categories="${safeText(filterTokens)}"`,
+            });
+          })
+          .join("")}
+      </div>
+      <div class="portfolio-gallery__empty" data-portfolio-empty hidden>
+        No images match this filter yet.
       </div>
     </section>
   `;
@@ -1305,6 +1342,7 @@ function buildPricingEstimate(input = {}) {
   const addOns = normalizeAddOnSelections(input.addOns);
   const turnaround = String(input.turnaround || "").trim();
   const suggestedPackage = recommendedPackageForInputs(squareFeet, propertyType);
+  const packageSelectedByUser = Boolean(String(input.packageInterest || "").trim());
   const selectedPackage = String(input.packageInterest || "").trim() || suggestedPackage;
   const service = quoteSummaryService(selectedPackage);
   const basePrice = parseCurrencyAmount(service?.price);
@@ -1323,9 +1361,39 @@ function buildPricingEstimate(input = {}) {
     !basePrice;
 
   const notes = [];
+  const metaPills = [selectedPackage];
 
-  if (!String(input.packageInterest || "").trim()) {
+  if (squareFeet) {
+    metaPills.push(`${squareFeet.toLocaleString("en-US")} sq ft`);
+  }
+
+  addOnLineItems.forEach((item) => {
+    metaPills.push(`${item.label} ${pricingFormatter.format(item.amount)}`);
+  });
+
+  let guidance = {
+    tone: "info",
+    label: "Recommended package",
+    title: suggestedPackage,
+    text: ESTIMATOR_PACKAGE_HINTS[suggestedPackage] || "A strong starting point based on the current property details.",
+  };
+
+  if (!packageSelectedByUser) {
     notes.push(`Suggested package: ${suggestedPackage}.`);
+  } else if (selectedPackage === suggestedPackage && !requiresCustomQuote) {
+    guidance = {
+      tone: "success",
+      label: "Package fit",
+      title: `${selectedPackage} looks like the right starting point`,
+      text: ESTIMATOR_PACKAGE_HINTS[selectedPackage] || "The current property inputs line up well with this package.",
+    };
+  } else if (selectedPackage !== suggestedPackage && !requiresCustomQuote) {
+    guidance = {
+      tone: "info",
+      label: "Recommended package",
+      title: `${suggestedPackage} may fit this listing better`,
+      text: `${ESTIMATOR_PACKAGE_HINTS[suggestedPackage] || "This package is the closer match for the current property inputs."} You are still viewing ${selectedPackage} pricing right now.`,
+    };
   }
 
   if (propertyType === "Luxury listing") {
@@ -1353,13 +1421,28 @@ function buildPricingEstimate(input = {}) {
   }
 
   if (requiresCustomQuote) {
+    guidance = {
+      tone: "warn",
+      label: "Manual review",
+      title: "Custom quote recommended",
+      text:
+        propertyType === "Commercial property"
+          ? "Commercial shoots usually need a manual review before pricing so the coverage and timeline are quoted accurately."
+          : outsideRadius
+            ? "Travel sits outside the standard radius, so this one should be priced manually."
+            : "The current details point to a custom quote instead of a fixed package total.",
+    };
+
     return {
       customQuote: true,
       selectedPackage,
+      suggestedPackage,
       propertyAddress,
       total: null,
       totalLabel: "Custom quote recommended",
       totalDetail: "Travel, scope, or property details need a manual review before quoting accurately.",
+      guidance,
+      metaPills,
       breakdown: [
         {
           label: selectedPackage === "Custom quote" ? "Package selection" : "Starting point",
@@ -1408,10 +1491,13 @@ function buildPricingEstimate(input = {}) {
   return {
     customQuote: false,
     selectedPackage,
+    suggestedPackage,
     propertyAddress,
     total,
     totalLabel: "Estimated starting quote",
     totalDetail: ESTIMATOR_PACKAGE_HINTS[selectedPackage] || "A quick working estimate based on the current package and selections.",
+    guidance,
+    metaPills,
     breakdown,
     notes,
     summary: `${selectedPackage} with the current selections comes to an estimated starting quote of ${pricingFormatter.format(total)}.`,
@@ -1506,6 +1592,8 @@ function pricingEstimateOutputMarkup(estimate) {
   const amountMarkup = estimate.customQuote
     ? `<div class="pricing-estimator__amount pricing-estimator__amount--custom">Custom quote</div>`
     : `<div class="pricing-estimator__amount">${pricingFormatter.format(estimate.total)}</div>`;
+  const guidance = estimate.guidance || null;
+  const breakdownTitle = estimate.customQuote ? "Why this moved to manual review" : "Estimate breakdown";
 
   return `
     <div class="pricing-estimator__cardInner">
@@ -1513,6 +1601,27 @@ function pricingEstimateOutputMarkup(estimate) {
       <div class="pricing-estimator__label">${safeText(estimate.totalLabel)}</div>
       ${amountMarkup}
       <p class="pricing-estimator__detail">${safeText(estimate.totalDetail)}</p>
+      ${
+        guidance
+          ? `
+            <div class="pricing-estimator__guidance pricing-estimator__guidance--${safeText(guidance.tone || "info")}">
+              <div class="pricing-estimator__guidanceLabel">${safeText(guidance.label)}</div>
+              <strong class="pricing-estimator__guidanceTitle">${safeText(guidance.title)}</strong>
+              <p class="pricing-estimator__guidanceText">${safeText(guidance.text)}</p>
+            </div>
+          `
+          : ""
+      }
+      ${
+        estimate.metaPills?.length
+          ? `
+            <div class="pricing-estimator__pills">
+              ${estimate.metaPills.map((item) => `<span class="pill pricing-estimator__pill">${safeText(item)}</span>`).join("")}
+            </div>
+          `
+          : ""
+      }
+      <div class="pricing-estimator__sectionLabel">${breakdownTitle}</div>
       <div class="pricing-estimator__breakdown">
         ${estimate.breakdown
           .map(
@@ -1840,6 +1949,38 @@ function homeContactCtaMarkup() {
           <div class="contact-row">
             <div class="contact-label">Response time</div>
             <div class="contact-value">${safeText(state.settings.responseTime || "Usually replies quickly during business hours.")}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function portfolioFinalCtaMarkup() {
+  return `
+    <section class="section portfolio-final-cta">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Ready to book</div>
+          <h2 class="section__title">Seen enough to know the look you want?</h2>
+          <p class="section__lead">If the work feels like the right fit, send the address, timing, and package you are leaning toward. I will follow up with availability and the best next step.</p>
+          <div class="section__actions">
+            <a class="button button--accent button--magnetic" href="${absoluteSiteUrl("contact.html")}" data-magnetic>Book a session</a>
+            <a class="button" href="${absoluteSiteUrl("services.html")}">View packages</a>
+          </div>
+        </div>
+        <div class="contact-box portfolio-final-cta__card" data-tilt-card>
+          <div class="contact-row">
+            <div class="contact-label">Best fit</div>
+            <div class="contact-value">Agents who already know the listing needs strong photos, quick delivery, and a smooth handoff.</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Fastest path</div>
+            <div class="contact-value">Send the property address, square footage, and the package you are considering.</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Turnaround</div>
+            <div class="contact-value">Most photo packages are delivered within 24 hours, with video following shortly after.</div>
           </div>
         </div>
       </div>
@@ -2646,7 +2787,7 @@ function portfolioPageMarkup() {
   return `
     ${portfolioGalleryMarkup()}
 
-    ${homeContactCtaMarkup()}
+    ${portfolioFinalCtaMarkup()}
   `;
 }
 
@@ -3787,6 +3928,56 @@ function wireGalleryReel() {
   });
 }
 
+function wirePortfolioFilters() {
+  const root = mainEl.querySelector("[data-portfolio-filter-root]");
+  if (!root) {
+    return;
+  }
+
+  const buttons = Array.from(root.querySelectorAll("[data-portfolio-filter]"));
+  const items = Array.from(mainEl.querySelectorAll("[data-portfolio-item]"));
+  const count = mainEl.querySelector("[data-portfolio-count]");
+  const empty = mainEl.querySelector("[data-portfolio-empty]");
+  if (!buttons.length || !items.length) {
+    return;
+  }
+
+  const setActive = (key) => {
+    let visibleCount = 0;
+
+    buttons.forEach((button) => {
+      const active = button.dataset.portfolioFilter === key;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+
+    items.forEach((item) => {
+      const categories = String(item.dataset.portfolioCategories || "").split(/\s+/).filter(Boolean);
+      const show = key === "all" || categories.includes(key);
+      item.hidden = !show;
+      if (show) {
+        visibleCount += 1;
+      }
+    });
+
+    if (count) {
+      count.textContent = `${visibleCount} image${visibleCount === 1 ? "" : "s"} shown`;
+    }
+
+    if (empty) {
+      empty.hidden = visibleCount > 0;
+    }
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setActive(button.dataset.portfolioFilter || "all");
+    });
+  });
+
+  setActive("all");
+}
+
 function wireTestimonialsCarousel() {
   const rail = document.querySelector("[data-testimonials-rail]");
   if (!rail || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -4232,7 +4423,8 @@ function renderPage() {
     mainEl.innerHTML = portfolioPageMarkup();
     wireLazyMediaTransitions();
     wireSectionReveal();
-    wireGalleryReel();
+    wirePortfolioFilters();
+    wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
     return;
