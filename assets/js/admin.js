@@ -2718,7 +2718,7 @@ async function buildSavePayload() {
   const payloadMedia = await Promise.all(
     mediaDrafts.map(async (item) => {
       const record = buildMediaSaveRecord(item);
-      if (isOptimizablePublicImage(record) && (record.blob || !record.variants?.full?.src)) {
+      if (isOptimizablePublicImage(record) && record.blob) {
         const optimized = await buildOptimizedImagePackage(record);
         record.generatedFiles = optimized.generatedFiles;
         record.variants = optimized.variants;
