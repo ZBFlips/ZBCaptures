@@ -2644,6 +2644,7 @@ img {
   height: 11px;
   border-top: 2px solid currentColor;
   border-right: 2px solid currentColor;
+  display: block;
 }
 
 .lightbox__nav:hover,
@@ -2668,7 +2669,7 @@ img {
 }
 
 .lightbox__nav[data-lightbox-prev]::before {
-  transform: rotate(-135deg);
+  transform: translate(1px, 1px) rotate(-135deg);
 }
 
 .lightbox__nav[data-lightbox-next] {
@@ -2676,7 +2677,7 @@ img {
 }
 
 .lightbox__nav[data-lightbox-next]::before {
-  transform: rotate(45deg);
+  transform: translate(-1px, 1px) rotate(45deg);
 }
 
 .lightbox__count {

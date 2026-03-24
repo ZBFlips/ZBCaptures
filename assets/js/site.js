@@ -878,8 +878,7 @@ function renderLightboxRecord(record) {
     : String(record.title || "").trim() && String(record.title || "").trim() !== String(record.name || "").trim()
       ? String(record.title || "").trim()
       : "";
-  const safeCaption = String(record.caption || "").trim();
-  const captionText = [safeTitle, safeCaption].filter(Boolean).join(" - ");
+  const captionText = safeTitle;
   lightboxImage.onload = null;
   lightboxImage.onerror = null;
   lightboxImage.removeAttribute("src");
