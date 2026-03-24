@@ -668,6 +668,19 @@ function portfolioFilterText(item = {}) {
 }
 
 function portfolioCategoriesFor(item = {}) {
+  const explicitTags = Array.isArray(item.portfolioTags)
+    ? Array.from(
+        new Set(
+          item.portfolioTags
+            .map((value) => String(value || "").trim().toLowerCase())
+            .filter((value) => ["interior", "exterior", "drone", "twilight"].includes(value))
+        )
+      )
+    : [];
+  if (explicitTags.length) {
+    return explicitTags;
+  }
+
   const text = portfolioFilterText(item);
   const categories = new Set();
   const hasInteriorCue = /\b(interior|kitchen|bed(room)?|bath(room)?|living|dining|office|foyer|laundry|closet|hall|stair|loft|great room|ceiling)\b/i.test(text);

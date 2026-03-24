@@ -246,6 +246,14 @@ export async function getMedia(id) {
 }
 
 export async function putMedia(record) {
+  const allowedPortfolioTags = new Set(["interior", "exterior", "drone", "twilight"]);
+  const portfolioTags = Array.from(
+    new Set(
+      (Array.isArray(record.portfolioTags) ? record.portfolioTags : [])
+        .map((value) => String(value || "").trim().toLowerCase())
+        .filter((value) => allowedPortfolioTags.has(value))
+    )
+  );
   const sourceExtension = record.src?.match(/\.(\w+)(?:\?|#|$)/)?.[1]?.toLowerCase();
   const inferredType = (() => {
     switch (sourceExtension) {
@@ -282,6 +290,7 @@ export async function putMedia(record) {
     alt: record.alt || "",
     placement: record.placement || "gallery",
     order: Number.isFinite(record.order) ? record.order : 0,
+    portfolioTags,
     featured: Boolean(record.featured),
     portalId: record.portalId || "",
     src: record.src || "",
@@ -304,6 +313,7 @@ export async function updateMedia(id, patch) {
     ...current,
     ...patch,
     order: Number.isFinite(Number(patch.order)) ? Number(patch.order) : current.order,
+    portfolioTags: Array.isArray(patch.portfolioTags) ? patch.portfolioTags : current.portfolioTags,
     featured: patch.featured ?? current.featured,
   };
 

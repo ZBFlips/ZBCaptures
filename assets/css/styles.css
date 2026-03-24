@@ -2330,6 +2330,13 @@ img {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.check-pill--compact {
+  gap: 8px;
+  padding: 0.55rem 0.72rem;
+  border-radius: 14px;
+  font-size: 0.78rem;
+}
+
 .field--checkbox {
   align-items: start;
   gap: 10px;
@@ -2911,6 +2918,36 @@ img {
   gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 20px;
+}
+
+.media-library-toolbar {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.media-library-toolbar__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 12px;
+  align-items: end;
+}
+
+.media-library-toolbar__meta {
+  display: grid;
+  gap: 6px;
+}
+
+.media-library-search {
+  min-width: 0;
+}
+
+.media-library-filter {
+  margin: 0;
 }
 
 .admin-grid {
@@ -3548,18 +3585,18 @@ img {
 
 .media-row {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr) 110px 96px 92px;
-  gap: 8px;
+  grid-template-columns: 96px minmax(0, 1.2fr) minmax(150px, 0.72fr) minmax(230px, 1fr) 132px;
+  gap: 12px;
   align-items: start;
-  padding: 10px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(0, 0, 0, 0.12);
 }
 
 .media-row__thumb {
-  width: 84px;
-  height: 64px;
+  width: 96px;
+  height: 72px;
   object-fit: cover;
   border-radius: 12px;
 }
@@ -3669,6 +3706,36 @@ img {
 
 .media-row .field textarea {
   min-height: 72px;
+}
+
+.media-tag-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.media-row__portfolio {
+  display: grid;
+  gap: 10px;
+}
+
+.media-row__orderGroup {
+  display: grid;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.media-row__orderStatus {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.media-row__orderButtons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .media-actions {
@@ -3812,6 +3879,10 @@ img {
   }
 
   .media-row {
+    grid-template-columns: 1fr;
+  }
+
+  .media-library-toolbar__controls {
     grid-template-columns: 1fr;
   }
 

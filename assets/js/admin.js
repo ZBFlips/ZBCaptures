@@ -53,8 +53,16 @@ const PUBLIC_IMAGE_VARIANT_TYPE = "image/webp";
 const PUBLIC_IMAGE_VARIANT_EXTENSION = "webp";
 const HOME_BEST_OF_LIMIT = 6;
 const HOME_BEST_OF_MOBILE_LIMIT = 4;
+const PORTFOLIO_TAG_OPTIONS = [
+  { value: "interior", label: "Interior" },
+  { value: "exterior", label: "Exterior" },
+  { value: "drone", label: "Drone" },
+  { value: "twilight", label: "Twilight" },
+];
 let homeBestOfActiveSlot = 0;
 let homeBestOfSearchQuery = "";
+let mediaLibrarySearchQuery = "";
+let mediaLibraryScope = "portfolio";
 
 function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
@@ -75,6 +83,88 @@ function formatBytes(bytes) {
   }
 
   return `${size.toFixed(size >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function normalizePortfolioTags(values = []) {
+  const allowed = new Set(PORTFOLIO_TAG_OPTIONS.map((option) => option.value));
+  return Array.from(
+    new Set(
+      (values || [])
+        .map((value) => String(value || "").trim().toLowerCase())
+        .filter((value) => allowed.has(value))
+    )
+  );
+}
+
+function isImageMedia(item) {
+  return !item?.type || String(item.type).startsWith("image/");
+}
+
+function isPortfolioMedia(item) {
+  return isImageMedia(item) && (item?.placement === "gallery" || item?.placement === "featured");
+}
+
+function portfolioTagsInputMarkup(selectedTags = [], options = {}) {
+  const fieldName = options.fieldName || "portfolioTags";
+  const disabled = options.disabled ? "disabled" : "";
+  const normalized = new Set(normalizePortfolioTags(selectedTags));
+  return `
+    <div class="media-tag-grid">
+      ${PORTFOLIO_TAG_OPTIONS.map(
+        (option) => `
+          <label class="check-pill check-pill--compact">
+            <input type="checkbox" value="${safeText(option.value)}" data-media-field="${safeText(fieldName)}" ${normalized.has(option.value) ? "checked" : ""} ${disabled} />
+            <span>${safeText(option.label)}</span>
+          </label>
+        `
+      ).join("")}
+    </div>
+  `;
+}
+
+function mediaLibraryItems(publicItems = []) {
+  const query = mediaLibrarySearchQuery.trim().toLowerCase();
+  return publicItems
+    .filter((item) => {
+      if (mediaLibraryScope === "portfolio") {
+        return isPortfolioMedia(item);
+      }
+      if (mediaLibraryScope === "other") {
+        return !isPortfolioMedia(item) && item.placement !== "video" && item.placement !== "hidden";
+      }
+      if (mediaLibraryScope === "video-hidden") {
+        return item.placement === "video" || item.placement === "hidden" || !isImageMedia(item);
+      }
+      return true;
+    })
+    .filter((item) => {
+      if (!query) {
+        return true;
+      }
+      const haystack = [
+        item.title,
+        item.name,
+        item.alt,
+        item.caption,
+        item.placement,
+        ...(Array.isArray(item.portfolioTags) ? item.portfolioTags : []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    })
+    .sort((left, right) => {
+      const leftPortfolio = isPortfolioMedia(left);
+      const rightPortfolio = isPortfolioMedia(right);
+      if (leftPortfolio !== rightPortfolio) {
+        return leftPortfolio ? -1 : 1;
+      }
+      if (leftPortfolio && rightPortfolio) {
+        return (left.order || 0) - (right.order || 0) || (right.createdAt || 0) - (left.createdAt || 0);
+      }
+      return (right.createdAt || 0) - (left.createdAt || 0);
+    });
 }
 
 function portalUiSnapshot(portalId) {
@@ -434,6 +524,7 @@ function mediaPreviewUrl(item) {
 function mediaDraftFromRow(row) {
   const id = row?.dataset.mediaRow;
   const current = media.find((item) => item.id === id) || { id };
+  const tagInputs = Array.from(row?.querySelectorAll('[data-media-field="portfolioTags"]:checked') || []);
   return {
     ...current,
     title: row?.querySelector('[data-media-field="title"]')?.value || "",
@@ -441,6 +532,7 @@ function mediaDraftFromRow(row) {
     alt: row?.querySelector('[data-media-field="alt"]')?.value || "",
     placement: row?.querySelector('[data-media-field="placement"]')?.value || "gallery",
     order: Number(row?.querySelector('[data-media-field="order"]')?.value || 0),
+    portfolioTags: normalizePortfolioTags(tagInputs.map((input) => input.value)),
   };
 }
 
@@ -1019,7 +1111,6 @@ function adminMarkup() {
         <button type="button" data-jump="#hero">Hero media</button>
         <button type="button" data-jump="#portfolio">Portfolio</button>
         <button type="button" data-jump="#home-bestof">Home best-of</button>
-        <button type="button" data-jump="#gallery-order">Portfolio order</button>
         <button type="button" data-jump="#locations">Location pages</button>
         <button type="button" data-jump="#client-delivery">Client delivery</button>
         <button type="button" data-jump="#services">Services</button>
@@ -1093,7 +1184,7 @@ function adminMarkup() {
 
         <section class="admin-panel" id="portfolio">
           <h2 class="admin-panel__title">Portfolio</h2>
-          <p class="admin-panel__text">Upload gallery images, manage the full portfolio library, and attach a video. The curated home-page picks are controlled in the Home best-of section right below this.</p>
+          <p class="admin-panel__text">Upload gallery images, tag them for the public portfolio filters, and manage ordering from one library instead of a separate reorder screen. The curated home-page picks are controlled in the Home best-of section right below this.</p>
           <form class="admin-grid" id="upload-form">
             <div class="field" style="grid-column: 1 / -1;">
               <label for="file">Images or video</label>
@@ -1129,6 +1220,11 @@ function adminMarkup() {
               <label for="caption">Caption</label>
               <textarea id="caption" name="caption" placeholder="Short note shown in the portfolio tiles"></textarea>
             </div>
+            <div class="field field--wide">
+              <span class="field__label">Portfolio tags</span>
+              <div class="admin-note">Use these when the image should show up under a specific portfolio filter. Leave them blank to let the site auto-detect from the filename and text.</div>
+              ${portfolioTagsInputMarkup([], { fieldName: "portfolioTags" })}
+            </div>
             <div style="grid-column: 1 / -1;">
               <button class="button button--accent" type="submit">Upload selected files</button>
             </div>
@@ -1137,15 +1233,6 @@ function adminMarkup() {
         </section>
 
         ${homeBestOfSectionMarkup()}
-
-        <section class="admin-panel" id="gallery-order">
-          <h2 class="admin-panel__title">Portfolio order</h2>
-          <p class="admin-panel__text">Reorder the full portfolio with simple up and down controls. This order drives the dedicated portfolio page and acts as the fallback order for the home best-of picker.</p>
-          <div class="admin-toolbar">
-            <span class="admin-note" id="gallery-order-status">Use the arrows to move images up or down in the full portfolio.</span>
-          </div>
-          <div class="gallery-order-list" id="gallery-order-list"></div>
-        </section>
 
         <section class="admin-panel" id="locations">
           <h2 class="admin-panel__title">Location pages</h2>
@@ -1335,7 +1422,7 @@ function adminMarkup() {
   `;
 }
 
-async function uploadMediaFiles(files, { placement, title, caption = "", alt, order = 0, portalId = "" }) {
+async function uploadMediaFiles(files, { placement, title, caption = "", alt, order = 0, portalId = "", portfolioTags = [] }) {
   if (!files.length) {
     throw new Error("Choose at least one image or video to upload.");
   }
@@ -1350,6 +1437,7 @@ async function uploadMediaFiles(files, { placement, title, caption = "", alt, or
       alt: alt || title || file.name,
       placement,
       order: order + index,
+      portfolioTags,
       portalId,
     });
   }
@@ -1983,10 +2071,18 @@ function updatePortalCardUi(portalId) {
   }
 }
 
-function mediaEditorRow(item) {
+function mediaEditorRow(item, options = {}) {
   const url = mediaPreviewUrl(item);
   const workflow = mediaWorkflowMarkup(item);
   const actions = mediaActionsMarkup(item);
+  const isPortfolioItem = isPortfolioMedia(item);
+  const portfolioPosition = Number(options.portfolioPosition || 0);
+  const portfolioTotal = Number(options.portfolioTotal || 0);
+  const canMoveUp = isPortfolioItem && portfolioPosition > 1;
+  const canMoveDown = isPortfolioItem && portfolioPosition > 0 && portfolioPosition < portfolioTotal;
+  const tagMarkup = isImageMedia(item)
+    ? portfolioTagsInputMarkup(item.portfolioTags, { fieldName: "portfolioTags" })
+    : `<div class="admin-note">Portfolio tags apply to images only.</div>`;
 
   return `
     <article class="media-row" data-media-row="${item.id}">
@@ -2030,6 +2126,23 @@ function mediaEditorRow(item) {
         <label>Order</label>
         <input data-media-field="order" data-media-id="${item.id}" type="number" value="${Number.isFinite(item.order) ? item.order : 0}" />
       </div>
+      <div class="field media-row__portfolio">
+        <label>Portfolio tags</label>
+        ${tagMarkup}
+        ${
+          isPortfolioItem
+            ? `
+              <div class="media-row__orderGroup">
+                <div class="media-row__orderStatus">Portfolio position #${portfolioPosition} of ${portfolioTotal}</div>
+                <div class="media-row__orderButtons">
+                  <button class="button ghost" type="button" data-media-order-move="up" data-media-order-id="${item.id}" ${canMoveUp ? "" : "disabled"}>Up</button>
+                  <button class="button ghost" type="button" data-media-order-move="down" data-media-order-id="${item.id}" ${canMoveDown ? "" : "disabled"}>Down</button>
+                </div>
+              </div>
+            `
+            : `<div class="admin-note">Switch this image to Gallery or Featured if it should appear in the public portfolio.</div>`
+        }
+      </div>
       <div class="media-actions" data-media-actions="${item.id}">
         ${actions}
       </div>
@@ -2041,10 +2154,45 @@ async function renderMediaList() {
   const target = document.getElementById("media-list");
   const publicItems = media.filter((item) => !item.portalId);
   const portalItemCount = media.length - publicItems.length;
+  const filteredItems = mediaLibraryItems(publicItems);
+  const portfolioItems = galleryOrderItems();
+  const portfolioPositionById = new Map(portfolioItems.map((item, index) => [item.id, index + 1]));
+  const toolbarMarkup = `
+    <div class="media-library-toolbar">
+      <div class="media-library-toolbar__controls">
+        <label class="home-bestof-search media-library-search">
+          <span>Search library</span>
+          <input type="search" data-media-library-search placeholder="Search by title, filename, alt text, or tag" value="${safeText(mediaLibrarySearchQuery)}" />
+        </label>
+        <div class="field media-library-filter">
+          <label for="media-library-scope">Show</label>
+          <select id="media-library-scope" data-media-library-scope>
+            <option value="portfolio" ${mediaLibraryScope === "portfolio" ? "selected" : ""}>Portfolio images</option>
+            <option value="all" ${mediaLibraryScope === "all" ? "selected" : ""}>All public media</option>
+            <option value="other" ${mediaLibraryScope === "other" ? "selected" : ""}>Other sections</option>
+            <option value="video-hidden" ${mediaLibraryScope === "video-hidden" ? "selected" : ""}>Video and hidden</option>
+          </select>
+        </div>
+      </div>
+      <div class="media-library-toolbar__meta">
+        <span class="admin-note">${filteredItems.length} item${filteredItems.length === 1 ? "" : "s"} shown${mediaLibraryScope === "portfolio" ? " from the portfolio library" : ""}.</span>
+        ${portalItemCount ? `<span class="admin-note">Client delivery uploads stay in the Client delivery section below. ${portalItemCount} portal file${portalItemCount === 1 ? "" : "s"} hidden here.</span>` : ""}
+        <span class="admin-note">Responsive WebP files are written when you click <strong>Save changes</strong> or <strong>Publish live</strong>. Use <strong>Refresh variants</strong> to cache a source file in this browser before the next export.</span>
+      </div>
+    </div>
+  `;
+
   target.innerHTML = publicItems.length
-    ? `${portalItemCount ? `<div class="admin-note">Client delivery uploads are managed in the Client delivery section below. ${portalItemCount} portal file${portalItemCount === 1 ? "" : "s"} hidden from this library.</div>` : ""}<div class="admin-note">Responsive WebP files are written when you click <strong>Save changes</strong> or <strong>Publish live</strong>. Use <strong>Refresh variants</strong> to cache a source file in this browser before the next export.</div>${publicItems
-        .map((item) => mediaEditorRow(item))
-        .join("")}`
+    ? `${toolbarMarkup}${filteredItems.length
+        ? filteredItems
+            .map((item) =>
+              mediaEditorRow(item, {
+                portfolioPosition: portfolioPositionById.get(item.id) || 0,
+                portfolioTotal: portfolioItems.length,
+              })
+            )
+            .join("")
+        : `<div class="admin-note">No media matched the current library filter. Try a different search or switch the dropdown above.</div>`}`
     : `<div class="admin-note">${portalItemCount ? "Only client delivery uploads exist right now. Manage those in the Client delivery section." : "No uploads yet. Use the upload form above to add your first images."}</div>`;
 }
 
@@ -2454,6 +2602,7 @@ function buildMediaSaveRecord(item) {
     alt: item.alt || "",
     placement: item.placement || "gallery",
     order: Number.isFinite(Number(item.order)) ? Number(item.order) : 0,
+    portfolioTags: normalizePortfolioTags(item.portfolioTags),
     featured: Boolean(item.featured),
     portalId: item.portalId || "",
     src: item.src || `./assets/uploads/${item.id}.${extension}`,
@@ -2770,6 +2919,7 @@ function wireUploadForm() {
     const caption = form.querySelector('[name="caption"]').value;
     const alt = form.querySelector('[name="alt"]').value;
     const order = Number(form.querySelector('[name="order"]').value || 0);
+    const portfolioTags = normalizePortfolioTags(Array.from(form.querySelectorAll('[data-media-field="portfolioTags"]:checked')).map((input) => input.value));
     const selectedFiles = Array.from(document.getElementById("file").files || []);
 
     try {
@@ -2779,6 +2929,7 @@ function wireUploadForm() {
         caption,
         alt,
         order,
+        portfolioTags,
       });
       form.reset();
       form.querySelector('[name="placement"]').value = placement;
@@ -3363,6 +3514,13 @@ function wireClientPortalsEditor() {
 function wireMediaListEvents() {
   const target = document.getElementById("media-list");
   target.addEventListener("change", (event) => {
+    const libraryScope = event.target.closest("[data-media-library-scope]");
+    if (libraryScope) {
+      mediaLibraryScope = libraryScope.value || "portfolio";
+      renderMediaList();
+      return;
+    }
+
     const field = event.target.closest('[data-media-field="placement"]');
     if (!field) {
       return;
@@ -3372,6 +3530,40 @@ function wireMediaListEvents() {
   });
 
   target.addEventListener("click", async (event) => {
+    const orderButton = event.target.closest("[data-media-order-move]");
+    if (orderButton) {
+      const targetId = orderButton.dataset.mediaOrderId;
+      const direction = orderButton.dataset.mediaOrderMove === "up" ? -1 : orderButton.dataset.mediaOrderMove === "down" ? 1 : 0;
+      if (!targetId || !direction) {
+        return;
+      }
+
+      const items = galleryOrderItems();
+      const index = items.findIndex((item) => item.id === targetId);
+      if (index < 0) {
+        return;
+      }
+
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= items.length) {
+        return;
+      }
+
+      const reordered = [...items];
+      const [moved] = reordered.splice(index, 1);
+      reordered.splice(nextIndex, 0, moved);
+
+      for (let position = 0; position < reordered.length; position += 1) {
+        await putMedia({
+          ...reordered[position],
+          order: position,
+        });
+      }
+
+      await syncAndRender();
+      return;
+    }
+
     const optimizeButton = event.target.closest("[data-media-optimize]");
     if (optimizeButton) {
       const row = target.querySelector(`[data-media-row="${optimizeButton.dataset.mediaOptimize}"]`);
@@ -3427,6 +3619,16 @@ function wireMediaListEvents() {
 
     await deleteMedia(deleteButton.dataset.mediaDelete);
     await syncAndRender();
+  });
+
+  target.addEventListener("input", (event) => {
+    const searchField = event.target.closest("[data-media-library-search]");
+    if (!searchField) {
+      return;
+    }
+
+    mediaLibrarySearchQuery = searchField.value || "";
+    renderMediaList();
   });
 }
 
@@ -3708,7 +3910,6 @@ async function syncAndRender() {
   syncCopyFormsFromState();
   renderFeaturedFrameOptions();
   renderHomeBestOfEditor();
-  renderGalleryOrderEditor();
   renderLocationPagesEditor();
   renderClientPortalsEditor();
   renderServicesEditor();
@@ -3893,7 +4094,6 @@ async function bootstrap() {
   wireUploadForm();
   wireServicesEditor();
   wireHomeBestOfEditor();
-  wireGalleryOrderEditor();
   wireLocationPagesEditor();
   wireClientPortalsEditor();
   wireMediaListEvents();
