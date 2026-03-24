@@ -146,6 +146,7 @@
       "alt": "",
       "placement": "video",
       "order": 0,
+      "portfolioTags": [],
       "featured": false,
       "src": "https://raw.githubusercontent.com/ZBFlips/ZBCaptures/main/assets/uploads/8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb.mp4",
       "variants": null,
@@ -162,6 +163,7 @@
       "alt": "2-1-print-396-revana-wy.png",
       "placement": "hero",
       "order": 0,
+      "portfolioTags": [],
       "featured": false,
       "src": "./assets/uploads/952028f8-6a70-400c-b4d0-6b1ef94ac6e1-full.webp",
       "variants": {
@@ -197,6 +199,7 @@
       "alt": "Twilight Real Estate Photography",
       "placement": "reveal",
       "order": 0,
+      "portfolioTags": [],
       "featured": false,
       "src": "./assets/uploads/6a25db3c-effe-45aa-9847-cf55c157d1ec-full.webp",
       "variants": {
@@ -232,6 +235,7 @@
       "alt": "Header logo",
       "placement": "logo",
       "order": 0,
+      "portfolioTags": [],
       "featured": false,
       "src": "./assets/uploads/e1e80edd-db68-4267-9e62-3ad353f6a3c7.png",
       "variants": null,
@@ -248,6 +252,7 @@
       "alt": "Night reveal",
       "placement": "reveal",
       "order": 0,
+      "portfolioTags": [],
       "featured": false,
       "src": "./assets/uploads/bfdee870-6786-432d-9ef1-3c57c04b80a0-full.webp",
       "variants": {
@@ -283,6 +288,7 @@
       "alt": "Daytime background",
       "placement": "hero",
       "order": 0,
+      "portfolioTags": [],
       "featured": false,
       "src": "./assets/uploads/14a63367-726d-4164-9527-4404ec649cb8-full.webp",
       "variants": {
@@ -313,11 +319,14 @@
       "name": "port",
       "type": "image/webp",
       "createdAt": 1774026900451,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Fire Pit & Patio Detail | Pensacola Residence",
+      "caption": "The bright sunlight beaming down on this backyard was key to showing off that blue glass fire pit. It’s a great example of how a well-designed outdoor space becomes the centerpiece of a Pensacola home. This shot by ZB Captures highlights the flow from the custom stone patio to the screened-in porch.",
+      "alt": "A wide-angle photo of a stone paver patio in Ensley, FL, featuring a large fire pit with blue glass and four wood chairs. A brick house with a screened-in porch is in the background under a blue sky.",
       "placement": "gallery",
       "order": 0,
+      "portfolioTags": [
+        "exterior"
+      ],
       "featured": false,
       "src": "./assets/uploads/c38c5376-9a75-4319-b2d3-225169ca4cc8-full.webp",
       "variants": {
@@ -348,11 +357,14 @@
       "name": "8-006_7604 Dewey Jernigan Rd.jpg",
       "type": "image/webp",
       "createdAt": 1773979295631,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Modern Home Exterior | Pace, FL Real Estate",
+      "caption": "Curb appeal is the first thing a buyer notices, and this modern craftsman in Pace, FL, is a perfect example. Between the clean board and batten siding and those sharp dormer windows, there’s a lot of character to capture here. At ZB Captures, I focus on wide, clean exterior angles that show off the full scale of the property and its landscaping, giving potential buyers a clear look at their future home.",
+      "alt": "An exterior photograph of a light gray modern farmhouse with white trim and a two-car garage in Pace, FL. The house features a front porch with a white bench, two dormer windows, and a neatly landscaped front yard under a bright blue sky. Professional real estate photography by ZB Captures.",
       "placement": "gallery",
       "order": 1,
+      "portfolioTags": [
+        "exterior"
+      ],
       "featured": false,
       "src": "./assets/uploads/c1295aee-fbba-4a63-b620-fa0354cce484-full.webp",
       "variants": {
@@ -383,11 +395,14 @@
       "name": "Interior (2).jpg",
       "type": "image/webp",
       "createdAt": 1774032289488,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Updated Kitchen & Dining Area | Navarre, FL Real Estate",
+      "caption": "Kitchens are the biggest selling point in any home, and this Navarre property shows why. Between the stainless steel appliances and the white subway tile, it’s got a clean, modern look that buyers love. I particularly like how the brick accent wall adds some texture to the dining nook. ZB Captures focuses on these interior details to help a listing feel like a home from the very first click.",
+      "alt": "An interior photo of a kitchen and dining nook in a Navarre, FL home. The kitchen features white cabinets, granite countertops, and stainless steel appliances, while the dining area has a grey brick accent wall and a hanging pendant light. Professional interior photography by ZB Captures.",
       "placement": "gallery",
       "order": 2,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/514a50d3-dde9-4b32-95fd-5b32a5cf24d6-full.webp",
       "variants": {
@@ -418,11 +433,14 @@
       "name": "c10226c9afc0bd9dcf11399c01e065bd",
       "type": "image/webp",
       "createdAt": 1774026900451,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Oceanfront Bedroom View | Panama City Beach Real Estate",
+      "caption": "There is nothing like a floor-to-ceiling view of the Gulf to sell a Panama City Beach condo. The challenge with shots like this is balancing the bright Florida sun outside with the interior details, but that’s where the right professional gear makes the difference. ZB Captures focuses on high-dynamic-range photography to ensure the white sands are just as clear as the coastal decor inside.",
+      "alt": "A bright, airy bedroom in Panama City Beach, Florida, with floor-to-ceiling windows overlooking the Gulf of Mexico. The room features coastal decor, a white dresser, and a sliding glass door leading to a balcony. Professional interior photography by ZB Captures.",
       "placement": "gallery",
       "order": 3,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/302fa87d-3104-4729-b49e-b45d2581d07a-full.webp",
       "variants": {
@@ -453,11 +471,14 @@
       "name": "Untitled3.jpg",
       "type": "image/webp",
       "createdAt": 1774196907225,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Open-Concept Coastal Living | Gulf Breeze, FL",
+      "caption": "Capturing the flow of an open layout like this one in Gulf Breeze is all about finding the angle that shows how the rooms actually connect. The coastal accents and blue tones really pop against the warm flooring, giving the whole space a move-in-ready feel. At ZB Captures, I focus on wide-angle interiors that help potential buyers visualize themselves moving through the home.",
+      "alt": "A wide-angle interior photograph of an open-concept living and dining area in a Gulf Breeze, FL home. The space features a coastal decor theme with blue accents, dark wood-style flooring, a large flat-screen TV, and a clear view into the kitchen and dining nook. Professional real estate photography by ZB Captures.",
       "placement": "gallery",
       "order": 4,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/babd7685-c34b-4194-a521-124452269480-full.webp",
       "variants": {
@@ -488,11 +509,15 @@
       "name": "RE-1-2.jpg",
       "type": "image/webp",
       "createdAt": 1774032418805,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Aerial Property View & Large Lot Layout | Milton, FL",
+      "caption": "Ground photos only tell half the story, especially for homes in Milton with significant acreage. This top-down perspective highlights the entire layout—from the clean rooflines and paved driveway to the landscaped stone path leading through the yard. As an FAA Part 107 certified pilot, I ensure these aerials for ZB Captures aren't just high-up shots, but strategic views that show off the property's boundaries and potential.",
+      "alt": "A high-resolution top-down aerial photograph of a residential property in Milton, FL. The image shows a dark-grey shingled roof, a wide concrete driveway, and a large, manicured green lawn with mature trees and a stone walking path. The bird's-eye view captures the full lot size and surrounding neighborhood context. Real estate drone photography by ZB Captures.",
       "placement": "gallery",
       "order": 5,
+      "portfolioTags": [
+        "exterior",
+        "drone"
+      ],
       "featured": false,
       "src": "./assets/uploads/d83eac99-2e41-43e6-92d6-1b64428a0ca0-full.webp",
       "variants": {
@@ -523,11 +548,14 @@
       "name": "15-14-print-396-revana-wy",
       "type": "image/webp",
       "createdAt": 1774026900432,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Luxury Kitchen Interior & Granite Island | Crestview, FL",
+      "caption": "Capturing a bright white kitchen without losing the details in the cabinets or the texture of the backsplash is always a rewarding challenge. This Crestview home is a showstopper, featuring a massive granite island and high-end stainless steel appliances that any home chef would love. At ZB Captures, I focus on highlighting these premium finishes—like the crown molding and custom pendant lighting—to ensure the listing stands out in the competitive North Florida market.",
+      "alt": "An interior photograph of a modern, luxury kitchen in Crestview, FL. The image features a large white granite-topped island with a farmhouse sink, stainless steel appliances, and white shaker-style cabinets with glass-front uppers. Three large glass pendant lights hang above the island over hardwood floors. Professional real estate photography by ZB Captures.",
       "placement": "gallery",
       "order": 6,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/cd877900-442c-42ae-bbed-60d462a72dc8-full.webp",
       "variants": {
@@ -558,11 +586,14 @@
       "name": "35-F8_5817 Front Beach Rd unit 1907_0034.jpg",
       "type": "image/webp",
       "createdAt": 1773979304903,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Beachfront Balcony View with Pier | Panama City Beach, FL",
+      "caption": "In a market like Panama City Beach, the balcony view is everything. This shot from a unit on Front Beach Road captures the iconic Russell-Fields Pier and the clear Gulf water that brings people to the Panhandle. Balancing the bright Florida sun with the vibrant turquoise of the water requires the right technical approach to ensure nothing gets blown out. At ZB Captures, I prioritize these \"money shots\" because they are often the first thing a potential guest or buyer clicks on.",
+      "alt": "A high-angle view from a 19th-floor condo balcony in Panama City Beach, FL, looking down at the white sand beach and the Russell-Fields Pier. The turquoise water of the Gulf of Mexico is vibrant under a blue sky. The balcony features bright yellow walls and turquoise Adirondack chairs. Professional real estate photography by ZB Captures.",
       "placement": "gallery",
       "order": 7,
+      "portfolioTags": [
+        "exterior"
+      ],
       "featured": false,
       "src": "./assets/uploads/040927aa-81b6-4c81-bd9b-ed1cdcc9a87d-full.webp",
       "variants": {
@@ -593,11 +624,14 @@
       "name": "Untitled3-2.jpg",
       "type": "image/webp",
       "createdAt": 1774196903324,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Bright Guest Bedroom & Skylight | Fort Walton Beach, FL",
+      "caption": "A high-quality guest room is a major selling point in Fort Walton Beach, and this space proves why. By using a wide-angle lens and balancing the natural light from the skylight and the sliding glass door, I was able to capture an airy, inviting vibe that doesn't feel like an afterthought. ZB Captures focuses on making every room in the house look like the best seat in the house.",
+      "alt": "A bright interior photo of a guest bedroom in Fort Walton Beach, FL, featuring a large skylight and sliding glass doors. The room is decorated with a coastal theme, including a nautical painting and neutral tones, over dark wood-look flooring. Professional real estate photography by ZB Captures.",
       "placement": "gallery",
       "order": 8,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/ec03023f-2779-432a-a9fd-6d26f7d1eea5-full.webp",
       "variants": {
@@ -628,11 +662,14 @@
       "name": "Untitled.jpg",
       "type": "image/webp",
       "createdAt": 1774196874675,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Spacious Open-Concept Living Area | Milton, FL",
+      "caption": "A bright and inviting open-concept great room in Milton, FL, featuring vaulted ceilings and a seamless flow from the foyer to the main living space. The interior is anchored by warm hardwood flooring and light neutral walls, offering a versatile layout with distinct seating areas, thoughtful built-in storage solutions, and immediate access to a comfortable guest suite.",
+      "alt": "A wide-angle interior shot of a sunlit living room with vaulted ceilings and a brown ceiling fan. A grey sectional and a blue storage bench sit on a large patterned rug. To the left, a doorway reveals a bedroom with a dark grey bed. To the right, a tiled entryway leads to a white front door with a decorative window.",
       "placement": "gallery",
       "order": 9,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/6ddad90d-a384-4715-9bba-3a1d55494f82-full.webp",
       "variants": {
@@ -659,15 +696,57 @@
       "originalType": "image/jpeg"
     },
     {
+      "id": "cd87f7b8-b404-4ce8-a251-f9257e6a7922",
+      "name": "ChatGPT Image Mar 24, 2026, 04_08_01 PM.png",
+      "type": "image/webp",
+      "createdAt": 1774386555567,
+      "title": "Coastal Resort Pool at Twilight | Perdido Key, FL",
+      "caption": "A stunning twilight view of the private beach club at Lost Key. The elevated pool deck features warm ambient lighting and signature blue-umbrella lounge seating, overlooking the sugar-white sands and emerald waters of the Gulf of Mexico. The silhouetted high-rise towers in the background anchor the scene against a vibrant sunset sky, highlighting the resort's premier amenity package.",
+      "alt": "A high-angle twilight photograph of a glowing rectangular swimming pool on a large wooden deck. Blue umbrellas and lounge chairs line the deck, which is illuminated by small golden pillar lights. In the background, a tall, lit-up condominium building stands against a sunset sky of deep blue and orange, next to the dark shoreline of the ocean.",
+      "placement": "gallery",
+      "order": 10,
+      "portfolioTags": [
+        "exterior",
+        "drone"
+      ],
+      "featured": false,
+      "src": "./assets/uploads/cd87f7b8-b404-4ce8-a251-f9257e6a7922-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/cd87f7b8-b404-4ce8-a251-f9257e6a7922-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/cd87f7b8-b404-4ce8-a251-f9257e6a7922-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/cd87f7b8-b404-4ce8-a251-f9257e6a7922-full.webp",
+          "type": "image/webp",
+          "width": 1536,
+          "height": 1024
+        }
+      },
+      "originalSrc": "./assets/uploads/cd87f7b8-b404-4ce8-a251-f9257e6a7922.png",
+      "originalType": "image/png"
+    },
+    {
       "id": "83e086ba-35ae-4b70-b2bf-8652f39206e6",
       "name": "Untitled2.jpg",
       "type": "image/webp",
       "createdAt": 1774196822729,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Coastal-Inspired Master Suite | Loxley, AL",
+      "caption": "A spacious and serene master bedroom in Loxley, AL, blending traditional comfort with a light coastal aesthetic. The room features a substantial wooden bed frame anchored by crisp white linens and nautical blue accents. Warm, layered lighting from dual bedside lamps and a central fixture complements the soft beige tones of the walls and plush carpeting, creating a tranquil retreat.",
+      "alt": "A wide-angle interior view of a bright bedroom with beige walls and carpet. A large wooden bed with white bedding and a blue-and-white striped throw is centered. To the right, an ornate glass-topped end table holds a lit lamp. On the left, a TV sits on a slender wooden console table next to a window with white curtains.",
       "placement": "gallery",
       "order": 10,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/83e086ba-35ae-4b70-b2bf-8652f39206e6-full.webp",
       "variants": {
@@ -698,11 +777,14 @@
       "name": "Interior (4).jpg",
       "type": "image/webp",
       "createdAt": 1774196822504,
-      "title": "Interior (4)",
-      "caption": "",
-      "alt": "Interior (4).jpg",
+      "title": "Modern Coastal Living Room | Designer Interior | Navarre, FL",
+      "caption": "A bright and inviting open-concept living area featuring a contemporary white sectional sofa accented with terracotta-orange throw pillows. The space is anchored by a vibrant geometric area rug and a sleek glass-top coffee table, with a clear view of the staircase and sliding glass doors that lead to a private outdoor patio.",
+      "alt": "A high-angle, wide interior shot of a well-lit living room with neutral beige walls and dark wood-plank flooring. A white L-shaped sectional sofa with orange pillows sits on a patterned blue and orange rug. In the background, white-painted stairs with a dark handrail are visible, and sliding glass doors are covered by sheer white curtains.",
       "placement": "gallery",
       "order": 11,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/0b912644-3256-418a-8d59-331088303e63-full.webp",
       "variants": {
@@ -733,11 +815,14 @@
       "name": "7-007_ 1305 Sixth St Florala.jpg",
       "type": "image/webp",
       "createdAt": 1774032362576,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Rustic-Luxe Great Room | Florala, FL",
+      "caption": "A masterfully designed rustic-luxe great room featuring a grand vaulted ceiling and a custom centerpiece antler-style chandelier. The focal point of the space is a floor-to-ceiling dry-stack stone fireplace with a natural wood mantel and a classic deer mount, all set upon light wood-plank flooring that enhances the home's open, airy floor plan.",
+      "alt": "A high-angle interior shot of a spacious rustic living room with white walls and vaulted ceilings. A large antler chandelier hangs in the center above brown wicker and leather furniture. A tall, light-gray stone fireplace with a deer mount on the chimney is on the right wall, and large windows provide a view of greenery outside.",
       "placement": "gallery",
       "order": 12,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/26e4d87b-f58a-4d45-9223-9a03ef37ce34-full.webp",
       "variants": {
@@ -773,6 +858,7 @@
       "alt": "",
       "placement": "gallery",
       "order": 13,
+      "portfolioTags": [],
       "featured": false,
       "src": "./assets/uploads/d8aef652-34f4-4e7e-aae4-d54b551eb281-full.webp",
       "variants": {
@@ -799,15 +885,57 @@
       "originalType": "image/jpeg"
     },
     {
+      "id": "07153b17-0a77-4d7a-97fd-087868ec39ce",
+      "name": "ChatGPT Image Mar 24, 2026, 03_58_27 PM.png",
+      "type": "image/webp",
+      "createdAt": 1774386027378,
+      "title": "Modern Ranch-Style Pool Home | Twilight Perspective | Pensacola, FL",
+      "caption": "A wide-angle twilight photograph of a white brick single-story house with a lit-up swimming pool in the foreground. The pool's interior lights glow yellow against the blue water, and the house windows and exterior sconces cast a warm golden light. A dark sky with purple and blue hues is visible above the silhouetted trees in the background.",
+      "alt": "A captivating ",
+      "placement": "gallery",
+      "order": 14,
+      "portfolioTags": [
+        "exterior",
+        "twilight"
+      ],
+      "featured": false,
+      "src": "./assets/uploads/07153b17-0a77-4d7a-97fd-087868ec39ce-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/07153b17-0a77-4d7a-97fd-087868ec39ce-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/07153b17-0a77-4d7a-97fd-087868ec39ce-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/07153b17-0a77-4d7a-97fd-087868ec39ce-full.webp",
+          "type": "image/webp",
+          "width": 1536,
+          "height": 1024
+        }
+      },
+      "originalSrc": "./assets/uploads/07153b17-0a77-4d7a-97fd-087868ec39ce.png",
+      "originalType": "image/png"
+    },
+    {
       "id": "328cba1c-65b8-47b6-9d99-cc5bfb0a65ac",
       "name": "Interior (14).jpg",
       "type": "image/webp",
       "createdAt": 1774196822497,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Modern Chef’s Kitchen & Open Dining | Fort Walton Beach, FL",
+      "caption": "A stunningly renovated open-concept kitchen and dining space in Fort Walton Beach, FL. The design features a bold navy blue center island topped with pristine white quartz, complemented by bright white perimeter cabinetry and a sleek textured-tile backsplash. The layout flows seamlessly into a spacious dining area anchored by a floor-to-ceiling stone fireplace, creating a sophisticated environment for coastal entertaining.",
+      "alt": "A wide-angle interior view of a modern kitchen flowing into a dining room. In the foreground, a large navy blue kitchen island with a white countertop sits on wood-plank flooring. White cabinets and a stainless steel oven line the left wall. In the background, a long wooden dining table is positioned in front of a light-colored stone fireplace and glass doors.",
       "placement": "gallery",
       "order": 14,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/328cba1c-65b8-47b6-9d99-cc5bfb0a65ac-full.webp",
       "variants": {
@@ -838,11 +966,14 @@
       "name": "re.jpg",
       "type": "image/webp",
       "createdAt": 1774032223230,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Welcoming Modern Entryway | Autumnal Staging | Ensley, FL",
+      "caption": "A charming front porch view of a contemporary home in Ensley, FL, featuring neutral taupe siding and crisp white trim. The entry is thoughtfully staged with seasonal floral arrangements, a checkered welcome mat, and an autumnal wreath, leading the eye toward the spacious side yard enclosed by a classic wooden privacy fence.",
+      "alt": "A close-up architectural shot of a home's front entrance. The porch has tan siding, a dark brown door with an orange leaf wreath, and white columns. Bright orange and white flowers in black planters line the walkway, which leads past a green lawn toward a tall wooden fence and mature trees in the background.",
       "placement": "gallery",
       "order": 15,
+      "portfolioTags": [
+        "exterior"
+      ],
       "featured": false,
       "src": "./assets/uploads/a6dc9347-8bb1-45d2-a9ef-7e20d2b70538-full.webp",
       "variants": {
@@ -873,11 +1004,15 @@
       "name": "46-004_F8_AERIAL_15817 Front Beach.jpg",
       "type": "image/webp",
       "createdAt": 1774032182524,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Coastal High-Rise Aerial | Calypso Resort & Towers | Panama City Beach, FL",
+      "caption": "A high-angle aerial perspective of the vibrant yellow towers at Calypso Resort & Towers on Front Beach Road. This drone-captured shot highlights the rhythmic geometry of the balconies—each featuring colorful accent seating—and overlooks the resort’s winding lagoon-style pool and private beach access along the emerald waters of the Gulf of Mexico.",
+      "alt": "A high-angle drone photograph looking down the side of a tall yellow condominium building with white balcony railings. Each balcony contains bright chairs in teal, blue, or yellow. At the base of the building, a long, winding turquoise swimming pool is surrounded by palm trees and a thatched-roof tiki hut, with a white sand beach visible in the upper right.",
       "placement": "gallery",
       "order": 16,
+      "portfolioTags": [
+        "exterior",
+        "drone"
+      ],
       "featured": false,
       "src": "./assets/uploads/7ee20adb-6cb8-4141-a5a3-5f2252556dbd-full.webp",
       "variants": {
@@ -908,11 +1043,14 @@
       "name": "25639402985d9f218da3552fe3cd6a56.jpg",
       "type": "image/webp",
       "createdAt": 1773979595906,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Coastal Guest Bedroom | Vibrant Blue Accent Wall | Fort Walton Beach, FL",
+      "caption": "A meticulously staged guest bedroom in Fort Walton Beach, FL, featuring a striking navy-blue shiplap accent wall that anchors the space. The room utilizes a symmetrical layout with dual wooden bed frames, crisp white linens, and blue runners, all tied together by neutral white wood-paneled walls and warm, light-oak flooring.",
+      "alt": "A bright, symmetrical bedroom featuring a bold blue paneled accent wall flanked by white paneled walls. Two identical wooden beds with white comforters and blue blankets are centered in the frame. A white ceiling fan hangs above, and natural light enters from a window with white blinds on the right.",
       "placement": "gallery",
       "order": 17,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/43148f0d-4461-413f-8a97-06eaea1eb60c-full.webp",
       "variants": {
@@ -943,11 +1081,14 @@
       "name": "47-46-print-396-revana-wy.jpg",
       "type": "image/webp",
       "createdAt": 1773979313994,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Luxury Poolside Lanai | Vineyards at Hammock Bay | Freeport, FL",
+      "caption": "A premier indoor-outdoor living space featuring a custom-built, double-sided brick gas fireplace and a stained tongue-and-groove wood ceiling. The screened enclosure houses roughly 85 square meters of travertine-tiled patio, offering a seamless transition to the private gunite pool and spillover spa overlooking the lakeside lot.",
+      "alt": "A wide-angle interior view of a luxury screened-in porch with a warm wood-plank ceiling and a long, modern brick fireplace with a glass-enclosed flame. Through the screens, a turquoise swimming pool and spa are visible on a white stone deck, surrounded by a lush forest under a bright blue sky.",
       "placement": "gallery",
       "order": 18,
+      "portfolioTags": [
+        "exterior"
+      ],
       "featured": false,
       "src": "./assets/uploads/9e0c87d5-1b2a-487e-aa43-e45e3b00a0f0-full.webp",
       "variants": {
@@ -978,11 +1119,14 @@
       "name": "re-2.jpg",
       "type": "image/webp",
       "createdAt": 1773979271562,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Classic Chef’s Kitchen | Stainless Steel Suite | Pace, FL",
+      "caption": "A spacious and functional suburban kitchen in Pace, FL, featuring traditional dark wood cabinetry and expansive granite countertops. The layout is optimized for high-traffic use with a central prep island, a decorative multi-tonal mosaic tile backsplash, and a full suite of stainless steel Maytag appliances integrated into the warm hardwood-style flooring.",
+      "alt": "A wide-angle interior shot of a large kitchen with dark-stained wood cabinets and light-colored granite countertops. A center island with a granite top sits on a polished wood floor. The kitchen features a mosaic tile backsplash and stainless steel appliances, including a large French-door refrigerator and a glass-top oven.",
       "placement": "gallery",
       "order": 19,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/36a0b4cf-f03d-4031-b4d9-8660ef8fd6e0-full.webp",
       "variants": {
@@ -1013,11 +1157,14 @@
       "name": "Interior (9).jpg",
       "type": "image/webp",
       "createdAt": 1773979261991,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Modern Master Suite | Navarre, FL",
+      "caption": "A spacious master bedroom featuring a deep-tray ceiling and a soothing sage-green color palette. The room is anchored by a dark leather sleigh bed and rustic wood nightstands, complemented by a large floral area rug and sliding door access to a private balcony.",
+      "alt": "A spacious bedroom with light green walls and a tray ceiling. A dark leather bed with white linens sits on a floral rug. Two rustic wood nightstands with unique wooden lamps flank the bed, and glass sliding doors are on the left.",
       "placement": "gallery",
       "order": 20,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/255fe567-d6e7-4cb7-8e43-753fbd125eb6-full.webp",
       "variants": {
@@ -1048,11 +1195,15 @@
       "name": "lost key-4.jpg",
       "type": "image/webp",
       "createdAt": 1773979252009,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Luxury High-Rise Architecture | Lost Key Golf & Beach Club | Perdido Key, FL",
+      "caption": "Caption: A full-facade architectural perspective of the San Anton tower at Lost Key. This structure rises approximately 38 meters and features integrated screened-in lanais designed for optimal ventilation and unobstructed views of the Arnold Palmer-designed golf course and the Gulf of Mexico.",
+      "alt": "ALT Text: A symmetrical, wide-angle exterior shot of a 10-story cream-colored condominium building with dark screened-in balconies and a light metal roof. The building is centered against a clear blue sky, with manicured green lawns, shrubs, and a paved walkway in the foreground.",
       "placement": "gallery",
       "order": 21,
+      "portfolioTags": [
+        "exterior",
+        "drone"
+      ],
       "featured": false,
       "src": "./assets/uploads/64401869-af1a-4199-880f-244fd744b7ab-full.webp",
       "variants": {
@@ -1083,11 +1234,14 @@
       "name": "8-010_f8_100 Hidden.JPG",
       "type": "image/webp",
       "createdAt": 1774032312968,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Modern Craftsman Great Room | Vaulted Wood Ceilings | Gulf Breeze, FL",
+      "caption": "A breathtaking open-concept living space in Gulf Breeze, FL, characterized by a dramatic vaulted tongue-and-groove wood ceiling and a massive contemporary 8-blade ceiling fan. The gourmet kitchen integrates seamlessly with the living area, featuring crisp white cabinetry, a custom brick-wrapped breakfast bar, and high-end light-oak LVP flooring that reflects the abundant natural light from the oversized windows.",
+      "alt": "A wide-angle interior photograph of a spacious open-concept home. The room features a high, angled light-wood ceiling with a large black multi-blade fan and recessed lights. A kitchen with white cabinets and a brick-fronted island sits to the left, while large white-trimmed windows on the right look out onto a lush green forest.",
       "placement": "gallery",
       "order": 22,
+      "portfolioTags": [
+        "interior"
+      ],
       "featured": false,
       "src": "./assets/uploads/5aba2a36-cba4-4621-b698-c4fc630c06d3-full.webp",
       "variants": {
@@ -1118,11 +1272,15 @@
       "name": "d9abb3200d9175b30197696ccfcd7058.jpg",
       "type": "image/webp",
       "createdAt": 1773979231570,
-      "title": "",
-      "caption": "",
-      "alt": "",
+      "title": "Premier Waterfront Estate | Private Dock & Coastal Views | Orange Beach, AL",
+      "caption": "A rare aerial perspective of this exclusive Orange Beach waterfront property. The home features unique stone facade accents and is anchored by an expansive private wooden boardwalk and dock system extending directly into the calm waters, offering seamless boating access. The extensive screened-in porch provides an unparalleled outdoor living experience with dynamic views of the manicured grounds and surrounding coastal landscape.",
+      "alt": "An aerial photograph looking down at a large single-family waterfront home with a unique light-colored stone facade and a tan roof. A wide wooden boardwalk and a private dock lead from the backyard across a green coastal vegetation barrier to the edge of the blue water. The property includes a multi-panel screened porch, manicured lawns, and mature palm trees under a bright blue sky.",
       "placement": "gallery",
       "order": 23,
+      "portfolioTags": [
+        "exterior",
+        "drone"
+      ],
       "featured": false,
       "src": "./assets/uploads/0782c117-ba6c-4b14-9f4e-e721d7dedd8f-full.webp",
       "variants": {
@@ -1149,5 +1307,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-03-24T02:55:29.223Z"
+  "savedAt": "2026-03-24T21:15:36.059Z"
 }
