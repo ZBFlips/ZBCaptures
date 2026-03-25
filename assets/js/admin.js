@@ -300,7 +300,7 @@ async function sha256Hex(value) {
 
 async function loadPublishedSiteData() {
   try {
-    const response = await fetch("./content/site-data.json", { cache: "no-store" });
+    const response = await fetch("/content/site-data.json", { cache: "no-store" });
     if (!response.ok) {
       return null;
     }
@@ -313,7 +313,7 @@ async function loadPublishedSiteData() {
 
 async function loadPublishedLocationPages() {
   try {
-    const response = await fetch("./content/locations.json", { cache: "no-store" });
+    const response = await fetch("/content/locations.json", { cache: "no-store" });
     if (!response.ok) {
       return [];
     }
@@ -2749,7 +2749,7 @@ async function buildSavePayload() {
 
 async function saveToLocalFiles(payload) {
   const { mediaDrafts, localClientPortals, ...serializablePayload } = payload;
-  const response = await fetch("./__admin/save", {
+  const response = await fetch("/__admin/save", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

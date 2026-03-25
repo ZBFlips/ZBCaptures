@@ -30,30 +30,30 @@ async function requestJson(path, options = {}) {
 }
 
 export async function getAdminSession() {
-  return requestJson("./api/admin/session");
+  return requestJson("/api/admin/session");
 }
 
 export async function adminLogin(password) {
-  return requestJson("./api/admin/session", {
+  return requestJson("/api/admin/session", {
     method: "POST",
     body: JSON.stringify({ password }),
   });
 }
 
 export async function adminLogout() {
-  return requestJson("./api/admin/session", {
+  return requestJson("/api/admin/session", {
     method: "DELETE",
   });
 }
 
 export async function listCloudPortals() {
-  const payload = await requestJson("./api/admin/portals");
+  const payload = await requestJson("/api/admin/portals");
   return Array.isArray(payload.portals) ? payload.portals : [];
 }
 
 export async function saveCloudPortal(portal, options = {}) {
   const method = portal?.id ? "PUT" : "POST";
-  const path = portal?.id ? `./api/admin/portals/${joinPath([portal.id])}` : "./api/admin/portals";
+  const path = portal?.id ? `/api/admin/portals/${joinPath([portal.id])}` : "/api/admin/portals";
   const payload = await requestJson(path, {
     method,
     body: JSON.stringify({
@@ -66,13 +66,13 @@ export async function saveCloudPortal(portal, options = {}) {
 }
 
 export async function deleteCloudPortal(portalId) {
-  return requestJson(`./api/admin/portals/${joinPath([portalId])}`, {
+  return requestJson(`/api/admin/portals/${joinPath([portalId])}`, {
     method: "DELETE",
   });
 }
 
 export async function createCloudUploadTarget(portalId, file) {
-  return requestJson(`./api/admin/portals/${joinPath([portalId])}/upload-url`, {
+  return requestJson(`/api/admin/portals/${joinPath([portalId])}/upload-url`, {
     method: "POST",
     body: JSON.stringify({
       fileName: file.name,
@@ -97,7 +97,7 @@ export async function uploadFileToR2(uploadTarget, file) {
 }
 
 export async function finalizeCloudPortalFile(portalId, fileRecord) {
-  const payload = await requestJson(`./api/admin/portals/${joinPath([portalId])}/files`, {
+  const payload = await requestJson(`/api/admin/portals/${joinPath([portalId])}/files`, {
     method: "POST",
     body: JSON.stringify(fileRecord),
   });
@@ -106,7 +106,7 @@ export async function finalizeCloudPortalFile(portalId, fileRecord) {
 }
 
 export async function deleteCloudPortalFile(portalId, fileId) {
-  const payload = await requestJson(`./api/admin/portals/${joinPath([portalId, "files", fileId])}`, {
+  const payload = await requestJson(`/api/admin/portals/${joinPath([portalId, "files", fileId])}`, {
     method: "DELETE",
   });
 
@@ -114,7 +114,7 @@ export async function deleteCloudPortalFile(portalId, fileId) {
 }
 
 export async function unlockCloudPortal({ slug, accessCode = "", token = "" }) {
-  const payload = await requestJson("./api/portal/unlock", {
+  const payload = await requestJson("/api/portal/unlock", {
     method: "POST",
     body: JSON.stringify({
       portal: slug,
@@ -127,6 +127,6 @@ export async function unlockCloudPortal({ slug, accessCode = "", token = "" }) {
 }
 
 export async function loadUnlockedCloudPortal(slug) {
-  const payload = await requestJson(`./api/portal/${joinPath([slug])}`);
+  const payload = await requestJson(`/api/portal/${joinPath([slug])}`);
   return payload.portal;
 }
