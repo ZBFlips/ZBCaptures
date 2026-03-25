@@ -141,6 +141,7 @@ export const DEFAULT_STATE = {
       price: "$150",
       featured: false,
       description: "Clean, color-true images that make MLS pages look sharp and immediate.",
+      bestFit: "Standard listings",
       bullets: ["Interiors + exteriors", "Blue sky / exposure correction", "Fast delivery"],
     },
     {
@@ -149,6 +150,7 @@ export const DEFAULT_STATE = {
       price: "$250",
       featured: true,
       description: "Cinematic presentation for higher-end homes, builders, and standout properties.",
+      bestFit: "Luxury listings",
       bullets: ["Editorial hero imagery", "Twilight options", "Curated online gallery"],
     },
     {
@@ -157,6 +159,7 @@ export const DEFAULT_STATE = {
       price: "$450",
       featured: false,
       description: "A flexible package for clients that want photography, reels, and website-ready assets.",
+      bestFit: "Full campaign launches",
       bullets: ["Video embeds", "Social cutdowns", "Brand-friendly formatting"],
     },
   ],

@@ -123,6 +123,7 @@
       "id": "service-listing",
       "title": "The Starter",
       "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
+      "bestFit": "Smaller listings",
       "bullets": [
         "30 HDR Images",
         "No Drone Images",
@@ -135,6 +136,7 @@
     {
       "id": "service-luxury",
       "title": "The Standard",
+      "bestFit": "Most residential listings",
       "description": "By adding dedicated drone photos to the interior set, this tier gives buyers a better sense of the property’s exterior layout and surrounding curb appeal.",
       "bullets": [
         "35 HDR Images",
@@ -148,6 +150,7 @@
     {
       "id": "service-media",
       "title": "The Works",
+      "bestFit": "Luxury launches",
       "description": "The heavy hitter. High-end photos paired with drone and social video—basically everything you need to make a listing impossible to ignore.",
       "bullets": [
         "45 HDR Images",

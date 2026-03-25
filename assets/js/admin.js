@@ -1502,6 +1502,10 @@ function renderServicesEditor() {
               <textarea data-service-field="description" data-service-index="${index}">${safeText(service.description)}</textarea>
             </div>
             <div class="field">
+              <label>Best fit</label>
+              <input data-service-field="bestFit" data-service-index="${index}" value="${safeText(service.bestFit || "")}" placeholder="Most residential listings" />
+            </div>
+            <div class="field">
               <label>Bullets, one per line</label>
               <textarea data-service-field="bullets" data-service-index="${index}">${safeText(service.bullets.join("\n"))}</textarea>
             </div>

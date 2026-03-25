@@ -3473,6 +3473,11 @@ function homeServiceSignalsMarkup() {
 }
 
 function serviceSummary(service, index) {
+  const bestFit = String(service?.bestFit || "").trim();
+  if (bestFit) {
+    return bestFit;
+  }
+
   const bullets = Array.isArray(service?.bullets) ? service.bullets.filter(Boolean) : [];
   if (bullets.length >= 2) {
     return `${bullets[0]} + ${bullets[1]}`;
