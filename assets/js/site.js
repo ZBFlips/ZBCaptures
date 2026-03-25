@@ -237,7 +237,6 @@ function headerNavItems() {
         { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
       ],
     },
-    { type: "link", href: absoluteSiteUrl("admin.html"), label: "Admin" },
   ];
 }
 
@@ -251,7 +250,6 @@ function footerNavItems() {
     { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
     { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
     { href: absoluteSiteUrl("contact.html"), label: "Contact" },
-    { href: absoluteSiteUrl("admin.html"), label: "Admin" },
     { href: absoluteSiteUrl("client-access.html"), label: "Client Access" },
   ];
 }
