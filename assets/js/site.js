@@ -225,6 +225,7 @@ function headerNavItems() {
       type: "menu",
       label: "Explore",
       items: [
+        { href: absoluteSiteUrl("quote.html"), label: "Quick Quote" },
         { href: absoluteSiteUrl("locations.html"), label: "Locations" },
         { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
       ],
@@ -246,6 +247,7 @@ function footerNavItems() {
     { href: absoluteSiteUrl("index.html"), label: "Home" },
     { href: absoluteSiteUrl("portfolio.html"), label: "Portfolio" },
     { href: absoluteSiteUrl("services.html"), label: "Services" },
+    { href: absoluteSiteUrl("quote.html"), label: "Quick Quote" },
     { href: absoluteSiteUrl("locations.html"), label: "Locations" },
     { href: absoluteSiteUrl("trust.html"), label: "Trust & Process" },
     { href: absoluteSiteUrl("results.html"), label: "Results" },
@@ -1905,6 +1907,60 @@ function pricingEstimatorSectionMarkup() {
   `;
 }
 
+function quoteContactInfoMarkup() {
+  return `
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Contact</div>
+          <h2 class="section__title">Want to talk through the listing instead?</h2>
+          <p class="section__lead">If the property needs a custom scope or you would rather send the details directly, reach out and I can confirm the best fit.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
+            <a class="button" href="mailto:${safeText(state.settings.email)}">Email directly</a>
+          </div>
+        </div>
+        <div class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Email</div>
+            <div class="contact-value"><a href="mailto:${safeText(state.settings.email)}">${safeText(state.settings.email)}</a></div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Phone</div>
+            <div class="contact-value"><a href="tel:${safeText(state.settings.phone)}">${safeText(state.settings.phone)}</a></div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Coverage</div>
+            <div class="contact-value">${safeText(state.settings.serviceArea)}</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Response time</div>
+            <div class="contact-value">${safeText(state.settings.responseTime || "Usually replies quickly during business hours.")}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function quotePageMarkup() {
+  return `
+    <section class="section">
+      <div class="section__eyebrow">Quick quote</div>
+      <h1 class="section__title">Build a working estimate before you reach out.</h1>
+      <p class="section__lead">Use the estimator to get a starting point for the listing, then carry the details into your inquiry if you want a confirmed quote.</p>
+      <div class="section__actions">
+        <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
+        <a class="button" href="${absoluteSiteUrl("services.html")}">View services</a>
+      </div>
+    </section>
+
+    ${pricingEstimatorSectionMarkup()}
+
+    ${quoteContactInfoMarkup()}
+  `;
+}
+
 function locationSignalsMarkup(locationPage) {
   const highlights = Array.isArray(locationPage?.highlights) ? locationPage.highlights.filter((item) => item?.label && item?.value) : [];
   if (!highlights.length) {
@@ -3239,7 +3295,7 @@ function servicesPageMarkup() {
       ${serviceSignalsMarkup()}
       <div class="section__actions">
         <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
-        <a class="button" href="${absoluteSiteUrl("client-access.html")}">See the delivery experience</a>
+        <a class="button" href="${absoluteSiteUrl("quote.html")}">Quick quote</a>
       </div>
     </section>
 
@@ -3250,10 +3306,6 @@ function servicesPageMarkup() {
     </section>
 
     ${servicesSupportMarkup()}
-
-    ${pricingEstimatorSectionMarkup()}
-
-    ${clientDeliveryTeaserMarkup()}
 
     ${videoMarkup()}
   `;
@@ -3576,6 +3628,13 @@ function pageSeoConfig() {
           "Real estate photography services in Pensacola, Florida with MLS-ready photos, HDR photography, drone coverage, twilight add-ons, and social video for Gulf Coast listings.",
         path: "services.html",
       };
+    case "quote":
+      return {
+        title: "Quick Quote | ZB Captures Real Estate Photography",
+        description:
+          "Use the ZB Captures quick quote estimator to build a starting price for Pensacola-area real estate photography, drone coverage, and listing media.",
+        path: "quote.html",
+      };
     case "portfolio":
       return {
         title: "Portfolio | ZB Captures Real Estate Photography",
@@ -3756,6 +3815,17 @@ function applyStructuredData(seo) {
       areaServed: SEO_SERVICE_AREAS,
       url: canonicalUrl,
       description: seo.description,
+    });
+  }
+
+  if (page === "quote") {
+    graph.push({
+      "@type": "WebPage",
+      "@id": `${canonicalUrl}#page`,
+      url: canonicalUrl,
+      name: seo.title,
+      description: seo.description,
+      about: { "@id": businessId },
     });
   }
 
@@ -5023,6 +5093,15 @@ function renderPage() {
     wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
+    return;
+  }
+
+  if (page === "quote") {
+    clearClientPortalState();
+    mainEl.innerHTML = quotePageMarkup();
+    wireSectionReveal();
+    wireStandalonePricingEstimator();
+    wirePricingMotion();
     return;
   }
 
