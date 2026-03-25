@@ -2110,7 +2110,10 @@ function locationsPageMarkup() {
       eyebrow: "Location pages",
       title: "Choose the market that fits the listing.",
       lead:
-        "These pages are meant to keep service-area browsing simple while still giving each market its own tailored destination.",
+        "Use the arrows or swipe through the markets below to open the page that matches the listing city without turning the service area into a crowded wall of cards.",
+      layout: "reel",
+      reelVisibleCount: 4,
+      sectionClass: "location-markets--carousel",
     })}
   `;
 }
@@ -2653,13 +2656,6 @@ function faqPageMarkup() {
 
 function trustPageMarkup() {
   const featuredMarkets = featuredLocationPages(6);
-  const resultsEyebrow = state.settings.resultsEyebrow ?? DEFAULT_STATE.settings.resultsEyebrow;
-  const resultsTitle = state.settings.resultsTitle ?? DEFAULT_STATE.settings.resultsTitle;
-  const resultsLead = state.settings.resultsLead ?? DEFAULT_STATE.settings.resultsLead;
-  const resultsBasedInValue = state.settings.resultsBasedInValue ?? DEFAULT_STATE.settings.resultsBasedInValue;
-  const resultsMarketsCountSuffix = state.settings.resultsMarketsCountSuffix ?? DEFAULT_STATE.settings.resultsMarketsCountSuffix;
-  const resultsProofSourcesValue = state.settings.resultsProofSourcesValue ?? DEFAULT_STATE.settings.resultsProofSourcesValue;
-  const resultsBestFitValue = state.settings.resultsBestFitValue ?? DEFAULT_STATE.settings.resultsBestFitValue;
   const resultsMarketsEyebrow = state.settings.resultsMarketsEyebrow ?? DEFAULT_STATE.settings.resultsMarketsEyebrow;
   const resultsMarketsTitle = state.settings.resultsMarketsTitle ?? DEFAULT_STATE.settings.resultsMarketsTitle;
   const resultsMarketsLead = state.settings.resultsMarketsLead ?? DEFAULT_STATE.settings.resultsMarketsLead;
@@ -2686,8 +2682,8 @@ function trustPageMarkup() {
       <div class="section-grid grid--split">
         <div>
           <div class="section__eyebrow">Trust & process</div>
-          <h1 class="section__title">How booking works, plus the proof behind it.</h1>
-          <p class="section__lead">This page keeps the short version in one place: how booking works, what delivery feels like, and the local proof agents usually want before they book or refer.</p>
+          <h1 class="section__title">How booking and delivery stay simple.</h1>
+          <p class="section__lead">This page keeps the short version in one place: how booking works, what delivery feels like, and the local details agents usually want before they book.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
             <a class="button" href="${absoluteSiteUrl("locations.html")}">Browse locations</a>
@@ -2703,8 +2699,8 @@ function trustPageMarkup() {
             <div class="contact-value">Quick delivery through a simple client portal</div>
           </div>
           <div class="contact-row">
-            <div class="contact-label">Proof</div>
-            <div class="contact-value">Feedback, local pages, and a public Google Business Profile</div>
+            <div class="contact-label">References</div>
+            <div class="contact-value">Feedback, location pages, and a public Google Business Profile</div>
           </div>
         </aside>
       </div>
@@ -2747,42 +2743,10 @@ function trustPageMarkup() {
             <div class="contact-value">Pensacola and nearby Gulf Coast markets</div>
           </div>
           <div class="contact-row">
-            <div class="contact-label">Proof</div>
+            <div class="contact-label">Feedback</div>
             <div class="contact-value"><a href="${absoluteSiteUrl("feedback.html")}">Client feedback</a> and <a href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">Google profile</a></div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-grid grid--split">
-        <div>
-          <div class="section__eyebrow">${safeText(resultsEyebrow)}</div>
-          <h2 class="section__title">${safeText(resultsTitle)}</h2>
-          <p class="section__lead">${safeText(resultsLead)}</p>
-          <div class="section__actions">
-            <a class="button button--accent" href="${absoluteSiteUrl("feedback.html")}">Read feedback</a>
-            <a class="button" href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">View Google Business Profile</a>
-          </div>
-        </div>
-        <aside class="contact-box">
-          <div class="contact-row">
-            <div class="contact-label">Based in</div>
-            <div class="contact-value">${safeText(resultsBasedInValue)}</div>
-          </div>
-          <div class="contact-row">
-            <div class="contact-label">Markets covered</div>
-            <div class="contact-value">${allLocationPages().length} ${safeText(resultsMarketsCountSuffix)}</div>
-          </div>
-          <div class="contact-row">
-            <div class="contact-label">Proof sources</div>
-            <div class="contact-value">${safeText(resultsProofSourcesValue)}</div>
-          </div>
-          <div class="contact-row">
-            <div class="contact-label">Best fit</div>
-            <div class="contact-value">${safeText(resultsBestFitValue)}</div>
-          </div>
-        </aside>
       </div>
     </section>
 
@@ -5104,6 +5068,7 @@ function renderPage() {
     clearClientPortalState();
     mainEl.innerHTML = locationsPageMarkup();
     wireSectionReveal();
+    wireGalleryReel();
     return;
   }
 

@@ -1270,6 +1270,10 @@ img {
   min-width: 0;
 }
 
+.location-markets--carousel .location-market-reel__item {
+  flex-basis: calc((100% - 36px) / 4);
+}
+
 .location-market-reel__item .location-market-card {
   min-height: 100%;
 }
@@ -1278,16 +1282,28 @@ img {
   .location-market-reel__item {
     flex-basis: calc((100% - 36px) / 4);
   }
+
+  .location-markets--carousel .location-market-reel__item {
+    flex-basis: calc((100% - 24px) / 3);
+  }
 }
 
 @media (max-width: 840px) {
   .location-market-reel__item {
     flex-basis: calc((100% - 12px) / 2);
   }
+
+  .location-markets--carousel .location-market-reel__item {
+    flex-basis: calc((100% - 12px) / 2);
+  }
 }
 
 @media (max-width: 560px) {
   .location-market-reel__item {
+    flex-basis: 100%;
+  }
+
+  .location-markets--carousel .location-market-reel__item {
     flex-basis: 100%;
   }
 }
