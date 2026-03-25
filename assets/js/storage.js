@@ -90,6 +90,25 @@ export const DEFAULT_STATE = {
         text: "The process is laid out clearly, so reviewing files, choosing images, and sharing them feels straightforward.",
       },
     ],
+    resultsEyebrow: "Results",
+    resultsTitle: "Proof that makes ZB Captures easier to recommend.",
+    resultsLead:
+      "The strongest local service brands are easy to verify. This page pulls together the market coverage, client feedback, and process signals that agents usually look for before they book or refer a real estate photographer.",
+    resultsBasedInValue: "Pensacola, Florida",
+    resultsMarketsCountSuffix: "city-specific pages live",
+    resultsProofSourcesValue: "Thumbtack feedback, Google Business Profile, and market-specific service pages.",
+    resultsBestFitValue: "Agents, brokers, builders, and listing teams who need dependable media.",
+    resultsMarketsEyebrow: "Market proof",
+    resultsMarketsTitle: "Local pages that make the service area easy to verify.",
+    resultsMarketsLead:
+      "Each market page gives search engines, agents, and property owners a direct link for the city they care about, instead of forcing everything through one generic service page.",
+    resultsShareEyebrow: "Shareable proof",
+    resultsShareTitle: "These are the pages worth sending when someone asks who to book.",
+    resultsShareLead:
+      "Use the trust page, this results page, or the closest location page when an agent asks who to use for real estate photography in Pensacola or the nearby Gulf Coast region.",
+    resultsSharePagesValue: "Results, trust, feedback, and the location page that matches the listing city.",
+    resultsShareStandoutValue: "Pensacola-based coverage, easy booking, quick delivery, and listing-ready files.",
+    resultsShareInquiryValue: "Send the address, timeline, and package interest through the contact page.",
     contactLead:
       "Send a note with the property address, target timeline, and the kind of coverage you need.",
     contactEyebrow: "Contact",

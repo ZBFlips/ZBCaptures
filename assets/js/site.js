@@ -2131,14 +2131,30 @@ function feedbackPageMarkup() {
 
 function resultsPageMarkup() {
   const featuredMarkets = featuredLocationPages(6);
+  const resultsEyebrow = state.settings.resultsEyebrow ?? DEFAULT_STATE.settings.resultsEyebrow;
+  const resultsTitle = state.settings.resultsTitle ?? DEFAULT_STATE.settings.resultsTitle;
+  const resultsLead = state.settings.resultsLead ?? DEFAULT_STATE.settings.resultsLead;
+  const resultsBasedInValue = state.settings.resultsBasedInValue ?? DEFAULT_STATE.settings.resultsBasedInValue;
+  const resultsMarketsCountSuffix = state.settings.resultsMarketsCountSuffix ?? DEFAULT_STATE.settings.resultsMarketsCountSuffix;
+  const resultsProofSourcesValue = state.settings.resultsProofSourcesValue ?? DEFAULT_STATE.settings.resultsProofSourcesValue;
+  const resultsBestFitValue = state.settings.resultsBestFitValue ?? DEFAULT_STATE.settings.resultsBestFitValue;
+  const resultsMarketsEyebrow = state.settings.resultsMarketsEyebrow ?? DEFAULT_STATE.settings.resultsMarketsEyebrow;
+  const resultsMarketsTitle = state.settings.resultsMarketsTitle ?? DEFAULT_STATE.settings.resultsMarketsTitle;
+  const resultsMarketsLead = state.settings.resultsMarketsLead ?? DEFAULT_STATE.settings.resultsMarketsLead;
+  const resultsShareEyebrow = state.settings.resultsShareEyebrow ?? DEFAULT_STATE.settings.resultsShareEyebrow;
+  const resultsShareTitle = state.settings.resultsShareTitle ?? DEFAULT_STATE.settings.resultsShareTitle;
+  const resultsShareLead = state.settings.resultsShareLead ?? DEFAULT_STATE.settings.resultsShareLead;
+  const resultsSharePagesValue = state.settings.resultsSharePagesValue ?? DEFAULT_STATE.settings.resultsSharePagesValue;
+  const resultsShareStandoutValue = state.settings.resultsShareStandoutValue ?? DEFAULT_STATE.settings.resultsShareStandoutValue;
+  const resultsShareInquiryValue = state.settings.resultsShareInquiryValue ?? DEFAULT_STATE.settings.resultsShareInquiryValue;
 
   return `
     <section class="section">
       <div class="section-grid grid--split">
         <div>
-          <div class="section__eyebrow">Results</div>
-          <h1 class="section__title">Proof that makes ZB Captures easier to recommend.</h1>
-          <p class="section__lead">The strongest local service brands are easy to verify. This page pulls together the market coverage, client feedback, and process signals that agents usually look for before they book or refer a real estate photographer.</p>
+          <div class="section__eyebrow">${safeText(resultsEyebrow)}</div>
+          <h1 class="section__title">${safeText(resultsTitle)}</h1>
+          <p class="section__lead">${safeText(resultsLead)}</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
             <a class="button" href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">View Google Business Profile</a>
@@ -2147,19 +2163,19 @@ function resultsPageMarkup() {
         <aside class="contact-box">
           <div class="contact-row">
             <div class="contact-label">Based in</div>
-            <div class="contact-value">Pensacola, Florida</div>
+            <div class="contact-value">${safeText(resultsBasedInValue)}</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Markets covered</div>
-            <div class="contact-value">${allLocationPages().length} city-specific pages live</div>
+            <div class="contact-value">${allLocationPages().length} ${safeText(resultsMarketsCountSuffix)}</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Proof sources</div>
-            <div class="contact-value">Thumbtack feedback, Google Business Profile, and market-specific service pages.</div>
+            <div class="contact-value">${safeText(resultsProofSourcesValue)}</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Best fit</div>
-            <div class="contact-value">Agents, brokers, builders, and listing teams who need dependable media.</div>
+            <div class="contact-value">${safeText(resultsBestFitValue)}</div>
           </div>
         </aside>
       </div>
@@ -2168,10 +2184,9 @@ function resultsPageMarkup() {
     ${agentProofMarkup()}
 
     ${locationMarketsSectionMarkup(featuredMarkets, {
-      eyebrow: "Market proof",
-      title: "Local pages that make the service area easy to verify.",
-      lead:
-        "Each market page gives search engines, agents, and property owners a direct link for the city they care about, instead of forcing everything through one generic service page.",
+      eyebrow: resultsMarketsEyebrow,
+      title: resultsMarketsTitle,
+      lead: resultsMarketsLead,
     })}
 
     ${testimonialsMarkup()}
@@ -2179,9 +2194,9 @@ function resultsPageMarkup() {
     <section class="section">
       <div class="section-grid grid--split">
         <div>
-          <div class="section__eyebrow">Shareable proof</div>
-          <h2 class="section__title">These are the pages worth sending when someone asks who to book.</h2>
-          <p class="section__lead">Use the trust page, this results page, or the closest location page when an agent asks who to use for real estate photography in Pensacola or the nearby Gulf Coast region.</p>
+          <div class="section__eyebrow">${safeText(resultsShareEyebrow)}</div>
+          <h2 class="section__title">${safeText(resultsShareTitle)}</h2>
+          <p class="section__lead">${safeText(resultsShareLead)}</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("locations.html")}">Browse locations</a>
             <a class="button" href="${absoluteSiteUrl("feedback.html")}">Read all feedback</a>
@@ -2190,15 +2205,15 @@ function resultsPageMarkup() {
         <div class="contact-box">
           <div class="contact-row">
             <div class="contact-label">Best pages to share</div>
-            <div class="contact-value">Results, trust, feedback, and the location page that matches the listing city.</div>
+            <div class="contact-value">${safeText(resultsSharePagesValue)}</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">What stands out</div>
-            <div class="contact-value">Pensacola-based coverage, easy booking, quick delivery, and listing-ready files.</div>
+            <div class="contact-value">${safeText(resultsShareStandoutValue)}</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Fastest inquiry</div>
-            <div class="contact-value">Send the address, timeline, and package interest through the contact page.</div>
+            <div class="contact-value">${safeText(resultsShareInquiryValue)}</div>
           </div>
         </div>
       </div>
