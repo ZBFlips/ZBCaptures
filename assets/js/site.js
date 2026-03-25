@@ -480,7 +480,7 @@ function renderFooter() {
           <div class="footer__meta">
             <div class="footer__metaItem">
               <span class="footer__metaLabel">Phone</span>
-              <a href="tel:${safeText(state.settings.phone)}">${safeText(state.settings.phone)}</a>
+              <span>${safeText(state.settings.phone)}</span>
             </div>
             <div class="footer__metaItem">
               <span class="footer__metaLabel">Instagram</span>
