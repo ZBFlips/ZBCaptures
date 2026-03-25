@@ -218,11 +218,26 @@ async function loadLocationPagesData() {
 
 function headerNavItems() {
   return [
-    { href: absoluteSiteUrl("index.html"), label: "Home" },
-    { href: absoluteSiteUrl("portfolio.html"), label: "Portfolio" },
-    { href: absoluteSiteUrl("services.html"), label: "Services" },
-    { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
-    { href: absoluteSiteUrl("admin.html"), label: "Admin" },
+    { type: "link", href: absoluteSiteUrl("index.html"), label: "Home" },
+    { type: "link", href: absoluteSiteUrl("portfolio.html"), label: "Portfolio" },
+    { type: "link", href: absoluteSiteUrl("services.html"), label: "Services" },
+    {
+      type: "menu",
+      label: "Explore",
+      items: [
+        { href: absoluteSiteUrl("locations.html"), label: "Locations" },
+        { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
+      ],
+    },
+    {
+      type: "menu",
+      label: "Company",
+      items: [
+        { href: absoluteSiteUrl("trust.html"), label: "Trust & Process" },
+        { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
+      ],
+    },
+    { type: "link", href: absoluteSiteUrl("admin.html"), label: "Admin" },
   ];
 }
 
@@ -231,6 +246,9 @@ function footerNavItems() {
     { href: absoluteSiteUrl("index.html"), label: "Home" },
     { href: absoluteSiteUrl("portfolio.html"), label: "Portfolio" },
     { href: absoluteSiteUrl("services.html"), label: "Services" },
+    { href: absoluteSiteUrl("locations.html"), label: "Locations" },
+    { href: absoluteSiteUrl("trust.html"), label: "Trust & Process" },
+    { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
     { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
     { href: absoluteSiteUrl("contact.html"), label: "Contact" },
     { href: absoluteSiteUrl("admin.html"), label: "Admin" },
@@ -269,15 +287,38 @@ function headerLogoMedia() {
     .sort((a, b) => (a.order || 0) - (b.order || 0))[0] || null;
 }
 
+function navHrefIsCurrent(href, currentPath = currentPathname()) {
+  return currentPath === resolvedPathname(href);
+}
+
+function renderHeaderNavItem(item, currentPath) {
+  if (item.type === "menu" && Array.isArray(item.items)) {
+    const hasCurrentChild = item.items.some((child) => navHrefIsCurrent(child.href, currentPath));
+    return `
+      <details class="nav-dropdown">
+        <summary class="nav-dropdown__trigger ${hasCurrentChild ? "is-current" : ""}">
+          <span class="nav-dropdown__label">${safeText(item.label)}</span>
+          <span class="nav-dropdown__caret" aria-hidden="true"></span>
+        </summary>
+        <div class="nav-dropdown__menu" aria-label="${safeText(item.label)} submenu">
+          ${item.items
+            .map(
+              (child) => `
+                <a href="${child.href}" ${navHrefIsCurrent(child.href, currentPath) ? 'aria-current="page"' : ""}>${safeText(child.label)}</a>
+              `
+            )
+            .join("")}
+        </div>
+      </details>
+    `;
+  }
+
+  return `<a href="${item.href}" ${navHrefIsCurrent(item.href, currentPath) ? 'aria-current="page"' : ""}>${safeText(item.label)}</a>`;
+}
+
 function renderHeader() {
   const currentPath = currentPathname();
-  const links = headerNavItems()
-    .map(
-      (item) => `
-        <a href="${item.href}" ${currentPath === resolvedPathname(item.href) ? 'aria-current="page"' : ""}>${item.label}</a>
-      `
-    )
-    .join("");
+  const links = headerNavItems().map((item) => renderHeaderNavItem(item, currentPath)).join("");
   const logo = headerLogoMedia();
   const tagText = String(state.settings.brandTag || "").trim();
   const logoMarkup = logo
@@ -319,8 +360,18 @@ function wireHeaderMenu() {
 
   const { signal } = headerMenuController;
   const mobileQuery = window.matchMedia("(max-width: 720px)");
+  const dropdowns = Array.from(nav.querySelectorAll(".nav-dropdown"));
+
+  const closeDropdowns = (keepOpen = null) => {
+    dropdowns.forEach((dropdown) => {
+      if (dropdown !== keepOpen) {
+        dropdown.removeAttribute("open");
+      }
+    });
+  };
 
   const closeMenu = () => {
+    closeDropdowns();
     nav.classList.remove("is-open");
     headerFrame.classList.remove("site-header--menu-open");
     toggle.setAttribute("aria-expanded", "false");
@@ -351,10 +402,23 @@ function wireHeaderMenu() {
     { signal }
   );
 
+  dropdowns.forEach((dropdown) => {
+    dropdown.addEventListener(
+      "toggle",
+      () => {
+        if (dropdown.open) {
+          closeDropdowns(dropdown);
+        }
+      },
+      { signal }
+    );
+  });
+
   nav.querySelectorAll("a").forEach((link) => {
     link.addEventListener(
       "click",
       () => {
+        closeDropdowns();
         closeMenu();
       },
       { signal }
@@ -366,6 +430,7 @@ function wireHeaderMenu() {
     () => {
       if (!mobileQuery.matches) {
         closeMenu();
+        closeDropdowns();
       }
     },
     { signal }
@@ -374,12 +439,11 @@ function wireHeaderMenu() {
   document.addEventListener(
     "click",
     (event) => {
-      if (!mobileQuery.matches || !nav.classList.contains("is-open")) {
-        return;
-      }
-
       if (!headerFrame.contains(event.target)) {
-        closeMenu();
+        closeDropdowns();
+        if (mobileQuery.matches && nav.classList.contains("is-open")) {
+          closeMenu();
+        }
       }
     },
     { signal }
@@ -389,6 +453,7 @@ function wireHeaderMenu() {
     "keydown",
     (event) => {
       if (event.key === "Escape") {
+        closeDropdowns();
         closeMenu();
       }
     },
@@ -1951,6 +2016,47 @@ function locationMarketsSectionMarkup(records, options = {}) {
   `;
 }
 
+function locationsPageMarkup() {
+  const records = allLocationPages();
+
+  return `
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Locations</div>
+          <h1 class="section__title">Browse the Gulf Coast markets I actively serve.</h1>
+          <p class="section__lead">Each location page keeps the same core packages and delivery workflow, while speaking more directly to the market, neighborhoods, and listing patterns in that area.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("services.html")}">View services</a>
+            <a class="button" href="${absoluteSiteUrl("contact.html")}">Contact</a>
+          </div>
+        </div>
+        <aside class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Markets live</div>
+            <div class="contact-value">${records.length} location pages</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Coverage radius</div>
+            <div class="contact-value">Roughly ${SERVICE_RADIUS_MILES} miles from Pensacola</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Use case</div>
+            <div class="contact-value">Helpful when you want market-specific links for listings across nearby cities.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    ${locationMarketsSectionMarkup(records, {
+      eyebrow: "Location pages",
+      title: "Choose the market that fits the listing.",
+      lead:
+        "These pages are meant to keep service-area browsing simple while still giving each market its own tailored destination.",
+    })}
+  `;
+}
+
 function testimonialsMarkup() {
   return `
     <section class="section testimonials-strip">
@@ -1982,6 +2088,40 @@ function testimonialsMarkup() {
           .join("")}
       </div>
     </section>
+  `;
+}
+
+function feedbackPageMarkup() {
+  return `
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Client feedback</div>
+          <h1 class="section__title">Real feedback from past clients, all in one place.</h1>
+          <p class="section__lead">This takes the review content off the homepage and gives it a dedicated page, so the social proof is still easy to find without making the front page feel overloaded.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
+            <a class="button" href="${absoluteSiteUrl("portfolio.html")}">View portfolio</a>
+          </div>
+        </div>
+        <aside class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Review source</div>
+            <div class="contact-value">Thumbtack client feedback</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Quotes shown</div>
+            <div class="contact-value">${testimonials.length} past-client notes</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Common themes</div>
+            <div class="contact-value">Fast turnaround, easy communication, and listing-ready delivery.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    ${testimonialsMarkup()}
   `;
 }
 
@@ -2440,6 +2580,42 @@ function faqPageMarkup() {
       title: "Questions agents usually want answered before scheduling.",
       lead: "If a listing has a special timeline, travel question, or custom scope, the contact page is still the fastest place to send the details and get a direct answer.",
     })}
+  `;
+}
+
+function trustPageMarkup() {
+  return `
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Trust & process</div>
+          <h1 class="section__title">How the booking-to-delivery process stays simple.</h1>
+          <p class="section__lead">This page brings together the workflow, reliability, and proof points behind the service so the homepage can stay focused on the work itself.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
+            <a class="button" href="${absoluteSiteUrl("services.html")}">View services</a>
+          </div>
+        </div>
+        <aside class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Turnaround</div>
+            <div class="contact-value">Same-day availability when the schedule allows</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Delivery</div>
+            <div class="contact-value">Clean handoff through a simple client portal</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Goal</div>
+            <div class="contact-value">Keep the process premium and straightforward from first message to final files.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    ${trustSectionMarkup()}
+
+    ${agentProofMarkup()}
   `;
 }
 
@@ -2923,18 +3099,6 @@ function servicesPageMarkup() {
 
     ${pricingEstimatorSectionMarkup()}
 
-    ${locationMarketsSectionMarkup(allLocationPages(), {
-      eyebrow: "Location pages",
-      title: "Browse the nearby markets I actively serve.",
-      lead:
-        "These pages are built to speak to the kinds of listings and booking patterns that show up in each Gulf Coast market, while keeping the same packages and delivery workflow.",
-      sectionClass: "location-markets--carousel",
-      layout: "reel",
-      reelVisibleCount: 6,
-    })}
-
-    ${agentProofMarkup()}
-
     ${clientDeliveryTeaserMarkup()}
 
     ${videoMarkup()}
@@ -3120,9 +3284,6 @@ function homePageMarkup() {
     heroMarkup(),
     bestOfGalleryMarkup(),
     servicesMarkup(),
-    testimonialsMarkup(),
-    trustSectionMarkup(),
-    homeContactCtaMarkup(),
   ].join("");
 }
 
@@ -3244,6 +3405,27 @@ function pageSeoConfig() {
         description:
           "Browse the full ZB Captures portfolio with real estate photography from Pensacola and nearby Gulf Coast markets.",
         path: "portfolio.html",
+      };
+    case "locations":
+      return {
+        title: "Locations | ZB Captures Real Estate Photography",
+        description:
+          "Browse the Gulf Coast markets ZB Captures actively serves, with location-specific pages for Pensacola-area and nearby cities.",
+        path: "locations.html",
+      };
+    case "trust":
+      return {
+        title: "Trust & Process | ZB Captures",
+        description:
+          "Learn how ZB Captures handles booking, turnaround, delivery, and the client experience from inquiry to final media handoff.",
+        path: "trust.html",
+      };
+    case "feedback":
+      return {
+        title: "Client Feedback | ZB Captures",
+        description:
+          "Read client feedback for ZB Captures, including notes about turnaround, communication, and listing-ready real estate media delivery.",
+        path: "feedback.html",
       };
     case "contact":
       return {
@@ -4579,9 +4761,7 @@ function renderPage() {
     wireLazyMediaTransitions();
     wireSectionReveal();
     wireHeroParallax();
-    wireTestimonialsCarousel();
     wireGalleryReel();
-    wireServiceAreaMap();
     wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
@@ -4593,10 +4773,7 @@ function renderPage() {
     mainEl.innerHTML = servicesPageMarkup();
     wireLazyMediaTransitions();
     wireSectionReveal();
-    wireTestimonialsCarousel();
-    wireGalleryReel();
     wireStandalonePricingEstimator();
-    wireServiceAreaMap();
     wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
@@ -4633,6 +4810,28 @@ function renderPage() {
     wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
+    return;
+  }
+
+  if (page === "locations") {
+    clearClientPortalState();
+    mainEl.innerHTML = locationsPageMarkup();
+    wireSectionReveal();
+    return;
+  }
+
+  if (page === "trust") {
+    clearClientPortalState();
+    mainEl.innerHTML = trustPageMarkup();
+    wireSectionReveal();
+    return;
+  }
+
+  if (page === "feedback") {
+    clearClientPortalState();
+    mainEl.innerHTML = feedbackPageMarkup();
+    wireSectionReveal();
+    wireTestimonialsCarousel();
     return;
   }
 
