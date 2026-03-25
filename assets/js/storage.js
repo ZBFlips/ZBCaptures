@@ -47,10 +47,21 @@ export const DEFAULT_STATE = {
       "Coverage built for easy booking, polished presentation, and quick delivery once the listing is ready to launch.",
     homeServicesEyebrow: "Services",
     homeServicesTitle: "Real estate media packages for Gulf Coast listings.",
+    feedbackEyebrow: "Client feedback",
+    feedbackTitle: "Real feedback from past clients, all in one place.",
+    feedbackLead:
+      "Past clients consistently mention communication, responsiveness, and how easy the finished media is to use once a listing is ready to launch.",
+    feedbackSourceLabel: "Review source",
+    feedbackSourceValue: "Thumbtack client feedback",
+    feedbackProfileLabel: "External profile",
+    feedbackProfileValue: "Google Business Profile",
+    feedbackThemesLabel: "Common themes",
+    feedbackThemesValue: "Easy communication, quick delivery, and listing-ready media.",
     testimonialsEyebrow: "Client feedback",
     testimonialsTitle: "Real feedback from past clients.",
     testimonialsLead:
       "These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.",
+    testimonialsBadgeLabel: "Thumbtack reviews",
     trustEyebrow: "Trust & process",
     trustTitle: "Easy booking, quick delivery, and a process that stays clear.",
     trustLead:

@@ -2126,7 +2126,7 @@ function testimonialsMarkup() {
         </div>
         <div class="testimonials-strip__badge">
           <strong>${testimonials.length}</strong>
-          <span>Thumbtack reviews</span>
+          <span>${safeText(state.settings.testimonialsBadgeLabel ?? "Thumbtack reviews")}</span>
         </div>
       </div>
       <div class="testimonials-strip__rail" aria-label="Client testimonials" data-testimonials-rail>
@@ -2150,13 +2150,23 @@ function testimonialsMarkup() {
 }
 
 function feedbackPageMarkup() {
+  const feedbackEyebrow = state.settings.feedbackEyebrow ?? DEFAULT_STATE.settings.feedbackEyebrow;
+  const feedbackTitle = state.settings.feedbackTitle ?? DEFAULT_STATE.settings.feedbackTitle;
+  const feedbackLead = state.settings.feedbackLead ?? DEFAULT_STATE.settings.feedbackLead;
+  const feedbackSourceLabel = state.settings.feedbackSourceLabel ?? DEFAULT_STATE.settings.feedbackSourceLabel;
+  const feedbackSourceValue = state.settings.feedbackSourceValue ?? DEFAULT_STATE.settings.feedbackSourceValue;
+  const feedbackProfileLabel = state.settings.feedbackProfileLabel ?? DEFAULT_STATE.settings.feedbackProfileLabel;
+  const feedbackProfileValue = state.settings.feedbackProfileValue ?? DEFAULT_STATE.settings.feedbackProfileValue;
+  const feedbackThemesLabel = state.settings.feedbackThemesLabel ?? DEFAULT_STATE.settings.feedbackThemesLabel;
+  const feedbackThemesValue = state.settings.feedbackThemesValue ?? DEFAULT_STATE.settings.feedbackThemesValue;
+
   return `
     <section class="section">
       <div class="section-grid grid--split">
         <div>
-          <div class="section__eyebrow">Client feedback</div>
-          <h1 class="section__title">Real feedback from past clients, all in one place.</h1>
-          <p class="section__lead">Past clients consistently mention communication, responsiveness, and how easy the finished media is to use once a listing is ready to launch.</p>
+          <div class="section__eyebrow">${safeText(feedbackEyebrow)}</div>
+          <h1 class="section__title">${safeText(feedbackTitle)}</h1>
+          <p class="section__lead">${safeText(feedbackLead)}</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
             <a class="button" href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">View Google Business Profile</a>
@@ -2164,16 +2174,16 @@ function feedbackPageMarkup() {
         </div>
         <aside class="contact-box">
           <div class="contact-row">
-            <div class="contact-label">Review source</div>
-            <div class="contact-value">Thumbtack client feedback</div>
+            <div class="contact-label">${safeText(feedbackSourceLabel)}</div>
+            <div class="contact-value">${safeText(feedbackSourceValue)}</div>
           </div>
           <div class="contact-row">
-            <div class="contact-label">External profile</div>
-            <div class="contact-value"><a href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">Google Business Profile</a></div>
+            <div class="contact-label">${safeText(feedbackProfileLabel)}</div>
+            <div class="contact-value"><a href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">${safeText(feedbackProfileValue)}</a></div>
           </div>
           <div class="contact-row">
-            <div class="contact-label">Common themes</div>
-            <div class="contact-value">Easy communication, quick delivery, and listing-ready media.</div>
+            <div class="contact-label">${safeText(feedbackThemesLabel)}</div>
+            <div class="contact-value">${safeText(feedbackThemesValue)}</div>
           </div>
         </aside>
       </div>
