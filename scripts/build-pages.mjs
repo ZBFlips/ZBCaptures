@@ -21,7 +21,7 @@ const requiredFiles = [
   "client-access.html",
 ];
 
-const requiredDirectories = ["assets/css", "assets/js", "assets/brand", "content"];
+const requiredDirectories = ["assets/css", "assets/js", "assets/brand", "content", "admin"];
 const optionalFiles = ["robots.txt", "sitemap.xml", "favicon.ico", "_headers", "_redirects"];
 
 const routesManifest = {

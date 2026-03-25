@@ -1,5 +1,5 @@
 https://zbcaptures.pages.dev/* https://zbcaptures.com/:splat 301
 https://www.zbcaptures.com/* https://zbcaptures.com/:splat 301
-/admin.html/ /admin 301
-/admin/ /admin 301
-/admin /admin.html 200
+/admin /admin/ 301
+/admin.html /admin/ 301
+/admin.html/ /admin/ 301
