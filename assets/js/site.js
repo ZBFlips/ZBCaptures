@@ -484,7 +484,7 @@ function renderFooter() {
             </div>
             <div class="footer__metaItem">
               <span class="footer__metaLabel">Instagram</span>
-              <span>${safeText(state.settings.instagram)}</span>
+              <a href="https://www.instagram.com/zb.re.media/" target="_blank" rel="noreferrer">${safeText(state.settings.instagram)}</a>
             </div>
             <div class="footer__metaItem">
               <span class="footer__metaLabel">Response time</span>
