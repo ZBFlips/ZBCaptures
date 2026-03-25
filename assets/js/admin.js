@@ -844,26 +844,20 @@ const SITE_COPY_GROUPS = [
   },
   {
     id: "copy-results",
-    eyebrow: "Results page",
-    title: "Results page copy",
-    description: "Use these fields to rewrite the Results page in your own voice. The proof cards themselves still live in the Proof editor below.",
+    eyebrow: "Trust page",
+    title: "Trust & proof page copy",
+    description: "These fields now control the proof and local-market section inside the Trust & Process page.",
     fields: [
-      { name: "resultsEyebrow", label: "Intro eyebrow" },
-      { name: "resultsTitle", label: "Intro title", type: "textarea", wide: true, rows: 2 },
-      { name: "resultsLead", label: "Intro lead", type: "textarea", wide: true, rows: 4 },
+      { name: "resultsEyebrow", label: "Proof section eyebrow" },
+      { name: "resultsTitle", label: "Proof section title", type: "textarea", wide: true, rows: 2 },
+      { name: "resultsLead", label: "Proof section lead", type: "textarea", wide: true, rows: 4 },
       { name: "resultsBasedInValue", label: "Based in value" },
       { name: "resultsMarketsCountSuffix", label: "Markets count suffix" },
       { name: "resultsProofSourcesValue", label: "Proof sources value", type: "textarea", wide: true, rows: 3 },
       { name: "resultsBestFitValue", label: "Best fit value", type: "textarea", wide: true, rows: 3 },
-      { name: "resultsMarketsEyebrow", label: "Market section eyebrow" },
-      { name: "resultsMarketsTitle", label: "Market section title", type: "textarea", wide: true, rows: 2 },
-      { name: "resultsMarketsLead", label: "Market section lead", type: "textarea", wide: true, rows: 4 },
-      { name: "resultsShareEyebrow", label: "Share section eyebrow" },
-      { name: "resultsShareTitle", label: "Share section title", type: "textarea", wide: true, rows: 2 },
-      { name: "resultsShareLead", label: "Share section lead", type: "textarea", wide: true, rows: 4 },
-      { name: "resultsSharePagesValue", label: "Best pages value", type: "textarea", wide: true, rows: 3 },
-      { name: "resultsShareStandoutValue", label: "What stands out value", type: "textarea", wide: true, rows: 3 },
-      { name: "resultsShareInquiryValue", label: "Fastest inquiry value", type: "textarea", wide: true, rows: 3 },
+      { name: "resultsMarketsEyebrow", label: "Market proof eyebrow" },
+      { name: "resultsMarketsTitle", label: "Market proof title", type: "textarea", wide: true, rows: 2 },
+      { name: "resultsMarketsLead", label: "Market proof lead", type: "textarea", wide: true, rows: 4 },
     ],
   },
   {
@@ -911,7 +905,7 @@ function siteCopySectionMarkup() {
   return `
     <section class="admin-panel" id="site-copy">
       <h2 class="admin-panel__title">Site copy</h2>
-      <p class="admin-panel__text">Edit the main headings and supporting text across the public pages in one place. Repeating content like service cards and proof cards still lives in its own editor further down.</p>
+      <p class="admin-panel__text">Edit the main headings and supporting text across the public pages in one place. Repeating content like service cards still lives in its own editor further down.</p>
       <div class="admin-toolbar">
         <span class="admin-note" id="site-copy-status">Copy changes autosave in this browser and are included when you click Save changes.</span>
       </div>
@@ -1139,7 +1133,6 @@ function adminMarkup() {
         <button type="button" data-jump="#locations">Location pages</button>
         <button type="button" data-jump="#client-delivery">Client delivery</button>
         <button type="button" data-jump="#services">Services</button>
-        <button type="button" data-jump="#proof">Proof</button>
         <button type="button" data-jump="#settings">Settings</button>
       </aside>
 
@@ -1289,54 +1282,6 @@ function adminMarkup() {
             <span class="admin-note" id="services-status">Your edits autosave in this browser, and this button gives you an explicit save action.</span>
           </div>
           <div class="admin-grid" id="services-list"></div>
-        </section>
-
-        <section class="admin-panel" id="proof">
-          <h2 class="admin-panel__title">Why agents book this</h2>
-          <p class="admin-panel__text">Edit the proof section that appears on the services page. You can change the headline and the three supporting cards without touching the code.</p>
-          <div class="admin-toolbar">
-            <button class="button button--accent" type="button" id="save-proof">Save proof section</button>
-            <span class="admin-note" id="proof-status">Your edits autosave in this browser, and this button gives you an explicit save action.</span>
-          </div>
-          <form class="admin-grid" id="proof-form">
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="proofEyebrow">Section eyebrow</label>
-              <input id="proofEyebrow" name="proofEyebrow" value="${safeText(state.settings.proofEyebrow || "Why agents book this")}" />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="proofTitle">Headline</label>
-              <textarea id="proofTitle" name="proofTitle">${safeText(state.settings.proofTitle || "Everything is designed to make the listing feel more valuable, not more complicated.")}</textarea>
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="proofLead">Subtext</label>
-              <textarea id="proofLead" name="proofLead">${safeText(state.settings.proofLead || "The experience stays clean, fast, and premium, so the focus stays on the property and the confidence it creates for buyers.")}</textarea>
-            </div>
-            ${Array.isArray(state.settings.proofCards) && state.settings.proofCards.length
-              ? state.settings.proofCards
-                  .map(
-                    (card, index) => `
-                      <article class="card" style="grid-column: 1 / -1;">
-                        <div class="card__body">
-                          <div class="section__eyebrow">Proof card ${index + 1}</div>
-                          <div class="field">
-                            <label for="proofCard${index + 1}Eyebrow">Eyebrow</label>
-                            <input id="proofCard${index + 1}Eyebrow" name="proofCard${index + 1}Eyebrow" value="${safeText(card.eyebrow || "")}" />
-                          </div>
-                          <div class="field">
-                            <label for="proofCard${index + 1}Title">Title</label>
-                            <textarea id="proofCard${index + 1}Title" name="proofCard${index + 1}Title">${safeText(card.title || "")}</textarea>
-                          </div>
-                          <div class="field">
-                            <label for="proofCard${index + 1}Text">Text</label>
-                            <textarea id="proofCard${index + 1}Text" name="proofCard${index + 1}Text">${safeText(card.text || "")}</textarea>
-                          </div>
-                        </div>
-                      </article>
-                    `
-                  )
-                  .join("")
-              : ""}
-          </form>
         </section>
 
         <section class="admin-panel" id="settings">

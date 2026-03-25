@@ -288,7 +288,6 @@ async function writeSitemap(locationPages) {
       `${siteOrigin}/contact.html`,
       `${siteOrigin}/locations.html`,
       `${siteOrigin}/trust.html`,
-      `${siteOrigin}/results.html`,
       `${siteOrigin}/feedback.html`,
       `${siteOrigin}/faq.html`,
       ...locationPages.map((item) => `${siteOrigin}/locations/${item.slug}/`),

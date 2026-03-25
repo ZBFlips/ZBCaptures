@@ -1,5 +1,8 @@
 https://zbcaptures.pages.dev/* https://zbcaptures.com/:splat 301
 https://www.zbcaptures.com/* https://zbcaptures.com/:splat 301
+/results /trust.html 301
+/results.html /trust.html 301
+/results.html/ /trust.html 301
 /admin /admin/ 301
 /admin.html /admin/ 301
 /admin.html/ /admin/ 301

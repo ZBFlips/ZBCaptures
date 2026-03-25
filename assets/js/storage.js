@@ -90,10 +90,10 @@ export const DEFAULT_STATE = {
         text: "The process is laid out clearly, so reviewing files, choosing images, and sharing them feels straightforward.",
       },
     ],
-    resultsEyebrow: "Results",
+    resultsEyebrow: "Proof",
     resultsTitle: "Proof that makes ZB Captures easier to recommend.",
     resultsLead:
-      "The strongest local service brands are easy to verify. This page pulls together the market coverage, client feedback, and process signals that agents usually look for before they book or refer a real estate photographer.",
+      "This section pulls together the market coverage, client feedback, and local trust signals agents usually want to see before they book or refer a real estate photographer.",
     resultsBasedInValue: "Pensacola, Florida",
     resultsMarketsCountSuffix: "city-specific pages live",
     resultsProofSourcesValue: "Thumbtack feedback, Google Business Profile, and market-specific service pages.",

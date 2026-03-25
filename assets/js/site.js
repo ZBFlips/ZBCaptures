@@ -235,7 +235,6 @@ function headerNavItems() {
       label: "Company",
       items: [
         { href: absoluteSiteUrl("trust.html"), label: "Trust & Process" },
-        { href: absoluteSiteUrl("results.html"), label: "Results" },
         { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
       ],
     },
@@ -250,7 +249,6 @@ function footerNavItems() {
     { href: absoluteSiteUrl("quote.html"), label: "Quick Quote" },
     { href: absoluteSiteUrl("locations.html"), label: "Locations" },
     { href: absoluteSiteUrl("trust.html"), label: "Trust & Process" },
-    { href: absoluteSiteUrl("results.html"), label: "Results" },
     { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
     { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
     { href: absoluteSiteUrl("contact.html"), label: "Contact" },
@@ -2088,7 +2086,7 @@ function locationsPageMarkup() {
           <p class="section__lead">Each location page gives you a direct, city-specific page you can send when an agent, seller, or brokerage asks whether ZB Captures serves that market.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("services.html")}">View services</a>
-            <a class="button" href="${absoluteSiteUrl("results.html")}">View results</a>
+            <a class="button" href="${absoluteSiteUrl("trust.html")}">Trust & process</a>
           </div>
         </div>
         <aside class="contact-box">
@@ -2182,98 +2180,6 @@ function feedbackPageMarkup() {
     </section>
 
     ${testimonialsMarkup()}
-  `;
-}
-
-function resultsPageMarkup() {
-  const featuredMarkets = featuredLocationPages(6);
-  const resultsEyebrow = state.settings.resultsEyebrow ?? DEFAULT_STATE.settings.resultsEyebrow;
-  const resultsTitle = state.settings.resultsTitle ?? DEFAULT_STATE.settings.resultsTitle;
-  const resultsLead = state.settings.resultsLead ?? DEFAULT_STATE.settings.resultsLead;
-  const resultsBasedInValue = state.settings.resultsBasedInValue ?? DEFAULT_STATE.settings.resultsBasedInValue;
-  const resultsMarketsCountSuffix = state.settings.resultsMarketsCountSuffix ?? DEFAULT_STATE.settings.resultsMarketsCountSuffix;
-  const resultsProofSourcesValue = state.settings.resultsProofSourcesValue ?? DEFAULT_STATE.settings.resultsProofSourcesValue;
-  const resultsBestFitValue = state.settings.resultsBestFitValue ?? DEFAULT_STATE.settings.resultsBestFitValue;
-  const resultsMarketsEyebrow = state.settings.resultsMarketsEyebrow ?? DEFAULT_STATE.settings.resultsMarketsEyebrow;
-  const resultsMarketsTitle = state.settings.resultsMarketsTitle ?? DEFAULT_STATE.settings.resultsMarketsTitle;
-  const resultsMarketsLead = state.settings.resultsMarketsLead ?? DEFAULT_STATE.settings.resultsMarketsLead;
-  const resultsShareEyebrow = state.settings.resultsShareEyebrow ?? DEFAULT_STATE.settings.resultsShareEyebrow;
-  const resultsShareTitle = state.settings.resultsShareTitle ?? DEFAULT_STATE.settings.resultsShareTitle;
-  const resultsShareLead = state.settings.resultsShareLead ?? DEFAULT_STATE.settings.resultsShareLead;
-  const resultsSharePagesValue = state.settings.resultsSharePagesValue ?? DEFAULT_STATE.settings.resultsSharePagesValue;
-  const resultsShareStandoutValue = state.settings.resultsShareStandoutValue ?? DEFAULT_STATE.settings.resultsShareStandoutValue;
-  const resultsShareInquiryValue = state.settings.resultsShareInquiryValue ?? DEFAULT_STATE.settings.resultsShareInquiryValue;
-
-  return `
-    <section class="section">
-      <div class="section-grid grid--split">
-        <div>
-          <div class="section__eyebrow">${safeText(resultsEyebrow)}</div>
-          <h1 class="section__title">${safeText(resultsTitle)}</h1>
-          <p class="section__lead">${safeText(resultsLead)}</p>
-          <div class="section__actions">
-            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
-            <a class="button" href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">View Google Business Profile</a>
-          </div>
-        </div>
-        <aside class="contact-box">
-          <div class="contact-row">
-            <div class="contact-label">Based in</div>
-            <div class="contact-value">${safeText(resultsBasedInValue)}</div>
-          </div>
-          <div class="contact-row">
-            <div class="contact-label">Markets covered</div>
-            <div class="contact-value">${allLocationPages().length} ${safeText(resultsMarketsCountSuffix)}</div>
-          </div>
-          <div class="contact-row">
-            <div class="contact-label">Proof sources</div>
-            <div class="contact-value">${safeText(resultsProofSourcesValue)}</div>
-          </div>
-          <div class="contact-row">
-            <div class="contact-label">Best fit</div>
-            <div class="contact-value">${safeText(resultsBestFitValue)}</div>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    ${agentProofMarkup()}
-
-    ${locationMarketsSectionMarkup(featuredMarkets, {
-      eyebrow: resultsMarketsEyebrow,
-      title: resultsMarketsTitle,
-      lead: resultsMarketsLead,
-    })}
-
-    ${testimonialsMarkup()}
-
-    <section class="section">
-      <div class="section-grid grid--split">
-        <div>
-          <div class="section__eyebrow">${safeText(resultsShareEyebrow)}</div>
-          <h2 class="section__title">${safeText(resultsShareTitle)}</h2>
-          <p class="section__lead">${safeText(resultsShareLead)}</p>
-          <div class="section__actions">
-            <a class="button button--accent" href="${absoluteSiteUrl("locations.html")}">Browse locations</a>
-            <a class="button" href="${absoluteSiteUrl("feedback.html")}">Read all feedback</a>
-          </div>
-        </div>
-        <div class="contact-box">
-          <div class="contact-row">
-            <div class="contact-label">Best pages to share</div>
-            <div class="contact-value">${safeText(resultsSharePagesValue)}</div>
-          </div>
-          <div class="contact-row">
-            <div class="contact-label">What stands out</div>
-            <div class="contact-value">${safeText(resultsShareStandoutValue)}</div>
-          </div>
-          <div class="contact-row">
-            <div class="contact-label">Fastest inquiry</div>
-            <div class="contact-value">${safeText(resultsShareInquiryValue)}</div>
-          </div>
-        </div>
-      </div>
-    </section>
   `;
 }
 
@@ -2736,6 +2642,17 @@ function faqPageMarkup() {
 }
 
 function trustPageMarkup() {
+  const featuredMarkets = featuredLocationPages(6);
+  const resultsEyebrow = state.settings.resultsEyebrow ?? DEFAULT_STATE.settings.resultsEyebrow;
+  const resultsTitle = state.settings.resultsTitle ?? DEFAULT_STATE.settings.resultsTitle;
+  const resultsLead = state.settings.resultsLead ?? DEFAULT_STATE.settings.resultsLead;
+  const resultsBasedInValue = state.settings.resultsBasedInValue ?? DEFAULT_STATE.settings.resultsBasedInValue;
+  const resultsMarketsCountSuffix = state.settings.resultsMarketsCountSuffix ?? DEFAULT_STATE.settings.resultsMarketsCountSuffix;
+  const resultsProofSourcesValue = state.settings.resultsProofSourcesValue ?? DEFAULT_STATE.settings.resultsProofSourcesValue;
+  const resultsBestFitValue = state.settings.resultsBestFitValue ?? DEFAULT_STATE.settings.resultsBestFitValue;
+  const resultsMarketsEyebrow = state.settings.resultsMarketsEyebrow ?? DEFAULT_STATE.settings.resultsMarketsEyebrow;
+  const resultsMarketsTitle = state.settings.resultsMarketsTitle ?? DEFAULT_STATE.settings.resultsMarketsTitle;
+  const resultsMarketsLead = state.settings.resultsMarketsLead ?? DEFAULT_STATE.settings.resultsMarketsLead;
   const trustSteps = [
     {
       step: "01",
@@ -2759,11 +2676,11 @@ function trustPageMarkup() {
       <div class="section-grid grid--split">
         <div>
           <div class="section__eyebrow">Trust & process</div>
-          <h1 class="section__title">A quick look at how booking and delivery work.</h1>
-          <p class="section__lead">The short version: send the address, get scheduled, and receive listing-ready files quickly. This page is here to show the process without making you read through a wall of copy.</p>
+          <h1 class="section__title">How booking works, plus the proof behind it.</h1>
+          <p class="section__lead">This page keeps the short version in one place: how booking works, what delivery feels like, and the local proof agents usually want before they book or refer.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
-            <a class="button" href="${absoluteSiteUrl("results.html")}">View results</a>
+            <a class="button" href="${absoluteSiteUrl("locations.html")}">Browse locations</a>
           </div>
         </div>
         <aside class="contact-box">
@@ -2826,6 +2743,48 @@ function trustPageMarkup() {
         </div>
       </div>
     </section>
+
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">${safeText(resultsEyebrow)}</div>
+          <h2 class="section__title">${safeText(resultsTitle)}</h2>
+          <p class="section__lead">${safeText(resultsLead)}</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("feedback.html")}">Read feedback</a>
+            <a class="button" href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">View Google Business Profile</a>
+          </div>
+        </div>
+        <aside class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Based in</div>
+            <div class="contact-value">${safeText(resultsBasedInValue)}</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Markets covered</div>
+            <div class="contact-value">${allLocationPages().length} ${safeText(resultsMarketsCountSuffix)}</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Proof sources</div>
+            <div class="contact-value">${safeText(resultsProofSourcesValue)}</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Best fit</div>
+            <div class="contact-value">${safeText(resultsBestFitValue)}</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    ${testimonialsMarkup()}
+
+    ${locationMarketsSectionMarkup(featuredMarkets, {
+      eyebrow: resultsMarketsEyebrow,
+      title: resultsMarketsTitle,
+      lead: resultsMarketsLead,
+      layout: "reel",
+      reelVisibleCount: 3,
+    })}
   `;
 }
 
@@ -3653,15 +3612,8 @@ function pageSeoConfig() {
       return {
         title: "Trust & Process | ZB Captures Real Estate Photography",
         description:
-          "See how ZB Captures handles booking, communication, quick delivery, and listing-ready media for Pensacola-area real estate clients.",
+          "See how ZB Captures handles booking, delivery, local market coverage, and client feedback for Pensacola-area real estate clients.",
         path: "trust.html",
-      };
-    case "results":
-      return {
-        title: "Results | ZB Captures Pensacola Real Estate Photography",
-        description:
-          "Proof, market coverage, and client feedback that show why Pensacola-area agents refer ZB Captures for real estate photography.",
-        path: "results.html",
       };
     case "feedback":
       return {
@@ -3863,7 +3815,7 @@ function applyStructuredData(seo) {
     });
   }
 
-  if (page === "feedback" || page === "results") {
+  if (page === "feedback") {
     const reviewItems = testimonialReviewSchemaItems(canonicalUrl, businessId);
     graph.push({
       "@type": "CollectionPage",
@@ -5149,20 +5101,14 @@ function renderPage() {
     clearClientPortalState();
     mainEl.innerHTML = trustPageMarkup();
     wireSectionReveal();
+    wireTestimonialsCarousel();
+    wireGalleryReel();
     return;
   }
 
   if (page === "feedback") {
     clearClientPortalState();
     mainEl.innerHTML = feedbackPageMarkup();
-    wireSectionReveal();
-    wireTestimonialsCarousel();
-    return;
-  }
-
-  if (page === "results") {
-    clearClientPortalState();
-    mainEl.innerHTML = resultsPageMarkup();
     wireSectionReveal();
     wireTestimonialsCarousel();
     return;
