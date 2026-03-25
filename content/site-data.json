@@ -87,7 +87,7 @@
     "phone": "(850) 736-1946",
     "instagram": "@zb.re.media",
     "responseTime": "Usually replies within 2 hours during business days.",
-    "contactNotificationEndpoint": "",
+    "contactNotificationEndpoint": "https://zb-captures-contact-backend.zbcaptures.workers.dev",
     "footerHeadline": "Pensacola real estate photography and video for clean, market-ready listing launches.",
     "footerNote": "Custom-built and ready for your own domain."
   },
@@ -136,6 +136,23 @@
   ],
   "clientPortals": [],
   "media": [
+    {
+      "id": "local-workspace-directory",
+      "name": "upload",
+      "type": "application/octet-stream",
+      "createdAt": 1774386929451,
+      "title": "",
+      "caption": "",
+      "alt": "",
+      "placement": "gallery",
+      "order": 0,
+      "portfolioTags": [],
+      "featured": false,
+      "src": "./assets/uploads/local-workspace-directory.bin",
+      "variants": null,
+      "originalSrc": "./assets/uploads/local-workspace-directory.bin",
+      "originalType": "application/octet-stream"
+    },
     {
       "id": "8b32f6e6-a1cf-4bf5-bdad-34b193ad1dcb",
       "name": "drone portfolio video_thf4.mp4",
@@ -1307,5 +1324,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-03-24T21:15:36.059Z"
+  "savedAt": "2026-03-25T04:48:18.864Z"
 }
