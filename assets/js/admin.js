@@ -69,6 +69,24 @@ function safeText(value) {
   return String(value || "").replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[char]));
 }
 
+function normalizeAssetUrl(path) {
+  const value = String(path || "").trim();
+  if (!value) {
+    return "";
+  }
+
+  if (
+    value.startsWith("/") ||
+    value.startsWith("blob:") ||
+    value.startsWith("data:") ||
+    /^[a-z][a-z0-9+.-]*:/i.test(value)
+  ) {
+    return value;
+  }
+
+  return `/${value.replace(/^[./\\]+/, "").replace(/\\/g, "/")}`;
+}
+
 function formatBytes(bytes) {
   const value = Number(bytes) || 0;
   if (!value) {
@@ -513,7 +531,9 @@ function updateLocationEditorStatus(message) {
 function mediaPreviewUrl(item) {
   let url = rowUrls.get(item.id);
   if (!url) {
-    url = item.blob ? URL.createObjectURL(item.blob) : item.variants?.thumb?.src || item.src || "";
+    url = item.blob
+      ? URL.createObjectURL(item.blob)
+      : normalizeAssetUrl(item.variants?.thumb?.src || item.src || "");
     if (item.blob) {
       rowUrls.set(item.id, url);
     }
@@ -842,16 +862,9 @@ const SITE_COPY_GROUPS = [
   {
     id: "copy-results",
     eyebrow: "Trust page",
-    title: "Trust & proof page copy",
-    description: "These fields now control the proof and local-market section inside the Trust & Process page.",
+    title: "Trust page market copy",
+    description: "These fields control the featured market section inside the Trust & Process page.",
     fields: [
-      { name: "resultsEyebrow", label: "Proof section eyebrow" },
-      { name: "resultsTitle", label: "Proof section title", type: "textarea", wide: true, rows: 2 },
-      { name: "resultsLead", label: "Proof section lead", type: "textarea", wide: true, rows: 4 },
-      { name: "resultsBasedInValue", label: "Based in value" },
-      { name: "resultsMarketsCountSuffix", label: "Markets count suffix" },
-      { name: "resultsProofSourcesValue", label: "Proof sources value", type: "textarea", wide: true, rows: 3 },
-      { name: "resultsBestFitValue", label: "Best fit value", type: "textarea", wide: true, rows: 3 },
       { name: "resultsMarketsEyebrow", label: "Market proof eyebrow" },
       { name: "resultsMarketsTitle", label: "Market proof title", type: "textarea", wide: true, rows: 2 },
       { name: "resultsMarketsLead", label: "Market proof lead", type: "textarea", wide: true, rows: 4 },
@@ -2533,11 +2546,12 @@ async function loadSourceBlobForVariants(item) {
     return item.blob;
   }
 
-  if (!item?.src) {
+  const sourceUrl = normalizeAssetUrl(item?.src);
+  if (!sourceUrl) {
     throw new Error(`No image source is available for ${item?.title || item?.id || "this media item"}.`);
   }
 
-  const response = await fetch(item.src, { cache: "no-store" });
+  const response = await fetch(sourceUrl, { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Unable to load ${item.title || item.id || "this image"} for optimization.`);
   }
