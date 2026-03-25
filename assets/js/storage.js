@@ -19,13 +19,13 @@ export const DEFAULT_STATE = {
   settings: {
     brandName: "Cinematic Portfolio",
     brandTag: "Real estate photography with an editorial edge",
-    location: "Serving luxury, commercial, and residential listings",
+    location: "Pensacola-based real estate media for agents and brokerages",
     heroKicker: "Pensacola real estate photography",
-    heroHeadline: "Market-ready media for listings that need to move fast.",
+    heroHeadline: "Market-ready media for Pensacola listings that need to launch polished.",
     heroLead:
-      "Photography, drone coverage, and video built for polished launches, quick turnaround, and a clean handoff once the property is ready to go live.",
+      "MLS-ready photography, drone coverage, and video for Pensacola agents, brokerages, and listing teams, with a guaranteed 24-hour photo turnaround and a clean handoff once the property is ready to launch.",
     homeHeroSubnote:
-      "Serving Pensacola and nearby Gulf Coast markets with easy booking and a clean delivery process.",
+      "Pensacola-based coverage for Gulf Coast listings, with easy booking and a clean delivery process.",
     featuredFrameTitle: "Selected work",
     featuredFrameLead: "A single image can carry the whole listing.",
     featuredFrameMediaId: "",
@@ -39,14 +39,14 @@ export const DEFAULT_STATE = {
     heroStats: [
       { label: "Turnaround", value: "Same-day or next-day delivery" },
       { label: "Coverage", value: "Interior, exterior, twilight, drone-ready" },
-      { label: "Experience", value: "Built to feel clear and professional right away" },
+      { label: "Best fit", value: "Agents, brokers, and listing teams" },
     ],
     servicesLead:
       "I provide real estate media with a guaranteed 24-hour turnaround, from HDR photos to drone coverage and video, so listings look strong and get to market quickly.",
     homeServicesLead:
       "Coverage built for easy booking, polished presentation, and quick delivery once the listing is ready to launch.",
     homeServicesEyebrow: "Services",
-    homeServicesTitle: "High-performance media for premium listings.",
+    homeServicesTitle: "Real estate media packages for Gulf Coast listings.",
     testimonialsEyebrow: "Client feedback",
     testimonialsTitle: "Real feedback from past clients.",
     testimonialsLead:
@@ -70,9 +70,9 @@ export const DEFAULT_STATE = {
     faqLead:
       "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.",
     proofEyebrow: "Why agents book this",
-    proofTitle: "Everything is designed to make the listing feel more valuable, not more complicated.",
+    proofTitle: "Why Gulf Coast agents keep ZB Captures in rotation.",
     proofLead:
-      "Listing photos do a lot of the heavy lifting. Strong images help a property make a better first impression, hold attention longer, and give buyers more confidence in what they are seeing.",
+      "The goal is simple: make booking easy, keep the presentation polished, and deliver files in a way that feels dependable when the listing needs to go live.",
     proofCards: [
       {
         eyebrow: "Faster launch",
@@ -102,7 +102,7 @@ export const DEFAULT_STATE = {
     responseTime: "Usually replies within 2 hours during business days.",
     contactNotificationEndpoint: "",
     footerHeadline: "Pensacola real estate photography and video for listings that need strong visuals, easy booking, and quick delivery.",
-    footerNote: "Custom-built and ready for your own domain.",
+    footerNote: "Pensacola-based real estate media for agents, brokers, and property marketers.",
   },
   services: [
     {

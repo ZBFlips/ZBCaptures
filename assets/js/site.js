@@ -234,6 +234,7 @@ function headerNavItems() {
       label: "Company",
       items: [
         { href: absoluteSiteUrl("trust.html"), label: "Trust & Process" },
+        { href: absoluteSiteUrl("results.html"), label: "Results" },
         { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
       ],
     },
@@ -247,6 +248,7 @@ function footerNavItems() {
     { href: absoluteSiteUrl("services.html"), label: "Services" },
     { href: absoluteSiteUrl("locations.html"), label: "Locations" },
     { href: absoluteSiteUrl("trust.html"), label: "Trust & Process" },
+    { href: absoluteSiteUrl("results.html"), label: "Results" },
     { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
     { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
     { href: absoluteSiteUrl("contact.html"), label: "Contact" },
@@ -483,6 +485,10 @@ function renderFooter() {
             <div class="footer__metaItem">
               <span class="footer__metaLabel">Instagram</span>
               <a href="https://www.instagram.com/zb.re.media/" target="_blank" rel="noreferrer">${safeText(state.settings.instagram)}</a>
+            </div>
+            <div class="footer__metaItem">
+              <span class="footer__metaLabel">Google</span>
+              <a href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">Business Profile</a>
             </div>
             <div class="footer__metaItem">
               <span class="footer__metaLabel">Response time</span>
@@ -2023,10 +2029,10 @@ function locationsPageMarkup() {
         <div>
           <div class="section__eyebrow">Locations</div>
           <h1 class="section__title">Browse the Gulf Coast markets I actively serve.</h1>
-          <p class="section__lead">Each location page keeps the same core packages and delivery workflow, while speaking more directly to the market, neighborhoods, and listing patterns in that area.</p>
+          <p class="section__lead">Each location page gives you a direct, city-specific page you can send when an agent, seller, or brokerage asks whether ZB Captures serves that market.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("services.html")}">View services</a>
-            <a class="button" href="${absoluteSiteUrl("contact.html")}">Contact</a>
+            <a class="button" href="${absoluteSiteUrl("results.html")}">View results</a>
           </div>
         </div>
         <aside class="contact-box">
@@ -2040,7 +2046,7 @@ function locationsPageMarkup() {
           </div>
           <div class="contact-row">
             <div class="contact-label">Use case</div>
-            <div class="contact-value">Helpful when you want market-specific links for listings across nearby cities.</div>
+            <div class="contact-value">Helpful for referrals, listing presentations, and local search when you need the city-specific page.</div>
           </div>
         </aside>
       </div>
@@ -2096,10 +2102,10 @@ function feedbackPageMarkup() {
         <div>
           <div class="section__eyebrow">Client feedback</div>
           <h1 class="section__title">Real feedback from past clients, all in one place.</h1>
-          <p class="section__lead">This takes the review content off the homepage and gives it a dedicated page, so the social proof is still easy to find without making the front page feel overloaded.</p>
+          <p class="section__lead">Past clients consistently mention communication, responsiveness, and how easy the finished media is to use once a listing is ready to launch.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
-            <a class="button" href="${absoluteSiteUrl("portfolio.html")}">View portfolio</a>
+            <a class="button" href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">View Google Business Profile</a>
           </div>
         </div>
         <aside class="contact-box">
@@ -2108,18 +2114,95 @@ function feedbackPageMarkup() {
             <div class="contact-value">Thumbtack client feedback</div>
           </div>
           <div class="contact-row">
-            <div class="contact-label">Quotes shown</div>
-            <div class="contact-value">${testimonials.length} past-client notes</div>
+            <div class="contact-label">External profile</div>
+            <div class="contact-value"><a href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">Google Business Profile</a></div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Common themes</div>
-            <div class="contact-value">Fast turnaround, easy communication, and listing-ready delivery.</div>
+            <div class="contact-value">Easy communication, quick delivery, and listing-ready media.</div>
           </div>
         </aside>
       </div>
     </section>
 
     ${testimonialsMarkup()}
+  `;
+}
+
+function resultsPageMarkup() {
+  const featuredMarkets = featuredLocationPages(6);
+
+  return `
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Results</div>
+          <h1 class="section__title">Proof that makes ZB Captures easier to recommend.</h1>
+          <p class="section__lead">The strongest local service brands are easy to verify. This page pulls together the market coverage, client feedback, and process signals that agents usually look for before they book or refer a real estate photographer.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
+            <a class="button" href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">View Google Business Profile</a>
+          </div>
+        </div>
+        <aside class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Based in</div>
+            <div class="contact-value">Pensacola, Florida</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Markets covered</div>
+            <div class="contact-value">${allLocationPages().length} city-specific pages live</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Proof sources</div>
+            <div class="contact-value">Thumbtack feedback, Google Business Profile, and market-specific service pages.</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Best fit</div>
+            <div class="contact-value">Agents, brokers, builders, and listing teams who need dependable media.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    ${agentProofMarkup()}
+
+    ${locationMarketsSectionMarkup(featuredMarkets, {
+      eyebrow: "Market proof",
+      title: "Local pages that make the service area easy to verify.",
+      lead:
+        "Each market page gives search engines, agents, and property owners a direct link for the city they care about, instead of forcing everything through one generic service page.",
+    })}
+
+    ${testimonialsMarkup()}
+
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Shareable proof</div>
+          <h2 class="section__title">These are the pages worth sending when someone asks who to book.</h2>
+          <p class="section__lead">Use the trust page, this results page, or the closest location page when an agent asks who to use for real estate photography in Pensacola or the nearby Gulf Coast region.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("locations.html")}">Browse locations</a>
+            <a class="button" href="${absoluteSiteUrl("feedback.html")}">Read all feedback</a>
+          </div>
+        </div>
+        <div class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Best pages to share</div>
+            <div class="contact-value">Results, trust, feedback, and the location page that matches the listing city.</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">What stands out</div>
+            <div class="contact-value">Pensacola-based coverage, easy booking, quick delivery, and listing-ready files.</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Fastest inquiry</div>
+            <div class="contact-value">Send the address, timeline, and package interest through the contact page.</div>
+          </div>
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -2588,10 +2671,10 @@ function trustPageMarkup() {
         <div>
           <div class="section__eyebrow">Trust & process</div>
           <h1 class="section__title">How the booking-to-delivery process stays simple.</h1>
-          <p class="section__lead">This page brings together the workflow, reliability, and proof points behind the service so the homepage can stay focused on the work itself.</p>
+          <p class="section__lead">This page brings together the workflow, reliability, and service signals agents usually want to see before they book or refer a photographer.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
-            <a class="button" href="${absoluteSiteUrl("services.html")}">View services</a>
+            <a class="button" href="${absoluteSiteUrl("results.html")}">View results</a>
           </div>
         </div>
         <aside class="contact-box">
@@ -2604,8 +2687,8 @@ function trustPageMarkup() {
             <div class="contact-value">Quick delivery through a clean, simple client portal</div>
           </div>
           <div class="contact-row">
-            <div class="contact-label">Goal</div>
-            <div class="contact-value">Keep the process premium and straightforward from first message to final files.</div>
+            <div class="contact-label">Proof</div>
+            <div class="contact-value">Supported by feedback, local market pages, and a public Google Business Profile.</div>
           </div>
         </aside>
       </div>
@@ -3431,21 +3514,28 @@ function pageSeoConfig() {
       return {
         title: "Locations | ZB Captures Real Estate Photography",
         description:
-          "Browse the Gulf Coast markets ZB Captures actively serves, with location-specific pages for Pensacola-area and nearby cities.",
+          "Browse the Gulf Coast markets ZB Captures actively serves, with city-specific real estate photography pages for Pensacola-area and nearby markets.",
         path: "locations.html",
       };
     case "trust":
       return {
-        title: "Trust & Process | ZB Captures",
+        title: "Trust & Process | ZB Captures Real Estate Photography",
         description:
-          "Learn how ZB Captures handles booking, turnaround, delivery, and the client experience from inquiry to final media handoff.",
+          "See how ZB Captures handles booking, communication, quick delivery, and listing-ready media for Pensacola-area real estate clients.",
         path: "trust.html",
+      };
+    case "results":
+      return {
+        title: "Results | ZB Captures Pensacola Real Estate Photography",
+        description:
+          "Proof, market coverage, and client feedback that show why Pensacola-area agents refer ZB Captures for real estate photography.",
+        path: "results.html",
       };
     case "feedback":
       return {
-        title: "Client Feedback | ZB Captures",
+        title: "Client Feedback | ZB Captures Real Estate Photography",
         description:
-          "Read client feedback for ZB Captures, including notes about turnaround, communication, and listing-ready real estate media delivery.",
+          "Read client feedback for ZB Captures, including notes about communication, quick delivery, and listing-ready real estate media.",
         path: "feedback.html",
       };
     case "contact":
@@ -3478,10 +3568,27 @@ function pageSeoConfig() {
       return {
         title: "Pensacola Real Estate Photography | ZB Captures",
         description:
-          "Pensacola real estate photography with MLS-ready photos, drone coverage, video, and fast turnaround for listings across Pensacola, Milton, Pace, Gulf Breeze, and nearby Gulf Coast markets.",
+          "Pensacola real estate photography with MLS-ready photos, drone coverage, video, easy booking, and quick delivery for Gulf Coast listings.",
         path: "",
       };
   }
+}
+
+function testimonialReviewSchemaItems(baseUrl, businessId) {
+  return testimonials.map((item, index) => ({
+    "@type": "Review",
+    "@id": `${baseUrl}#review-${index + 1}`,
+    itemReviewed: { "@id": businessId },
+    author: {
+      "@type": "Person",
+      name: item.name,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Thumbtack",
+    },
+    reviewBody: item.quote,
+  }));
 }
 
 function upsertMetaTag(key, value, mode = "name") {
@@ -3546,6 +3653,15 @@ function applyStructuredData(seo) {
     },
     sameAs: ["https://www.instagram.com/zb.re.media/", GOOGLE_BUSINESS_PROFILE_URL],
     knowsAbout: [...SEO_DELIVERABLES, ...SEO_PLATFORMS],
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "customer service",
+        email: state.settings.email,
+        telephone: state.settings.phone,
+        areaServed: SEO_SERVICE_AREAS,
+      },
+    ],
   };
 
   const graph = [
@@ -3580,6 +3696,42 @@ function applyStructuredData(seo) {
       url: canonicalUrl,
       description: seo.description,
     });
+  }
+
+  if (page === "locations") {
+    graph.push({
+      "@type": "CollectionPage",
+      "@id": `${canonicalUrl}#collection`,
+      url: canonicalUrl,
+      name: seo.title,
+      description: seo.description,
+      about: { "@id": businessId },
+    });
+  }
+
+  if (page === "trust") {
+    graph.push({
+      "@type": "AboutPage",
+      "@id": `${canonicalUrl}#page`,
+      url: canonicalUrl,
+      name: seo.title,
+      description: seo.description,
+      about: { "@id": businessId },
+    });
+  }
+
+  if (page === "feedback" || page === "results") {
+    const reviewItems = testimonialReviewSchemaItems(canonicalUrl, businessId);
+    graph.push({
+      "@type": "CollectionPage",
+      "@id": `${canonicalUrl}#collection`,
+      url: canonicalUrl,
+      name: seo.title,
+      description: seo.description,
+      about: { "@id": businessId },
+      hasPart: reviewItems.map((item) => ({ "@id": item["@id"] })),
+    });
+    graph.push(...reviewItems);
   }
 
   if ((page === "faq" || page === "location") && faqSchemaItems.length) {
@@ -4851,6 +5003,14 @@ function renderPage() {
   if (page === "feedback") {
     clearClientPortalState();
     mainEl.innerHTML = feedbackPageMarkup();
+    wireSectionReveal();
+    wireTestimonialsCarousel();
+    return;
+  }
+
+  if (page === "results") {
+    clearClientPortalState();
+    mainEl.innerHTML = resultsPageMarkup();
     wireSectionReveal();
     wireTestimonialsCarousel();
     return;

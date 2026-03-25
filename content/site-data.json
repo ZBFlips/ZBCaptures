@@ -2,11 +2,11 @@
   "settings": {
     "brandName": "ZB Captures",
     "brandTag": "",
-    "location": "Serving luxury, commercial, and residential listings",
-    "heroKicker": "Premium Real Estate Media, 24-Hour Turnaround, Guaranteed.",
-    "heroHeadline": "Turn your listing into a sale.",
-    "heroLead": "High-end media designed to capture attention, move quickly, and give your listings a competitive edge.",
-    "homeHeroSubnote": "Serving Pensacola and nearby Gulf Coast markets with easy booking and a clean delivery process.",
+    "location": "Pensacola-based real estate media for agents and brokerages",
+    "heroKicker": "Pensacola real estate photography",
+    "heroHeadline": "Market-ready media for Pensacola listings that need to launch polished.",
+    "heroLead": "MLS-ready photography, drone coverage, and video for Pensacola agents, brokerages, and listing teams, with a guaranteed 24-hour photo turnaround and a clean handoff once the property is ready to launch.",
+    "homeHeroSubnote": "Pensacola-based coverage for Gulf Coast listings, with easy booking and a clean delivery process.",
     "featuredFrameTitle": "Highlighted Photo",
     "featuredFrameLead": "A single image can carry the whole listing.",
     "featuredFrameMediaId": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
@@ -34,14 +34,14 @@
         "value": "Interior, exterior, twilight, drone-ready"
       },
       {
-        "label": "Experience",
-        "value": "Designed to feel premium from the first second"
+        "label": "Best fit",
+        "value": "Agents, brokers, and listing teams"
       }
     ],
     "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
     "homeServicesLead": "Coverage built for easy booking, polished presentation, and quick delivery once the listing is ready to launch.",
     "homeServicesEyebrow": "Services",
-    "homeServicesTitle": "High-performance media for every listing.",
+    "homeServicesTitle": "Real estate media packages for Gulf Coast listings.",
     "testimonialsEyebrow": "Client feedback",
     "testimonialsTitle": "Real feedback from past clients.",
     "testimonialsLead": "These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.",
@@ -60,8 +60,8 @@
     "faqTitle": "Questions agents usually ask before booking.",
     "faqLead": "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.",
     "proofEyebrow": "Why agents book this",
-    "proofTitle": "The Impact",
-    "proofLead": "According to eye-tracking data, buyers spend 60% of their time looking at listing photos (compared to 20% at the description). On average, professional photos drive 61% more views to a listing, and reduce time on the market by 32%. Better photos also improve the perceived value of a home, increasing the sale price by up to $11,200 on average.",
+    "proofTitle": "Why Gulf Coast agents keep ZB Captures in rotation.",
+    "proofLead": "The goal is simple: make booking easy, keep the presentation polished, and deliver files in a way that feels dependable when the listing needs to go live.",
     "proofCards": [
       {
         "eyebrow": "Faster launch",
@@ -90,7 +90,7 @@
     "responseTime": "Usually replies within 2 hours during business days.",
     "contactNotificationEndpoint": "https://zb-captures-contact-backend.zbcaptures.workers.dev",
     "footerHeadline": "Pensacola real estate photography and video for clean, market-ready listing launches, easy booking, and quick delivery.",
-    "footerNote": "Custom-built and ready for your own domain."
+    "footerNote": "Pensacola-based real estate media for agents, brokers, and property marketers."
   },
   "services": [
     {

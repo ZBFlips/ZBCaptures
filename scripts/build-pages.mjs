@@ -7,6 +7,7 @@ const maxPagesFileSizeBytes = 25 * 1024 * 1024;
 const siteOrigin = "https://zbcaptures.com";
 const socialShareImage = `${siteOrigin}/assets/brand/social-share.png`;
 const brandName = "ZB Captures";
+const googleBusinessProfileUrl = "https://share.google/aDc3usKYdvNCryRrN";
 
 const requiredFiles = [
   "index.html",
@@ -15,6 +16,7 @@ const requiredFiles = [
   "contact.html",
   "locations.html",
   "trust.html",
+  "results.html",
   "feedback.html",
   "faq.html",
   "admin.html",
@@ -105,7 +107,7 @@ function sharedBusinessGraph() {
         "Fort Walton Beach, FL",
         "Crestview, FL",
       ],
-      sameAs: ["https://www.instagram.com/zb.re.media/"],
+      sameAs: ["https://www.instagram.com/zb.re.media/", googleBusinessProfileUrl],
     },
   ];
 }
@@ -279,14 +281,15 @@ async function writeSitemap(locationPages) {
   const today = new Date().toISOString().slice(0, 10);
   const urls = [
     `${siteOrigin}/`,
-    `${siteOrigin}/portfolio.html`,
-    `${siteOrigin}/services.html`,
-    `${siteOrigin}/contact.html`,
-    `${siteOrigin}/locations.html`,
-    `${siteOrigin}/trust.html`,
-    `${siteOrigin}/feedback.html`,
-    `${siteOrigin}/faq.html`,
-    ...locationPages.map((item) => `${siteOrigin}/locations/${item.slug}/`),
+      `${siteOrigin}/portfolio.html`,
+      `${siteOrigin}/services.html`,
+      `${siteOrigin}/contact.html`,
+      `${siteOrigin}/locations.html`,
+      `${siteOrigin}/trust.html`,
+      `${siteOrigin}/results.html`,
+      `${siteOrigin}/feedback.html`,
+      `${siteOrigin}/faq.html`,
+      ...locationPages.map((item) => `${siteOrigin}/locations/${item.slug}/`),
   ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -306,7 +309,13 @@ ${urls
 }
 
 async function writeRobots() {
-  const robots = `User-agent: *
+  const robots = `User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: *
 Allow: /
 
 Sitemap: ${siteOrigin}/sitemap.xml
