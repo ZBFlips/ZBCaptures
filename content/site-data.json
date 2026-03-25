@@ -6,7 +6,7 @@
     "heroKicker": "Premium Real Estate Media, 24-Hour Turnaround, Guaranteed.",
     "heroHeadline": "Turn your listing into a sale.",
     "heroLead": "High-end media designed to capture attention, move quickly, and give your listings a competitive edge.",
-    "homeHeroSubnote": "Serving Pensacola and nearby Gulf Coast markets with fast turnaround and a clean delivery process.",
+    "homeHeroSubnote": "Serving Pensacola and nearby Gulf Coast markets with easy booking and a clean delivery process.",
     "featuredFrameTitle": "Highlighted Photo",
     "featuredFrameLead": "A single image can carry the whole listing.",
     "featuredFrameMediaId": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
@@ -39,14 +39,15 @@
       }
     ],
     "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
+    "homeServicesLead": "Coverage built for easy booking, polished presentation, and quick delivery once the listing is ready to launch.",
     "homeServicesEyebrow": "Services",
     "homeServicesTitle": "High-performance media for every listing.",
     "testimonialsEyebrow": "Client feedback",
     "testimonialsTitle": "Real feedback from past clients.",
     "testimonialsLead": "These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.",
     "trustEyebrow": "Trust & process",
-    "trustTitle": "Fast turnaround, clean delivery, and a process that stays easy.",
-    "trustLead": "The goal is simple: make the property look strong, get the files back quickly, and keep the booking-to-delivery flow clear for agents and clients.",
+    "trustTitle": "Easy booking, quick delivery, and a process that stays clear.",
+    "trustLead": "The goal is simple: make the property look strong, keep booking easy, and make delivery feel straightforward for agents and clients.",
     "homeCtaEyebrow": "Start a project",
     "homeCtaTitle": "Ready when the next listing is.",
     "homeCtaLead": "If you already know the address, timeline, or package you need, send it through and I will follow up with availability and the best fit.",
@@ -65,7 +66,7 @@
       {
         "eyebrow": "Faster launch",
         "title": "Listings can move from shoot to market quickly.",
-        "text": "The turnaround and package structure make it easy for agents to keep momentum when a property is ready to go live."
+        "text": "The easy booking flow and clear package structure make it simple for agents to keep momentum when a property is ready to go live."
       },
       {
         "eyebrow": "Stronger first impression",
@@ -88,7 +89,7 @@
     "instagram": "@zb.re.media",
     "responseTime": "Usually replies within 2 hours during business days.",
     "contactNotificationEndpoint": "https://zb-captures-contact-backend.zbcaptures.workers.dev",
-    "footerHeadline": "Pensacola real estate photography and video for clean, market-ready listing launches.",
+    "footerHeadline": "Pensacola real estate photography and video for clean, market-ready listing launches, easy booking, and quick delivery.",
     "footerNote": "Custom-built and ready for your own domain."
   },
   "services": [

@@ -469,7 +469,7 @@ function renderFooter() {
       <div class="footer__inner">
         <div class="footer__brand">
           <strong>${safeText(state.settings.brandName)}</strong>
-          <p class="footer__headline">${safeText(state.settings.footerHeadline ?? "Pensacola real estate photography and video for listings that need strong visuals and a fast turnaround.")}</p>
+          <p class="footer__headline">${safeText(state.settings.footerHeadline ?? "Pensacola real estate photography and video for listings that need strong visuals, easy booking, and quick delivery.")}</p>
           <p class="footer__copy">${safeText(state.settings.serviceArea)}</p>
           <a class="footer__contact" href="mailto:${safeText(state.settings.email)}">Primary contact: ${safeText(state.settings.email)}</a>
         </div>
@@ -1028,7 +1028,7 @@ function heroMarkup() {
               <a class="button button--accent" href="${absoluteSiteUrl(state.settings.heroCtas.primaryHref)}">${safeText(state.settings.heroCtas.primaryLabel)}</a>
               <a class="button" href="${absoluteSiteUrl(state.settings.heroCtas.secondaryHref)}">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
             </div>
-            <p class="hero__subnote">${safeText(state.settings.homeHeroSubnote ?? "Serving Pensacola and nearby Gulf Coast markets with fast turnaround and a clean delivery process.")}</p>
+            <p class="hero__subnote">${safeText(state.settings.homeHeroSubnote ?? "Serving Pensacola and nearby Gulf Coast markets with easy booking and a clean delivery process.")}</p>
           </div>
         </div>
       </div>
@@ -1218,8 +1218,8 @@ function servicesMarkup() {
       <div class="services-home__layout">
         <div class="services-home__intro">
           <h2 class="section__title">${safeText(state.settings.homeServicesTitle ?? "High-performance media for premium listings.")}</h2>
-          <p class="section__lead">${safeText(state.settings.servicesLead)}</p>
-          ${serviceSignalsMarkup()}
+          <p class="section__lead">${safeText(state.settings.homeServicesLead ?? "Coverage built for easy booking, polished presentation, and quick delivery once the listing is ready to launch.")}</p>
+          ${homeServiceSignalsMarkup()}
           <div class="section__actions">
           <a class="button button--accent" href="${absoluteSiteUrl("services.html")}">View the full services page</a>
           <a class="button" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
@@ -1324,9 +1324,9 @@ const testimonials = [
 
 const trustPillars = [
   {
-    eyebrow: "Speed agents care about",
-    title: "Same-day availability when possible.",
-    text: "When a property is ready to launch, the workflow is built to move quickly so you can keep the listing schedule on track.",
+    eyebrow: "Easy booking",
+    title: "Clear next steps from inquiry to shoot day.",
+    text: "You can send the address, choose the right coverage, and get the shoot scheduled without a lot of back-and-forth.",
   },
   {
     eyebrow: "Industry-ready deliverables",
@@ -1334,9 +1334,9 @@ const trustPillars = [
     text: "The media packages are shaped around the formats and expectations agents already work with every day.",
   },
   {
-    eyebrow: "Easy handoff",
+    eyebrow: "Quick delivery",
     title: "A client portal that feels refined and simple.",
-    text: "Finished shoots can be delivered through a clean download portal so agents are not chasing files across email threads.",
+    text: "Finished shoots can be delivered through a clean download portal so agents get the files quickly without chasing links across email threads.",
   },
 ];
 
@@ -1348,13 +1348,13 @@ const homeProcessSteps = [
   },
   {
     step: "02",
-    title: "Shoot, edit, and turn it around fast",
-    text: "The workflow is built around quick scheduling, edited photos, and fast delivery once the property is ready.",
+    title: "Confirm the plan and get it on the calendar",
+    text: "The booking flow stays clear, so it is easy to lock in the right coverage and keep the listing schedule moving.",
   },
   {
     step: "03",
     title: "Receive files ready for the listing launch",
-    text: "You get clean, organized media that is easy to review, download, and hand off when it is time to go live.",
+    text: "You get clean, organized media with quick delivery, making it easy to review, download, and hand off when it is time to go live.",
   },
 ];
 
@@ -2414,8 +2414,8 @@ function trustSectionMarkup() {
       <div class="section__eyebrow">${safeText(state.settings.trustEyebrow ?? "Trust & process")}</div>
       <div class="trust-layout">
         <div class="trust-layout__copy">
-          <h2 class="section__title">${safeText(state.settings.trustTitle ?? "Fast turnaround, clean delivery, and a process that stays easy.")}</h2>
-          <p class="section__lead">${safeText(state.settings.trustLead ?? "The goal is simple: make the property look strong, get the files back quickly, and keep the booking-to-delivery flow clear for agents and clients.")}</p>
+          <h2 class="section__title">${safeText(state.settings.trustTitle ?? "Easy booking, quick delivery, and a process that stays clear.")}</h2>
+          <p class="section__lead">${safeText(state.settings.trustLead ?? "The goal is simple: make the property look strong, keep booking easy, and make delivery feel straightforward for agents and clients.")}</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
             <a class="button" href="${absoluteSiteUrl("services.html")}">See packages</a>
@@ -2596,12 +2596,12 @@ function trustPageMarkup() {
         </div>
         <aside class="contact-box">
           <div class="contact-row">
-            <div class="contact-label">Turnaround</div>
-            <div class="contact-value">Same-day availability when the schedule allows</div>
+            <div class="contact-label">Booking</div>
+            <div class="contact-value">Easy booking from the first inquiry to the scheduled shoot</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Delivery</div>
-            <div class="contact-value">Clean handoff through a simple client portal</div>
+            <div class="contact-value">Quick delivery through a clean, simple client portal</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Goal</div>
@@ -3294,6 +3294,29 @@ function serviceSignalsMarkup() {
 
   return `
     <div class="signal-grid" aria-label="Service highlights">
+      ${signals
+        .map(
+          (signal) => `
+            <div class="signal-card">
+              <span class="signal-card__label">${safeText(signal.label)}</span>
+              <strong class="signal-card__value">${safeText(signal.value)}</strong>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function homeServiceSignalsMarkup() {
+  const signals = [
+    { label: "Booking", value: "Easy booking and clear next steps" },
+    { label: "Coverage", value: "Photo, video, and drone-ready" },
+    { label: "Delivery", value: "Quick delivery with a simple handoff" },
+  ];
+
+  return `
+    <div class="signal-grid" aria-label="Homepage service highlights">
       ${signals
         .map(
           (signal) => `
