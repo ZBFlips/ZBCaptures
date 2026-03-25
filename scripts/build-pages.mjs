@@ -4,7 +4,9 @@ import path from "node:path";
 const projectRoot = process.cwd();
 const distDir = path.join(projectRoot, "dist");
 const maxPagesFileSizeBytes = 25 * 1024 * 1024;
-const siteOrigin = "https://zbcaptures.pages.dev";
+const siteOrigin = "https://zbcaptures.com";
+const socialShareImage = `${siteOrigin}/assets/brand/social-share.png`;
+const brandName = "ZB Captures";
 
 const requiredFiles = [
   "index.html",
@@ -28,6 +30,166 @@ function escapeHtml(value = "") {
   return String(value).replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char]));
 }
 
+function escapeJsonForScript(value = "") {
+  return String(value).replace(/</g, "\\u003c");
+}
+
+function absoluteSiteUrl(relativePath = "") {
+  const value = String(relativePath || "").replace(/^\.\//, "");
+  return new URL(value, `${siteOrigin}/`).toString();
+}
+
+function jsonLdScript(payload) {
+  return `<script type="application/ld+json">${escapeJsonForScript(JSON.stringify(payload))}</script>`;
+}
+
+function headMarkup({ title, description, canonicalPath = "", robots = "index, follow, max-image-preview:large", structuredData = null, assetPrefix = "./" }) {
+  const canonicalUrl = absoluteSiteUrl(canonicalPath);
+
+  return `
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="${escapeHtml(description)}" />
+    <meta name="robots" content="${escapeHtml(robots)}" />
+    <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
+    <meta property="og:title" content="${escapeHtml(title)}" />
+    <meta property="og:description" content="${escapeHtml(description)}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
+    <meta property="og:image" content="${escapeHtml(socialShareImage)}" />
+    <meta property="og:site_name" content="${escapeHtml(brandName)}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtml(title)}" />
+    <meta name="twitter:description" content="${escapeHtml(description)}" />
+    <meta name="twitter:image" content="${escapeHtml(socialShareImage)}" />
+    <title>${escapeHtml(title)}</title>
+    <link rel="icon" href="${assetPrefix}assets/brand/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="${assetPrefix}assets/css/styles.css" />
+    ${structuredData ? jsonLdScript(structuredData) : ""}
+  `.trim();
+}
+
+function sharedBusinessGraph() {
+  return [
+    {
+      "@type": "WebSite",
+      "@id": `${siteOrigin}/#website`,
+      name: brandName,
+      url: `${siteOrigin}/`,
+    },
+    {
+      "@type": ["LocalBusiness", "ProfessionalService"],
+      "@id": `${siteOrigin}/#business`,
+      name: brandName,
+      url: `${siteOrigin}/`,
+      image: socialShareImage,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Pensacola",
+        addressRegion: "FL",
+        addressCountry: "US",
+      },
+      telephone: "(850) 736-1946",
+      email: "zacbrannen@gmail.com",
+      areaServed: [
+        "Pensacola, FL",
+        "Milton, FL",
+        "Pace, FL",
+        "Gulf Breeze, FL",
+        "Navarre, FL",
+        "Destin, FL",
+        "Fort Walton Beach, FL",
+        "Crestview, FL",
+      ],
+      sameAs: ["https://www.instagram.com/zb.re.media/"],
+    },
+  ];
+}
+
+function locationStructuredData({ title, description, locationPage }) {
+  const canonicalUrl = absoluteSiteUrl(`locations/${locationPage.slug}/`);
+  const marketName = locationPage.market || locationPage.name;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      ...sharedBusinessGraph(),
+      {
+        "@type": "WebPage",
+        "@id": `${canonicalUrl}#webpage`,
+        url: canonicalUrl,
+        name: title,
+        description,
+        isPartOf: { "@id": `${siteOrigin}/#website` },
+      },
+      {
+        "@type": "Service",
+        "@id": `${canonicalUrl}#service`,
+        serviceType: "Real estate photography",
+        name: `Real estate photography in ${marketName}`,
+        provider: { "@id": `${siteOrigin}/#business` },
+        areaServed: [marketName],
+        url: canonicalUrl,
+        description,
+      },
+    ],
+  };
+}
+
+function locationSeoFallbackMarkup(locationPage, allLocationPages) {
+  const nearbyPages = Array.isArray(locationPage.nearbySlugs)
+    ? allLocationPages.filter((item) => locationPage.nearbySlugs.includes(item.slug))
+    : [];
+  const faqItems = Array.isArray(locationPage.faq) ? locationPage.faq.slice(0, 3) : [];
+  const coverageSummary = locationPage.coverageSummary || locationPage.cardLead || locationPage.lead || "";
+
+  return `
+    <section class="section">
+      <p>${escapeHtml(locationPage.eyebrow || `${locationPage.market || locationPage.name} Real Estate Photography`)}</p>
+      <h1>${escapeHtml(locationPage.headline || `${locationPage.market || locationPage.name} real estate photography`)}</h1>
+      <p>${escapeHtml(locationPage.lead || coverageSummary)}</p>
+      ${coverageSummary && coverageSummary !== locationPage.lead ? `<p>${escapeHtml(coverageSummary)}</p>` : ""}
+      <p>
+        <a href="../../services.html">View services</a> |
+        <a href="../../portfolio.html">View portfolio</a> |
+        <a href="../../contact.html">Book a session</a>
+      </p>
+    </section>
+    ${
+      faqItems.length
+        ? `<section class="section">
+      <h2>Common questions about ${escapeHtml(locationPage.name)}</h2>
+      ${faqItems
+        .map(
+          (item) => `
+        <article>
+          <h3>${escapeHtml(item.question)}</h3>
+          <p>${escapeHtml(item.answer)}</p>
+        </article>
+      `
+        )
+        .join("")}
+    </section>`
+        : ""
+    }
+    ${
+      nearbyPages.length
+        ? `<section class="section">
+      <h2>Nearby markets</h2>
+      <ul>
+        ${nearbyPages
+          .map(
+            (item) =>
+              `<li><a href="../../locations/${item.slug}/">${escapeHtml(item.market || item.name)}</a></li>`
+          )
+          .join("")}
+      </ul>
+    </section>`
+        : ""
+    }
+  `.trim();
+}
+
 async function loadLocationPages() {
   try {
     const raw = await readFile(path.join(projectRoot, "content", "locations.json"), "utf8");
@@ -38,21 +200,25 @@ async function loadLocationPages() {
   }
 }
 
-function publicPageShell({ title, description, page, assetPrefix = "./", bodyAttributes = "" }) {
+function publicPageShell({
+  title,
+  description,
+  page,
+  canonicalPath = "",
+  assetPrefix = "./",
+  bodyAttributes = "",
+  structuredData = null,
+  mainContent = "",
+}) {
   return `<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="${escapeHtml(description)}" />
-    <title>${escapeHtml(title)}</title>
-    <link rel="icon" href="${assetPrefix}assets/brand/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="${assetPrefix}assets/css/styles.css" />
+    ${headMarkup({ title, description, canonicalPath, assetPrefix, structuredData })}
   </head>
   <body data-page="${escapeHtml(page)}"${bodyAttributes ? ` ${bodyAttributes}` : ""}>
     <div class="page-shell">
       <header id="site-header"></header>
-      <main id="site-main"></main>
+      <main id="site-main">${mainContent}</main>
       <footer id="site-footer"></footer>
     </div>
 
@@ -95,8 +261,11 @@ async function writeLocationPages(locationPages) {
         title,
         description,
         page: "location",
+        canonicalPath: `locations/${locationPage.slug}/`,
         assetPrefix: "../../",
         bodyAttributes: `data-base-path="../../" data-location-slug="${escapeHtml(locationPage.slug)}"`,
+        structuredData: locationStructuredData({ title, description, locationPage }),
+        mainContent: locationSeoFallbackMarkup(locationPage, locationPages),
       })
     );
   }
@@ -126,6 +295,16 @@ ${urls
 `;
 
   await writeFile(path.join(distDir, "sitemap.xml"), sitemap);
+}
+
+async function writeRobots() {
+  const robots = `User-agent: *
+Allow: /
+
+Sitemap: ${siteOrigin}/sitemap.xml
+`;
+
+  await writeFile(path.join(distDir, "robots.txt"), robots);
 }
 
 async function ensureEntryExists(relativePath) {
@@ -236,6 +415,7 @@ async function build() {
 
   await writeLocationPages(locationPages);
   await writeSitemap(locationPages);
+  await writeRobots();
 
   await writeFile(path.join(distDir, "_routes.json"), `${JSON.stringify(routesManifest, null, 2)}\n`);
 

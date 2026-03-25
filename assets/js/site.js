@@ -5,6 +5,7 @@ import { loadUnlockedCloudPortal, unlockCloudPortal } from "./client-delivery-ap
 const page = document.body.dataset.page;
 const pageBasePath = document.body.dataset.basePath || "./";
 const locationSlug = String(document.body.dataset.locationSlug || "").trim();
+const PUBLIC_SITE_ORIGIN = "https://zbcaptures.com";
 const headerEl = document.getElementById("site-header");
 const mainEl = document.getElementById("site-main");
 const footerEl = document.getElementById("site-footer");
@@ -113,6 +114,19 @@ function absoluteSiteUrl(relativePath = "") {
   }
 
   return new URL(value.replace(/^\.\//, ""), new URL(pageBasePath, window.location.href)).toString();
+}
+
+function absolutePublicUrl(relativePath = "") {
+  const value = String(relativePath || "").trim();
+  if (!value) {
+    return `${PUBLIC_SITE_ORIGIN}/`;
+  }
+
+  if (/^(?:[a-z]+:)?\/\//i.test(value) || value.startsWith("data:") || value.startsWith("blob:") || value.startsWith("mailto:") || value.startsWith("tel:") || value.startsWith("#")) {
+    return value;
+  }
+
+  return new URL(value.replace(/^\.\//, ""), `${PUBLIC_SITE_ORIGIN}/`).toString();
 }
 
 function currentPathname() {
@@ -3134,7 +3148,7 @@ function loadingShellMarkup(currentPage) {
 }
 
 function absolutePageUrl(relativePath = "") {
-  return absoluteSiteUrl(relativePath);
+  return absolutePublicUrl(relativePath);
 }
 
 function seoImageUrl() {
@@ -3164,7 +3178,7 @@ function pageSeoConfig() {
       return {
         title: "Real Estate Photography Services in Pensacola, FL | ZB Captures",
         description:
-          "Real estate photography services in Pensacola, Florida with MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video for Zillow, Homes.com, Redfin, Airbnb, and VRBO listings.",
+          "Real estate photography services in Pensacola, Florida with MLS-ready photos, HDR photography, drone coverage, twilight add-ons, and social video for Gulf Coast listings.",
         path: "services.html",
       };
     case "portfolio":
@@ -3176,9 +3190,9 @@ function pageSeoConfig() {
       };
     case "contact":
       return {
-        title: "Contact ZB Captures | Pensacola Real Estate Photographer",
+        title: "Contact ZB Captures | Pensacola Real Estate Photography",
         description:
-          "Contact ZB Captures for Pensacola real estate photography, MLS-ready photos, drone photos, and listing media with same-day availability when possible across the Gulf Coast.",
+          "Contact ZB Captures to book Pensacola real estate photography, drone coverage, and listing media for properties across Pensacola and nearby Gulf Coast markets.",
         path: "contact.html",
       };
     case "client-access":
@@ -3195,9 +3209,9 @@ function pageSeoConfig() {
       };
     default:
       return {
-        title: "ZB Captures | Real Estate Photography",
+        title: "Pensacola Real Estate Photography | ZB Captures",
         description:
-          "ZB Captures provides Pensacola real estate photography with MLS-ready photos, Zillow-ready images, HDR photography, drone photos, and social video for Zillow, Homes.com, Redfin, Airbnb, and VRBO listings across the Gulf Coast.",
+          "Pensacola real estate photography with MLS-ready photos, drone coverage, video, and fast turnaround for listings across Pensacola, Milton, Pace, Gulf Breeze, and nearby Gulf Coast markets.",
         path: "",
       };
   }
@@ -3237,12 +3251,12 @@ function applyStructuredData(seo) {
   const areaServed = page === "location" && locationPage?.market ? [locationPage.market] : SEO_SERVICE_AREAS;
   const faqSchemaItems = currentFaqItems();
   const canonicalUrl = absolutePageUrl(seo.path);
-  const businessId = `${window.location.origin}/#business`;
+  const businessId = `${absolutePageUrl("")}#business`;
   const business = {
     "@type": ["LocalBusiness", "ProfessionalService"],
     "@id": businessId,
     name: state.settings.brandName,
-    url: window.location.origin,
+    url: absolutePageUrl(""),
     image: locationHero ? mediaOriginalUrlFor(locationHero) || mediaUrlFor(locationHero, "full") || seoImageUrl() : seoImageUrl(),
     description: seo.description,
     areaServed,
@@ -3270,9 +3284,9 @@ function applyStructuredData(seo) {
   const graph = [
     {
       "@type": "WebSite",
-      "@id": `${window.location.origin}/#website`,
+      "@id": `${absolutePageUrl("")}#website`,
       name: state.settings.brandName,
-      url: window.location.origin,
+      url: absolutePageUrl(""),
     },
     business,
   ];
