@@ -38,7 +38,7 @@
         "value": "Designed to feel premium from the first second"
       }
     ],
-    "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
+    "servicesLead": "Premium real estate media with a 24-hour turnaround. High-end HDR, licensed drone work, and cinematic video to help your listings stand out and sell fast.",
     "homeServicesLead": "Coverage built for easy booking, polished presentation, and quick delivery once the listing is ready to launch.",
     "homeServicesEyebrow": "Services",
     "homeServicesTitle": "High-performance media for every listing.",
@@ -65,7 +65,7 @@
     "servicesPageTitle": "Elevate Your Listing, Engage Your Buyers.",
     "clientDeliveryEyebrow": "Client delivery",
     "clientDeliveryTitle": "A delivery portal that feels polished instead of technical.",
-    "clientDeliveryLead": "Each finished shoot can be shared through a dedicated access page so your realtor can preview the work, download the original files, and move fast without guessing what to click.",
+    "clientDeliveryLead": "Every shoot is delivered through a private link for instant previews and one-click downloads. No more guesswork—just fast access so you can get listed.",
     "faqEyebrow": "FAQ & SERVICE AREA",
     "faqTitle": "Questions agents usually ask before booking.",
     "faqLead": "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.",
@@ -1351,5 +1351,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-03-25T19:26:03.872Z"
+  "savedAt": "2026-03-25T19:36:10.932Z"
 }

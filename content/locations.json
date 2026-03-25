@@ -70,8 +70,13 @@
           "answer": "Yes. The workflow is built around MLS-ready delivery while still giving agents assets that feel strong enough for listing launches, social promotion, and brokerage use."
         }
       ],
-      "heroMediaId": "",
-      "galleryMediaIds": [],
+      "heroMediaId": "952028f8-6a70-400c-b4d0-6b1ef94ac6e1",
+      "galleryMediaIds": [
+        "a6dc9347-8bb1-45d2-a9ef-7e20d2b70538",
+        "255fe567-d6e7-4cb7-8e43-753fbd125eb6",
+        "328cba1c-65b8-47b6-9d99-cc5bfb0a65ac",
+        "07153b17-0a77-4d7a-97fd-087868ec39ce"
+      ],
       "nearbySlugs": [
         "gulf-breeze-fl",
         "pace-fl",
@@ -148,8 +153,12 @@
           "answer": "Often they do. Drone photos and video can add meaningful value when location, amenity access, or the surrounding setting help the property stand out."
         }
       ],
-      "heroMediaId": "",
-      "galleryMediaIds": [],
+      "heroMediaId": "040927aa-81b6-4c81-bd9b-ed1cdcc9a87d",
+      "galleryMediaIds": [
+        "302fa87d-3104-4729-b49e-b45d2581d07a",
+        "7ee20adb-6cb8-4141-a5a3-5f2252556dbd",
+        "43148f0d-4461-413f-8a97-06eaea1eb60c"
+      ],
       "nearbySlugs": [
         "destin-fl",
         "navarre-fl",
@@ -304,8 +313,12 @@
           "answer": "Often they do. Drone photos or video can add value when exterior context, proximity, or neighborhood layout helps the property feel more compelling online."
         }
       ],
-      "heroMediaId": "",
-      "galleryMediaIds": [],
+      "heroMediaId": "ec03023f-2779-432a-a9fd-6d26f7d1eea5",
+      "galleryMediaIds": [
+        "328cba1c-65b8-47b6-9d99-cc5bfb0a65ac",
+        "43148f0d-4461-413f-8a97-06eaea1eb60c",
+        "36a0b4cf-f03d-4031-b4d9-8660ef8fd6e0"
+      ],
       "nearbySlugs": [
         "niceville-fl",
         "destin-fl",
