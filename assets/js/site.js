@@ -2665,13 +2665,31 @@ function faqPageMarkup() {
 }
 
 function trustPageMarkup() {
+  const trustSteps = [
+    {
+      step: "01",
+      title: "Send the address and timing",
+      text: "Share the property address, the target timeline, and the coverage you want.",
+    },
+    {
+      step: "02",
+      title: "Approve the plan",
+      text: "Lock in the package, confirm the shoot, and keep the listing schedule moving.",
+    },
+    {
+      step: "03",
+      title: "Get the finished files",
+      text: "Receive clean, listing-ready media through a simple portal handoff.",
+    },
+  ];
+
   return `
     <section class="section">
       <div class="section-grid grid--split">
         <div>
           <div class="section__eyebrow">Trust & process</div>
-          <h1 class="section__title">How the booking-to-delivery process stays simple.</h1>
-          <p class="section__lead">This page brings together the workflow, reliability, and service signals agents usually want to see before they book or refer a photographer.</p>
+          <h1 class="section__title">A quick look at how booking and delivery work.</h1>
+          <p class="section__lead">The short version: send the address, get scheduled, and receive listing-ready files quickly. This page is here to show the process without making you read through a wall of copy.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
             <a class="button" href="${absoluteSiteUrl("results.html")}">View results</a>
@@ -2680,23 +2698,63 @@ function trustPageMarkup() {
         <aside class="contact-box">
           <div class="contact-row">
             <div class="contact-label">Booking</div>
-            <div class="contact-value">Easy booking from the first inquiry to the scheduled shoot</div>
+            <div class="contact-value">Clear next steps from inquiry to shoot day</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Delivery</div>
-            <div class="contact-value">Quick delivery through a clean, simple client portal</div>
+            <div class="contact-value">Quick delivery through a simple client portal</div>
           </div>
           <div class="contact-row">
             <div class="contact-label">Proof</div>
-            <div class="contact-value">Supported by feedback, local market pages, and a public Google Business Profile.</div>
+            <div class="contact-value">Feedback, local pages, and a public Google Business Profile</div>
           </div>
         </aside>
       </div>
     </section>
 
-    ${trustSectionMarkup()}
-
-    ${agentProofMarkup()}
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div class="contact-box">
+          <div class="card__eyebrow">How it works</div>
+          <h2 class="card__title">Three simple steps.</h2>
+          <div class="timeline">
+            ${trustSteps
+              .map(
+                (item) => `
+                  <div class="timeline__item">
+                    <div class="timeline__step">${safeText(item.step)}</div>
+                    <div>
+                      <h3 class="timeline__title">${safeText(item.title)}</h3>
+                      <p class="timeline__text">${safeText(item.text)}</p>
+                    </div>
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
+        </div>
+        <div class="contact-box">
+          <div class="card__eyebrow">What stands out</div>
+          <h2 class="card__title">What agents usually want to know.</h2>
+          <div class="contact-row">
+            <div class="contact-label">Turnaround</div>
+            <div class="contact-value">24-hour photo delivery on standard shoots</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Availability</div>
+            <div class="contact-value">Same-day openings when the schedule allows</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Coverage</div>
+            <div class="contact-value">Pensacola and nearby Gulf Coast markets</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Proof</div>
+            <div class="contact-value"><a href="${absoluteSiteUrl("feedback.html")}">Client feedback</a> and <a href="${GOOGLE_BUSINESS_PROFILE_URL}" target="_blank" rel="noreferrer">Google profile</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
   `;
 }
 
