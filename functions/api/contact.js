@@ -31,6 +31,51 @@ function normalizeList(value) {
   return single ? [single] : [];
 }
 
+function extractEmailAddress(value) {
+  const text = normalizeField(value);
+  if (!text) {
+    return "";
+  }
+
+  const angleMatch = text.match(/<([^<>]+)>/);
+  if (angleMatch?.[1]) {
+    return angleMatch[1].trim();
+  }
+
+  const directMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return directMatch?.[0]?.trim() || "";
+}
+
+function contactConfig(env = {}) {
+  const fromHeader = normalizeField(env.NOTIFICATION_FROM);
+  const toHeader = normalizeField(env.NOTIFICATION_TO);
+  const fromAddress = extractEmailAddress(fromHeader);
+  const toAddress = extractEmailAddress(toHeader);
+  const missing = [];
+
+  if (!env.CONTACT_SUBMISSIONS) {
+    missing.push("CONTACT_SUBMISSIONS");
+  }
+  if (!env.EMAIL) {
+    missing.push("EMAIL");
+  }
+  if (!fromHeader || !fromAddress) {
+    missing.push("NOTIFICATION_FROM");
+  }
+  if (!toHeader || !toAddress) {
+    missing.push("NOTIFICATION_TO");
+  }
+
+  return {
+    configured: missing.length === 0,
+    missing,
+    fromHeader,
+    toHeader,
+    fromAddress,
+    toAddress,
+  };
+}
+
 function buildKey(timestamp, id) {
   const safeStamp = timestamp.replace(/[:.]/g, "-");
   return `submissions/${timestamp.slice(0, 10)}/${safeStamp}-${id}.json`;
@@ -144,14 +189,34 @@ export async function onRequestOptions(context) {
   });
 }
 
+export async function onRequestGet(context) {
+  const origin = context.request.headers.get("origin") || "*";
+  const config = contactConfig(context.env);
+
+  return json(
+    {
+      ok: config.configured,
+      configured: config.configured,
+      message: config.configured
+        ? "The contact backend is configured and ready."
+        : "The contact backend is missing required Cloudflare bindings or notification email settings.",
+      missing: config.missing,
+    },
+    config.configured ? 200 : 503,
+    corsHeaders(origin)
+  );
+}
+
 export async function onRequestPost(context) {
   const origin = context.request.headers.get("origin") || "*";
+  const config = contactConfig(context.env);
 
-  if (!context.env.CONTACT_SUBMISSIONS || !context.env.EMAIL || !context.env.NOTIFICATION_FROM || !context.env.NOTIFICATION_TO) {
+  if (!config.configured) {
     return json(
       {
         ok: false,
         error: "The contact backend is not configured yet.",
+        missing: config.missing,
       },
       503,
       corsHeaders(origin)
@@ -187,8 +252,8 @@ export async function onRequestPost(context) {
       httpMetadata: { contentType: "application/json; charset=utf-8" },
     });
 
-    const rawEmail = buildEmail(submission, savedAs, context.env.NOTIFICATION_FROM, context.env.NOTIFICATION_TO);
-    const emailMessage = new EmailMessage(context.env.NOTIFICATION_FROM, context.env.NOTIFICATION_TO, rawEmail);
+    const rawEmail = buildEmail(submission, savedAs, config.fromHeader, config.toHeader);
+    const emailMessage = new EmailMessage(config.fromAddress, config.toAddress, rawEmail);
 
     await context.env.EMAIL.send(emailMessage);
 

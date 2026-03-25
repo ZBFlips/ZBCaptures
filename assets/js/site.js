@@ -4190,6 +4190,7 @@ function wireContactForm() {
     const company = formData.get("company")?.toString().trim() || "";
     const endpoint = state.settings.contactNotificationEndpoint?.trim() || defaultContactEndpoint();
     const originalLabel = submitButton?.textContent || "Send inquiry";
+    let shouldOpenMailFallback = false;
 
     if (submitButton) {
       submitButton.disabled = true;
@@ -4234,7 +4235,18 @@ function wireContactForm() {
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload?.ok === false) {
-        throw new Error(payload?.error || "The contact form service returned an error.");
+        if (payload?.savedAs) {
+          if (status) {
+            status.textContent =
+              payload?.error ||
+              "Your inquiry was saved, but the notification email hit an issue. I should still have the submission and can follow up directly.";
+          }
+          return;
+        }
+
+        const error = new Error(payload?.error || "The contact form service returned an error.");
+        error.contactPayload = payload;
+        throw error;
       }
 
       form.reset();
@@ -4250,14 +4262,22 @@ function wireContactForm() {
       return;
     } catch (error) {
       console.error(error);
+      shouldOpenMailFallback = true;
       if (status) {
-        status.textContent = "The form backend could not be reached, so your email app will open as a fallback.";
+        const backendMessage = error?.contactPayload?.error || (error instanceof Error ? error.message : "");
+        status.textContent = backendMessage
+          ? `${backendMessage} Your email app will open as a fallback.`
+          : "The form backend could not be reached, so your email app will open as a fallback.";
       }
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.textContent = originalLabel;
       }
+    }
+
+    if (!shouldOpenMailFallback) {
+      return;
     }
 
     const subject = encodeURIComponent(

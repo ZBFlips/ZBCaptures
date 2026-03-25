@@ -48,7 +48,14 @@ To finish the live contact form on Cloudflare Pages:
 3. In Pages `Settings > Variables and Secrets`, add:
    - `NOTIFICATION_FROM`
    - `NOTIFICATION_TO`
-4. Redeploy the Pages project.
+4. Set `NOTIFICATION_FROM` to a verified sender on your custom domain, for example `noreply@zbcaptures.com`.
+5. Redeploy the Pages project.
+6. Open `/api/contact` on the live site. A healthy backend will return JSON with `"configured": true`.
+
+Notes:
+
+- The contact backend now accepts either a plain email address or a display-name format like `ZB Captures <noreply@zbcaptures.com>` in `NOTIFICATION_FROM` and `NOTIFICATION_TO`.
+- The backend only exists when Cloudflare Pages deploys the repo with the `functions/` directory included. A static-only upload of `dist/` will not provide `/api/contact`.
 
 The standalone Worker in [`contact-backend/`](/C:/Users/Zac/Desktop/photography%20portfolio%20website/contact-backend) can still be used as a reference or separate deployment if you ever want the contact flow split out again.
 
