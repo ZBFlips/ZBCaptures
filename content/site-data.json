@@ -2,11 +2,11 @@
   "settings": {
     "brandName": "ZB Captures",
     "brandTag": "",
-    "location": "Pensacola-based real estate media for agents and brokerages",
-    "heroKicker": "Pensacola real estate photography",
-    "heroHeadline": "Market-ready media for Pensacola listings that need to launch polished.",
-    "heroLead": "MLS-ready photography, drone coverage, and video for Pensacola agents, brokerages, and listing teams, with a guaranteed 24-hour photo turnaround and a clean handoff once the property is ready to launch.",
-    "homeHeroSubnote": "Pensacola-based coverage for Gulf Coast listings, with easy booking and a clean delivery process.",
+    "location": "Serving luxury, commercial, and residential listings",
+    "heroKicker": "Premium Real Estate Media, 24-Hour Turnaround, Guaranteed.",
+    "heroHeadline": "Turn your listing into a sale.",
+    "heroLead": "High-end media designed to capture attention, move quickly, and give your listings a competitive edge.",
+    "homeHeroSubnote": "Serving Pensacola and nearby Gulf Coast markets with fast turnaround and a clean delivery process.",
     "featuredFrameTitle": "Highlighted Photo",
     "featuredFrameLead": "A single image can carry the whole listing.",
     "featuredFrameMediaId": "d83eac99-2e41-43e6-92d6-1b64428a0ca0",
@@ -34,14 +34,14 @@
         "value": "Interior, exterior, twilight, drone-ready"
       },
       {
-        "label": "Best fit",
-        "value": "Agents, brokers, and listing teams"
+        "label": "Experience",
+        "value": "Designed to feel premium from the first second"
       }
     ],
     "servicesLead": "I provide professional real estate media with a guaranteed 24-hour turnaround, offering everything from high-end HDR photography and flexible pricing tiers to licensed aerial drone photos and cinematic video to help your listings stand out and sell faster.",
     "homeServicesLead": "Coverage built for easy booking, polished presentation, and quick delivery once the listing is ready to launch.",
     "homeServicesEyebrow": "Services",
-    "homeServicesTitle": "Real estate media packages for Gulf Coast listings.",
+    "homeServicesTitle": "High-performance media for every listing.",
     "feedbackEyebrow": "Client feedback",
     "feedbackTitle": "Real feedback from past clients, all in one place.",
     "feedbackLead": "Past clients consistently mention communication, responsiveness, and how easy the finished media is to use once a listing is ready to launch.",
@@ -52,12 +52,12 @@
     "feedbackThemesLabel": "Common themes",
     "feedbackThemesValue": "Easy communication, quick delivery, and listing-ready media.",
     "testimonialsEyebrow": "Client feedback",
-    "testimonialsTitle": "Real feedback from past clients.",
+    "testimonialsTitle": "Read what former clients had to say.",
     "testimonialsLead": "These are pulled from actual Thumbtack reviews so you can get a feel for what working together is like before you book.",
     "testimonialsBadgeLabel": "Thumbtack reviews",
     "trustEyebrow": "Trust & process",
-    "trustTitle": "Easy booking, quick delivery, and a process that stays clear.",
-    "trustLead": "The goal is simple: make the property look strong, keep booking easy, and make delivery feel straightforward for agents and clients.",
+    "trustTitle": "Fast turnaround, friendly service, and an easy delivery process.",
+    "trustLead": "The goal is simple: make the property look strong, get the files back quickly, and keep the booking-to-delivery flow clear for agents and clients.",
     "homeCtaEyebrow": "Start a project",
     "homeCtaTitle": "Ready when the next listing is.",
     "homeCtaLead": "If you already know the address, timeline, or package you need, send it through and I will follow up with availability and the best fit.",
@@ -70,13 +70,13 @@
     "faqTitle": "Questions agents usually ask before booking.",
     "faqLead": "The goal is to make the process feel straightforward from the first click. These are the details most agents want clarified before they lock in a shoot.",
     "proofEyebrow": "Why agents book this",
-    "proofTitle": "Why Gulf Coast agents keep ZB Captures in rotation.",
-    "proofLead": "The goal is simple: make booking easy, keep the presentation polished, and deliver files in a way that feels dependable when the listing needs to go live.",
+    "proofTitle": "The Impact",
+    "proofLead": "According to eye-tracking data, buyers spend 60% of their time looking at listing photos (compared to 20% at the description). On average, professional photos drive 61% more views to a listing, and reduce time on the market by 32%. Better photos also improve the perceived value of a home, increasing the sale price by up to $11,200 on average.",
     "proofCards": [
       {
         "eyebrow": "Faster launch",
         "title": "Listings can move from shoot to market quickly.",
-        "text": "The easy booking flow and clear package structure make it simple for agents to keep momentum when a property is ready to go live."
+        "text": "The turnaround and package structure make it easy for agents to keep momentum when a property is ready to go live."
       },
       {
         "eyebrow": "Stronger first impression",
@@ -115,8 +115,8 @@
     "instagram": "@zb.re.media",
     "responseTime": "Usually replies within 2 hours during business days.",
     "contactNotificationEndpoint": "https://zb-captures-contact-backend.zbcaptures.workers.dev",
-    "footerHeadline": "Pensacola real estate photography and video for clean, market-ready listing launches, easy booking, and quick delivery.",
-    "footerNote": "Pensacola-based real estate media for agents, brokers, and property marketers."
+    "footerHeadline": "Pensacola real estate photography and video for clean, market-ready listing launches.",
+    "footerNote": "Custom-built and ready for your own domain."
   },
   "services": [
     {
@@ -148,7 +148,7 @@
     {
       "id": "service-media",
       "title": "The Works",
-      "description": "This is the ultimate marketing kit, combining premium photography with cinematic social and drone video to create a high-energy, immersive experience that stops the scroll.",
+      "description": "The heavy hitter. High-end photos paired with drone and social video—basically everything you need to make a listing impossible to ignore.",
       "bullets": [
         "45 HDR Images",
         "10 Drone Images",
@@ -167,7 +167,7 @@
       "id": "local-workspace-directory",
       "name": "upload",
       "type": "application/octet-stream",
-      "createdAt": 1774386929451,
+      "createdAt": 1774466659302,
       "title": "",
       "caption": "",
       "alt": "",
@@ -1351,5 +1351,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-03-25T04:48:18.864Z"
+  "savedAt": "2026-03-25T19:26:03.872Z"
 }
