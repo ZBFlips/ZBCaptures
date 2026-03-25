@@ -221,14 +221,19 @@ function headerNavItems() {
     { href: absoluteSiteUrl("index.html"), label: "Home" },
     { href: absoluteSiteUrl("portfolio.html"), label: "Portfolio" },
     { href: absoluteSiteUrl("services.html"), label: "Services" },
-    { href: absoluteSiteUrl("contact.html"), label: "Contact" },
+    { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
     { href: absoluteSiteUrl("admin.html"), label: "Admin" },
   ];
 }
 
 function footerNavItems() {
   return [
-    ...headerNavItems(),
+    { href: absoluteSiteUrl("index.html"), label: "Home" },
+    { href: absoluteSiteUrl("portfolio.html"), label: "Portfolio" },
+    { href: absoluteSiteUrl("services.html"), label: "Services" },
+    { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
+    { href: absoluteSiteUrl("contact.html"), label: "Contact" },
+    { href: absoluteSiteUrl("admin.html"), label: "Admin" },
     { href: absoluteSiteUrl("client-access.html"), label: "Client Access" },
   ];
 }
@@ -294,7 +299,7 @@ function renderHeader() {
         </button>
         <nav class="nav" id="site-nav" data-site-nav aria-label="Primary navigation">
           ${links}
-          <a class="nav__cta" href="${absoluteSiteUrl("contact.html")}">${safeText(state.settings.heroCtas.secondaryLabel)}</a>
+          <a class="nav__cta" href="${absoluteSiteUrl("contact.html")}">Contact</a>
         </nav>
       </div>
     </div>
@@ -2104,52 +2109,38 @@ function contactMarkup(options = {}) {
   const contactRecord = showContactImage ? contactMedia() : null;
   return `
     <section class="section contact-section">
-      <div class="contact-layout">
-        <div class="contact-panel">
-          <div>
-            <div class="section__eyebrow">${safeText(state.settings.contactEyebrow ?? "Contact")}</div>
-            <h2 class="section__title">${safeText(state.settings.contactTitle ?? "Let's turn the next property into something memorable.")}</h2>
-            <p class="section__lead">${safeText(state.settings.contactLead)}</p>
-          </div>
-          <div class="contact-box">
-            <div class="contact-row">
-              <div class="contact-label">Email</div>
-              <div class="contact-value"><a href="mailto:${safeText(state.settings.email)}">${safeText(state.settings.email)}</a></div>
-            </div>
-            <div class="contact-row">
-              <div class="contact-label">Phone</div>
-              <div class="contact-value"><a href="tel:${safeText(state.settings.phone)}">${safeText(state.settings.phone)}</a></div>
-            </div>
-            <div class="contact-row">
-              <div class="contact-label">Instagram</div>
-              <div class="contact-value">${safeText(state.settings.instagram)}</div>
-            </div>
-            <div class="contact-row">
-              <div class="contact-label">Coverage</div>
-              <div class="contact-value">${safeText(state.settings.serviceArea)}</div>
-            </div>
-            <div class="contact-row">
-              <div class="contact-label">Response time</div>
-              <div class="contact-value">${safeText(state.settings.responseTime || "Usually replies quickly during business hours.")}</div>
-            </div>
-          </div>
-          ${showBestFit ? `
-            <div class="contact-box">
-              <strong>Best for:</strong>
-              <div class="helper">Property launches, listing refreshes, luxury presentations, and media packages that need strong listing photos and video.</div>
-            </div>
-          ` : ""}
+      <div class="contact-page__top">
+        <div class="contact-page__intro">
+          <div class="section__eyebrow">${safeText(state.settings.contactEyebrow ?? "Contact")}</div>
+          <h1 class="section__title">${safeText(state.settings.contactTitle ?? "Let's turn the next property into something memorable.")}</h1>
+          <p class="section__lead">${safeText(state.settings.contactLead)}</p>
         </div>
+        <aside class="contact-box contact-box--prominent">
+          <div class="contact-box__kicker">Reach out directly</div>
+          <div class="contact-row">
+            <div class="contact-label">Email</div>
+            <div class="contact-value"><a href="mailto:${safeText(state.settings.email)}">${safeText(state.settings.email)}</a></div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Phone</div>
+            <div class="contact-value"><a href="tel:${safeText(state.settings.phone)}">${safeText(state.settings.phone)}</a></div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Instagram</div>
+            <div class="contact-value">${safeText(state.settings.instagram)}</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Coverage</div>
+            <div class="contact-value">${safeText(state.settings.serviceArea)}</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Response time</div>
+            <div class="contact-value">${safeText(state.settings.responseTime || "Usually replies quickly during business hours.")}</div>
+          </div>
+        </aside>
+      </div>
+      <div class="contact-layout contact-layout--details-first">
         <div class="contact-panel">
-          ${contactRecord ? `<div class="card"><button class="media-tile__button" data-preview data-id="${contactRecord.id}" type="button" aria-label="Preview ${safeText(contactRecord.title || "contact image")}">${responsivePictureMarkup(contactRecord, {
-            imgClass: "card__image",
-            alt: contactRecord.alt || contactRecord.title || "Contact image",
-            keys: ["thumb", "medium", "full"],
-            sizes: "(max-width: 1100px) 100vw, 52vw",
-            loading: "lazy",
-            decoding: "async",
-          })}</button></div>` : ""}
-          ${showEstimate ? contactEstimatePanelMarkup() : ""}
           <div class="contact-box">
             <form class="form" id="contact-form">
               <div class="helper" data-contact-prefill-note hidden></div>
@@ -2244,7 +2235,37 @@ function contactMarkup(options = {}) {
             </form>
           </div>
         </div>
+        <div class="contact-panel">
+          ${contactRecord ? `<div class="card"><button class="media-tile__button" data-preview data-id="${contactRecord.id}" type="button" aria-label="Preview ${safeText(contactRecord.title || "contact image")}">${responsivePictureMarkup(contactRecord, {
+            imgClass: "card__image",
+            alt: contactRecord.alt || contactRecord.title || "Contact image",
+            keys: ["thumb", "medium", "full"],
+            sizes: "(max-width: 1100px) 100vw, 52vw",
+            loading: "lazy",
+            decoding: "async",
+          })}</button></div>` : ""}
+          ${showBestFit ? `
+            <div class="contact-box">
+              <strong>Best for:</strong>
+              <div class="helper">Property launches, listing refreshes, luxury presentations, and media packages that need strong listing photos and video.</div>
+            </div>
+          ` : ""}
+        </div>
       </div>
+      ${
+        showEstimate
+          ? `
+            <div class="contact-page__estimate">
+              <div class="contact-page__estimateCopy">
+                <div class="section__eyebrow">Pricing guide</div>
+                <h2 class="card__title">The live estimate now sits at the end of the page.</h2>
+                <p class="card__text">As you update the package, size, turnaround, and add-ons in the inquiry form above, the estimate below updates with the same details.</p>
+              </div>
+              ${contactEstimatePanelMarkup()}
+            </div>
+          `
+          : ""
+      }
     </section>
   `;
 }
@@ -2381,6 +2402,44 @@ function faqMarkup(items = faqItems, options = {}) {
         </aside>
       </div>
     </section>
+  `;
+}
+
+function faqPageMarkup() {
+  return `
+    <section class="section">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">FAQ</div>
+          <h1 class="section__title">Answers before you book.</h1>
+          <p class="section__lead">Everything important lives here in one place, from turnaround and service radius to drone coverage and how the final files are delivered.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
+            <a class="button" href="${absoluteSiteUrl("services.html")}">View services</a>
+          </div>
+        </div>
+        <aside class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Delivery</div>
+            <div class="contact-value">Most standard photo sets land within 24 hours.</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Coverage</div>
+            <div class="contact-value">Pensacola-based with a service radius of roughly 120 miles.</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Media</div>
+            <div class="contact-value">Photography, drone coverage, video, and clean portal delivery.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    ${faqMarkup(currentFaqItems(), {
+      eyebrow: "Frequently asked questions",
+      title: "Questions agents usually want answered before scheduling.",
+      lead: "If a listing has a special timeline, travel question, or custom scope, the contact page is still the fastest place to send the details and get a direct answer.",
+    })}
   `;
 }
 
@@ -2879,8 +2938,6 @@ function servicesPageMarkup() {
     ${clientDeliveryTeaserMarkup()}
 
     ${videoMarkup()}
-
-    ${faqMarkup()}
   `;
 }
 
@@ -3195,6 +3252,13 @@ function pageSeoConfig() {
           "Contact ZB Captures to book Pensacola real estate photography, drone coverage, and listing media for properties across Pensacola and nearby Gulf Coast markets.",
         path: "contact.html",
       };
+    case "faq":
+      return {
+        title: "FAQ | ZB Captures Real Estate Photography",
+        description:
+          "Read the ZB Captures FAQ for answers about turnaround, MLS-ready photos, service radius, drone coverage, and client delivery.",
+        path: "faq.html",
+      };
     case "client-access":
       return {
         title: "Client Delivery Portal | ZB Captures",
@@ -3315,7 +3379,7 @@ function applyStructuredData(seo) {
     });
   }
 
-  if ((page === "home" || page === "services" || page === "location") && faqSchemaItems.length) {
+  if ((page === "faq" || page === "location") && faqSchemaItems.length) {
     graph.push({
       "@type": "FAQPage",
       mainEntity: faqSchemaItems.map((item) => ({
@@ -4569,6 +4633,14 @@ function renderPage() {
     wirePricingMotion();
     wirePreviewButtons();
     wireLightbox();
+    return;
+  }
+
+  if (page === "faq") {
+    clearClientPortalState();
+    mainEl.innerHTML = faqPageMarkup();
+    wireSectionReveal();
+    wireServiceAreaMap();
     return;
   }
 

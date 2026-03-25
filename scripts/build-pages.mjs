@@ -13,6 +13,7 @@ const requiredFiles = [
   "portfolio.html",
   "services.html",
   "contact.html",
+  "faq.html",
   "admin.html",
   "client-access.html",
 ];
@@ -278,6 +279,7 @@ async function writeSitemap(locationPages) {
     `${siteOrigin}/portfolio.html`,
     `${siteOrigin}/services.html`,
     `${siteOrigin}/contact.html`,
+    `${siteOrigin}/faq.html`,
     ...locationPages.map((item) => `${siteOrigin}/locations/${item.slug}/`),
   ];
 

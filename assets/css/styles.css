@@ -2202,9 +2202,36 @@ img {
   gap: 20px;
 }
 
+.contact-page__top,
+.contact-page__estimate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.contact-page__top {
+  margin-bottom: 20px;
+}
+
+.contact-page__intro,
+.contact-page__estimateCopy {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
 .contact-panel {
   display: grid;
   gap: 16px;
+}
+
+.contact-box__kicker {
+  color: var(--accent-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 
 .contact-box {
@@ -2212,6 +2239,35 @@ img {
   border: 1px solid var(--line);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.contact-box--prominent {
+  background:
+    linear-gradient(180deg, rgba(14, 18, 26, 0.94), rgba(10, 12, 18, 0.9)),
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.12), transparent 68%);
+  border-color: rgba(var(--accent-rgb), 0.28);
+}
+
+.contact-box--prominent .contact-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 18px 0;
+}
+
+.contact-box--prominent .contact-label {
+  color: var(--accent-2);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.contact-box--prominent .contact-value {
+  font-size: clamp(1.12rem, 1.45vw, 1.42rem);
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
 }
 
 .contact-box.pricing-card {
@@ -4027,6 +4083,8 @@ img {
   .hero__grid,
   .services-home__layout,
   .grid--split,
+  .contact-page__top,
+  .contact-page__estimate,
   .contact-layout,
   .admin-shell {
     grid-template-columns: 1fr;
