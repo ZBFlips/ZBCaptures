@@ -167,6 +167,78 @@
   "clientPortals": [],
   "media": [
     {
+      "id": "9804a2bc-e4ce-43f7-b561-75d67fb03363",
+      "name": "Gemini_Generated_Image_e4siwne4siwne4si.png",
+      "type": "image/webp",
+      "createdAt": 1774554137319,
+      "title": "Night reveal",
+      "caption": "",
+      "alt": "Night reveal",
+      "placement": "reveal",
+      "order": 0,
+      "portfolioTags": [],
+      "featured": false,
+      "src": "./assets/uploads/9804a2bc-e4ce-43f7-b561-75d67fb03363-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/9804a2bc-e4ce-43f7-b561-75d67fb03363-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/9804a2bc-e4ce-43f7-b561-75d67fb03363-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/9804a2bc-e4ce-43f7-b561-75d67fb03363-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/9804a2bc-e4ce-43f7-b561-75d67fb03363.png",
+      "originalType": "image/png"
+    },
+    {
+      "id": "3d08d8f1-51a2-402f-8c59-7ed9c621d955",
+      "name": "2-1-print-396-revana-wy.png",
+      "type": "image/webp",
+      "createdAt": 1774554127656,
+      "title": "Daytime background",
+      "caption": "",
+      "alt": "Daytime background",
+      "placement": "hero",
+      "order": 0,
+      "portfolioTags": [],
+      "featured": false,
+      "src": "./assets/uploads/3d08d8f1-51a2-402f-8c59-7ed9c621d955-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/3d08d8f1-51a2-402f-8c59-7ed9c621d955-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 427
+        },
+        "medium": {
+          "src": "./assets/uploads/3d08d8f1-51a2-402f-8c59-7ed9c621d955-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 853
+        },
+        "full": {
+          "src": "./assets/uploads/3d08d8f1-51a2-402f-8c59-7ed9c621d955-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1467
+        }
+      },
+      "originalSrc": "./assets/uploads/3d08d8f1-51a2-402f-8c59-7ed9c621d955.png",
+      "originalType": "image/png"
+    },
+    {
       "id": "2b9bb43a-0d93-422a-9a88-0bb27965e539",
       "name": "revana 2.png",
       "type": "image/webp",
@@ -1426,5 +1498,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-03-26T19:32:28.499Z"
+  "savedAt": "2026-03-26T19:42:30.056Z"
 }
