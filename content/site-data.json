@@ -167,6 +167,78 @@
   "clientPortals": [],
   "media": [
     {
+      "id": "2b9bb43a-0d93-422a-9a88-0bb27965e539",
+      "name": "revana 2.png",
+      "type": "image/webp",
+      "createdAt": 1774553505916,
+      "title": "Night reveal",
+      "caption": "",
+      "alt": "Night reveal",
+      "placement": "reveal",
+      "order": 0,
+      "portfolioTags": [],
+      "featured": false,
+      "src": "./assets/uploads/2b9bb43a-0d93-422a-9a88-0bb27965e539-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/2b9bb43a-0d93-422a-9a88-0bb27965e539-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 480
+        },
+        "medium": {
+          "src": "./assets/uploads/2b9bb43a-0d93-422a-9a88-0bb27965e539-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 960
+        },
+        "full": {
+          "src": "./assets/uploads/2b9bb43a-0d93-422a-9a88-0bb27965e539-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1650
+        }
+      },
+      "originalSrc": "./assets/uploads/2b9bb43a-0d93-422a-9a88-0bb27965e539.png",
+      "originalType": "image/png"
+    },
+    {
+      "id": "b2842252-9edd-4a81-b880-ccbc983fbab3",
+      "name": "revana 1.png",
+      "type": "image/webp",
+      "createdAt": 1774553500505,
+      "title": "Daytime background",
+      "caption": "",
+      "alt": "Daytime background",
+      "placement": "hero",
+      "order": 0,
+      "portfolioTags": [],
+      "featured": false,
+      "src": "./assets/uploads/b2842252-9edd-4a81-b880-ccbc983fbab3-full.webp",
+      "variants": {
+        "thumb": {
+          "src": "./assets/uploads/b2842252-9edd-4a81-b880-ccbc983fbab3-thumb.webp",
+          "type": "image/webp",
+          "width": 640,
+          "height": 480
+        },
+        "medium": {
+          "src": "./assets/uploads/b2842252-9edd-4a81-b880-ccbc983fbab3-medium.webp",
+          "type": "image/webp",
+          "width": 1280,
+          "height": 960
+        },
+        "full": {
+          "src": "./assets/uploads/b2842252-9edd-4a81-b880-ccbc983fbab3-full.webp",
+          "type": "image/webp",
+          "width": 2200,
+          "height": 1650
+        }
+      },
+      "originalSrc": "./assets/uploads/b2842252-9edd-4a81-b880-ccbc983fbab3.png",
+      "originalType": "image/png"
+    },
+    {
       "id": "local-workspace-directory",
       "name": "upload",
       "type": "application/octet-stream",
@@ -1354,5 +1426,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-03-25T19:36:10.932Z"
+  "savedAt": "2026-03-26T19:32:28.499Z"
 }
