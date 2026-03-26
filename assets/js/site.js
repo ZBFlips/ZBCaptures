@@ -1396,6 +1396,11 @@ const faqItems = [
     answer: "Yes. Depending on the package, coverage can include HDR photography, drone photos, social video, and larger listing marketing deliverables.",
   },
   {
+    question: "Can I add-on extras to a package?",
+    answer:
+      "Yes, any package can be modified to add or remove media assets (price may vary). For example, the 'Starter' package can have drone video added to it for $125.",
+  },
+  {
     question: "How do clients receive the finished files?",
     answer: "Each finished shoot can be delivered through a private client portal where the gallery can be reviewed and the original files can be downloaded without confusion.",
   },
@@ -1442,8 +1447,8 @@ const ESTIMATOR_LARGE_PROPERTY_SURCHARGE = 50;
 const ESTIMATOR_LARGE_PROPERTY_REASON = "Properties exceeding 3000sqft include a $50 price increase to account for longer job times.";
 
 const ESTIMATOR_ADD_ON_PRICES = {
-  "Drone photos": 75,
-  "Drone video": 175,
+  "Drone photos": 100,
+  "Drone video": 125,
   "Social reel": 150,
   "Twilight images": 20,
 };
