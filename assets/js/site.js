@@ -670,6 +670,20 @@ function responsiveImageAttrs(record, keys, sizes) {
   return `srcset="${safeText(srcset)}" sizes="${safeText(sizes)}"`;
 }
 
+function humanList(values = []) {
+  const items = values.filter(Boolean).map((value) => String(value).trim()).filter(Boolean);
+  if (!items.length) {
+    return "";
+  }
+  if (items.length === 1) {
+    return items[0];
+  }
+  if (items.length === 2) {
+    return `${items[0]} and ${items[1]}`;
+  }
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
 function mediaOriginalUrlFor(record) {
   if (record?.originalSrc) {
     return absoluteSiteUrl(record.originalSrc);
@@ -1989,9 +2003,9 @@ function locationMarketsSectionMarkup(records, options = {}) {
 
   const eyebrow = options.eyebrow || "Featured markets";
   const title = options.title || "Browse nearby Gulf Coast service areas.";
-  const lead =
-    options.lead ||
-    "Each location page focuses on the kinds of listings, booking patterns, and marketing needs that show up most often in that market.";
+  const lead = Object.prototype.hasOwnProperty.call(options, "lead")
+    ? String(options.lead || "").trim()
+    : "Each location page focuses on the kinds of listings, booking patterns, and marketing needs that show up most often in that market.";
   const sectionClassName = String(options.sectionClass || "").trim();
   const gridClassName = String(options.gridClass || "").trim();
   const sectionClass = sectionClassName ? ` ${sectionClassName}` : "";
@@ -2004,7 +2018,7 @@ function locationMarketsSectionMarkup(records, options = {}) {
       <section class="section location-markets${sectionClass}">
         <div class="section__eyebrow">${safeText(eyebrow)}</div>
         <h2 class="section__title">${safeText(title)}</h2>
-        <p class="section__lead">${safeText(lead)}</p>
+        ${lead ? `<p class="section__lead">${safeText(lead)}</p>` : ""}
         <div class="gallery-reel location-market-reel ${showReelArrows ? "gallery-reel--arrows" : ""}">
           ${showReelArrows ? `<button class="gallery-reel__nav gallery-reel__nav--prev" type="button" data-gallery-reel-prev aria-label="Scroll location pages left">Previous</button>` : ""}
           <div class="gallery-reel__rail location-market-reel__rail" aria-label="${safeText(title)}" data-gallery-reel-rail>
@@ -2044,7 +2058,7 @@ function locationMarketsSectionMarkup(records, options = {}) {
     <section class="section location-markets${sectionClass}">
       <div class="section__eyebrow">${safeText(eyebrow)}</div>
       <h2 class="section__title">${safeText(title)}</h2>
-      <p class="section__lead">${safeText(lead)}</p>
+      ${lead ? `<p class="section__lead">${safeText(lead)}</p>` : ""}
       <div class="section-grid grid--cards location-market-grid${gridClass}">
         ${items
           .map(
@@ -3272,6 +3286,7 @@ function locationPageMarkup() {
   const nearbyMarkets = Array.isArray(locationPage.nearbySlugs)
     ? locationPage.nearbySlugs.map((slug) => findLocationPage(slug)).filter(Boolean)
     : featuredLocationPages(3, locationPage.slug);
+  const nearbyMarketNames = nearbyMarkets.map((item) => item.name || item.market || item.slug).filter(Boolean);
   const heroRecord = locationHeroMedia(locationPage);
   const galleryRecords = locationGalleryMedia(locationPage).filter((item) => item.id !== heroRecord?.id);
   const heroCardMarkup = heroRecord
@@ -3289,9 +3304,9 @@ function locationPageMarkup() {
             })}
           </button>
           <div class="card__body">
-            <div class="card__eyebrow">Local work</div>
+            <div class="card__eyebrow">${safeText(`${locationPage.name || locationPage.market || "Local"} example`)}</div>
             <h2 class="card__title">${safeText(heroRecord.title || `Recent photography from ${locationPage.market || locationPage.name || "this market"}`)}</h2>
-            <p class="card__text">${safeText(heroRecord.caption || `A location-specific image selected from the shared portfolio library for ${locationPage.market || locationPage.name || "this market"}.`)}</p>
+            <p class="card__text">${safeText(heroRecord.caption || `An example of the kind of listing photography used for homes in ${locationPage.market || locationPage.name || "this market"}.`)}</p>
           </div>
         </aside>
       `
@@ -3300,7 +3315,7 @@ function locationPageMarkup() {
     ? `
         <section class="section location-page__gallery">
           <div class="section__eyebrow">${safeText(locationPage.name || locationPage.market || "Market")} gallery</div>
-          <h2 class="section__title">${safeText(`Photography selected for ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
+          <h2 class="section__title">${safeText(`Recent work that fits ${locationPage.market || locationPage.name || "this market"} listings.`)}</h2>
           <div class="portfolio-grid gallery-grid location-page__galleryGrid">
             ${galleryRecords
               .map(
@@ -3348,7 +3363,7 @@ function locationPageMarkup() {
           <section class="section location-page__fit">
             <div class="section__eyebrow">Best fit</div>
             <h2 class="section__title">${safeText(locationPage.fitTitle || `What agents usually need in ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
-            <p class="section__lead">${safeText(locationPage.fitLead || "These are the booking patterns and listing types this page is meant to speak to directly.")}</p>
+            <p class="section__lead">${safeText(locationPage.fitLead || "These are the listing types this page is built around most often in this market.")}</p>
             <div class="section-grid grid--cards location-page__fitGrid">
               ${fitCards
                 .map(
@@ -3374,7 +3389,7 @@ function locationPageMarkup() {
     <section class="section services-page__packages">
       <div class="section__eyebrow">Packages</div>
       <h2 class="section__title">${safeText(locationPage.packagesTitle || `Packages available for ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
-      <p class="section__lead">${safeText(locationPage.packagesLead || "The package structure stays consistent, while the local page focuses the messaging around the kinds of listings that show up most often in this market.")}</p>
+      <p class="section__lead">${safeText(locationPage.packagesLead || "The service options stay the same, but the emphasis shifts with the kinds of homes that show up in this market.")}</p>
       <div class="section-grid grid--cards services-packages">
         ${serviceCardsMarkup()}
       </div>
@@ -3382,8 +3397,12 @@ function locationPageMarkup() {
 
     ${locationMarketsSectionMarkup(nearbyMarkets, {
       eyebrow: "Nearby markets",
-      title: `Also serving nearby Gulf Coast markets around ${locationPage.market || locationPage.name || "this area"}.`,
-      lead: locationPage.nearbyLead || "If you work across several nearby cities, these location pages keep the copy and internal links specific to each market without changing the core service workflow."
+      title: `Also booking listings in nearby markets around ${locationPage.market || locationPage.name || "this area"}.`,
+      lead:
+        locationPage.nearbyLead ||
+        (nearbyMarketNames.length
+          ? `If you also list homes in ${humanList(nearbyMarketNames)}, those nearby market pages are linked here too.`
+          : "")
     })}
 
     ${faqMarkup(currentFaqItems(), {
@@ -3391,7 +3410,7 @@ function locationPageMarkup() {
       title: `Questions about booking in ${locationPage.market || locationPage.name || "this market"}.`,
       lead:
         locationPage.faqLead ||
-        `The answers below are tailored to the way listing work usually gets scheduled and delivered in ${locationPage.market || locationPage.name || "this market"}.`
+        `The answers below cover the things agents usually want to know before booking in ${locationPage.market || locationPage.name || "this market"}.`
     })}
   `;
 }
