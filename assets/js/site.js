@@ -2129,6 +2129,17 @@ function locationsPageMarkup() {
       reelVisibleCount: 4,
       sectionClass: "location-markets--carousel",
     })}
+
+    ${serviceAreaSectionMarkup({
+      eyebrow: "Address check",
+      title: "Check a listing address before you book.",
+      lead:
+        "If you want to confirm whether a property falls inside the standard coverage radius before reaching out, enter the address below and the map will show where it lands.",
+      toolTitle: "See whether the property sits inside the standard service area.",
+      toolText:
+        "Enter the listing address and the map will show whether it falls inside the normal radius centered on Pensacola, Florida.",
+      statusText: `Search a listing address to see whether it falls inside the ${SERVICE_RADIUS_MILES}-mile service radius.`,
+    })}
   `;
 }
 
@@ -2578,6 +2589,59 @@ function trustSectionMarkup() {
   `;
 }
 
+function serviceAreaToolMarkup(options = {}) {
+  const title = options.toolTitle || `Check whether a property falls inside the ${SERVICE_RADIUS_MILES}-mile radius.`;
+  const text =
+    options.toolText ||
+    "Enter an address and the map will show whether it sits inside the service radius centered on Pensacola, Florida.";
+  const statusText =
+    options.statusText ||
+    `Search an address to see whether it falls inside the ${SERVICE_RADIUS_MILES}-mile service radius.`;
+
+  return `
+    <aside class="service-area-tool">
+      <div class="service-area-tool__copy">
+        <h3 class="service-area-tool__title">${safeText(title)}</h3>
+        <p class="service-area-tool__text">${safeText(text)}</p>
+      </div>
+      <form class="service-area-form" id="service-area-form">
+        <input class="service-area-form__input" name="address" placeholder="Enter a property address" autocomplete="street-address" />
+        <button class="button button--accent" type="submit">Check address</button>
+      </form>
+      <div class="helper" id="service-area-status">${safeText(statusText)}</div>
+      <div class="service-area-tool__actions" id="service-area-actions"></div>
+      <div class="service-area-map" id="service-area-map" aria-label="Interactive service area map"></div>
+      <div class="service-area-tool__legend">
+        <span class="service-area-tool__legendItem"><span class="service-area-tool__dot service-area-tool__dot--center"></span>Pensacola center point</span>
+        <span class="service-area-tool__legendItem"><span class="service-area-tool__dot service-area-tool__dot--radius"></span>${SERVICE_RADIUS_MILES}-mile service radius</span>
+      </div>
+    </aside>
+  `;
+}
+
+function serviceAreaSectionMarkup(options = {}) {
+  const eyebrow = options.eyebrow || "Address check";
+  const title = options.title || "Check whether a listing sits inside the standard service area.";
+  const lead =
+    options.lead ||
+    "Enter a property address to see whether it falls inside the normal coverage radius before you book.";
+
+  return `
+    <section class="section">
+      <div class="section__eyebrow">${safeText(eyebrow)}</div>
+      <div class="faq-layout">
+        <div class="faq-layout__content">
+          <div class="faq-layout__copy">
+            <h2 class="section__title">${safeText(title)}</h2>
+            <p class="section__lead">${safeText(lead)}</p>
+          </div>
+        </div>
+        ${serviceAreaToolMarkup(options)}
+      </div>
+    </section>
+  `;
+}
+
 function faqMarkup(items = faqItems, options = {}) {
   const eyebrow = options.eyebrow || state.settings.faqEyebrow || "FAQ & SERVICE AREA";
   const title = options.title || state.settings.faqTitle || "Questions agents usually ask before booking.";
@@ -2608,23 +2672,7 @@ function faqMarkup(items = faqItems, options = {}) {
               .join("")}
           </div>
         </div>
-        <aside class="service-area-tool">
-          <div class="service-area-tool__copy">
-            <h3 class="service-area-tool__title">Check whether a property falls inside the 120-mile radius.</h3>
-            <p class="service-area-tool__text">Enter an address and the map will show whether it sits inside the service radius centered on Pensacola, Florida.</p>
-          </div>
-          <form class="service-area-form" id="service-area-form">
-            <input class="service-area-form__input" name="address" placeholder="Enter a property address" autocomplete="street-address" />
-            <button class="button button--accent" type="submit">Check address</button>
-          </form>
-          <div class="helper" id="service-area-status">Search an address to see whether it falls inside the ${SERVICE_RADIUS_MILES}-mile service radius.</div>
-          <div class="service-area-tool__actions" id="service-area-actions"></div>
-          <div class="service-area-map" id="service-area-map" aria-label="Interactive service area map"></div>
-          <div class="service-area-tool__legend">
-            <span class="service-area-tool__legendItem"><span class="service-area-tool__dot service-area-tool__dot--center"></span>Pensacola center point</span>
-            <span class="service-area-tool__legendItem"><span class="service-area-tool__dot service-area-tool__dot--radius"></span>${SERVICE_RADIUS_MILES}-mile service radius</span>
-          </div>
-        </aside>
+        ${serviceAreaToolMarkup()}
       </div>
     </section>
   `;
@@ -5071,6 +5119,7 @@ function renderPage() {
     mainEl.innerHTML = locationsPageMarkup();
     wireSectionReveal();
     wireGalleryReel();
+    wireServiceAreaMap();
     return;
   }
 
