@@ -68,6 +68,7 @@ const GOOGLE_BUSINESS_PROFILE_URL = "https://share.google/aDc3usKYdvNCryRrN";
 const PENSACOLA_CENTER = { lat: 30.4213, lon: -87.2169, label: "Pensacola, FL" };
 const SERVICE_RADIUS_MILES = 120;
 const SERVICE_RADIUS_METERS = SERVICE_RADIUS_MILES * 1609.344;
+const FEATURED_LOCATION_SLUGS = ["pensacola-fl", "navarre-fl", "gulf-breeze-fl", "pace-fl", "destin-fl", "fort-walton-beach-fl"];
 const LEAFLET_CSS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 const LEAFLET_JS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
@@ -257,7 +258,40 @@ function footerNavItems() {
 }
 
 function featuredLocationPages(limit = 4, excludeSlug = "") {
-  return allLocationPages(excludeSlug).slice(0, limit);
+  const records = allLocationPages(excludeSlug);
+  const bySlug = new Map(records.map((item) => [item.slug, item]));
+  const selected = [];
+  const seen = new Set();
+
+  for (const slug of FEATURED_LOCATION_SLUGS) {
+    if (!slug || slug === excludeSlug || seen.has(slug)) {
+      continue;
+    }
+
+    const record = bySlug.get(slug);
+    if (!record) {
+      continue;
+    }
+
+    selected.push(record);
+    seen.add(slug);
+    if (selected.length >= limit) {
+      return selected;
+    }
+  }
+
+  for (const record of records) {
+    if (!record?.slug || seen.has(record.slug)) {
+      continue;
+    }
+
+    selected.push(record);
+    if (selected.length >= limit) {
+      break;
+    }
+  }
+
+  return selected;
 }
 
 function allLocationPages(excludeSlug = "") {
@@ -1842,6 +1876,54 @@ function pricingEstimateOutputMarkup(estimate) {
   `;
 }
 
+function homeLocalSearchMarkup() {
+  return `
+    <section class="section home-local-search">
+      <div class="section-grid grid--split">
+        <div>
+          <div class="section__eyebrow">Pensacola real estate photography</div>
+          <h2 class="section__title">Pensacola-based coverage for Gulf Coast listings that need to launch quickly.</h2>
+          <p class="section__lead">ZB Captures provides MLS-ready real estate photography, drone coverage, and video for Pensacola agents, brokerages, and listing teams, with quick turnaround and a clean delivery process across nearby Gulf Coast markets.</p>
+          <div class="section__actions">
+            <a class="button button--accent" href="${absoluteSiteUrl("services.html")}">View services</a>
+            <a class="button" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
+          </div>
+        </div>
+        <aside class="contact-box">
+          <div class="contact-row">
+            <div class="contact-label">Based in</div>
+            <div class="contact-value">Pensacola, Florida</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Top markets</div>
+            <div class="contact-value">Pensacola, Navarre, Gulf Breeze, Pace, Destin, and Fort Walton Beach</div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-label">Best fit</div>
+            <div class="contact-value">Agents, brokerages, builders, and listing teams that need listing-ready media quickly</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  `;
+}
+
+function homeFeaturedMarketsMarkup() {
+  const featuredMarkets = featuredLocationPages(6);
+  const featuredMarketNames = featuredMarkets.map((item) => item.name || item.market || item.slug).filter(Boolean);
+  if (!featuredMarkets.length) {
+    return "";
+  }
+
+  return locationMarketsSectionMarkup(featuredMarkets, {
+    eyebrow: "Featured markets",
+    title: "City pages for the Gulf Coast markets agents ask about most.",
+    lead: featuredMarketNames.length
+      ? `If the listing sits in ${humanList(featuredMarketNames)}, open the matching city page for local details, examples, and booking links.`
+      : "Open the matching city page for local details, examples, and booking links.",
+  });
+}
+
 function pricingEstimatorSectionMarkup() {
   const packageOptions = [
     `<option value="">Let the estimator suggest a package</option>`,
@@ -3309,6 +3391,132 @@ function portfolioPageMarkup() {
   `;
 }
 
+function locationBreadcrumbMarkup(locationPage) {
+  const label = locationPage?.name || locationPage?.market || "Location";
+
+  return `
+    <nav class="page-breadcrumbs" aria-label="Breadcrumb">
+      <a href="${absoluteSiteUrl("index.html")}">Home</a>
+      <span class="page-breadcrumbs__divider" aria-hidden="true">/</span>
+      <a href="${absoluteSiteUrl("locations.html")}">Locations</a>
+      <span class="page-breadcrumbs__divider" aria-hidden="true">/</span>
+      <span aria-current="page">${safeText(label)}</span>
+    </nav>
+  `;
+}
+
+function locationAreaSectionMarkup(locationPage) {
+  const marketLabel = locationPage?.market || locationPage?.name || "this market";
+  const locationLabel = locationPage?.name || locationPage?.market || "this market";
+  const coverageTitle = locationPage?.coverageTitle || `Where this page tends to fit best around ${marketLabel}.`;
+  const coverageLead = String(locationPage?.coverageLead || "").trim();
+  const coverageSummary = String(locationPage?.coverageSummary || locationPage?.cardLead || "").trim();
+  const coverageAreas = Array.isArray(locationPage?.coverageAreas)
+    ? locationPage.coverageAreas.map((item) => String(item || "").trim()).filter(Boolean)
+    : [];
+
+  if (!coverageLead && !coverageSummary && !coverageAreas.length) {
+    return "";
+  }
+
+  const areaPreview = coverageAreas.slice(0, 3);
+  const areaPreviewText = areaPreview.length ? humanList(areaPreview) : "";
+  const coverageCardsMarkup = [
+    coverageSummary
+      ? `
+          <article class="card location-page__coverageCard">
+            <div class="card__body">
+              <div class="card__eyebrow">Best used for</div>
+              <h3 class="card__title">${safeText(`Listings around ${locationLabel} that need a local fit.`)}</h3>
+              <p class="card__text">${safeText(coverageSummary)}</p>
+            </div>
+          </article>
+        `
+      : "",
+    coverageAreas.length
+      ? `
+          <article class="card location-page__coverageCard">
+            <div class="card__body">
+              <div class="card__eyebrow">Common pockets</div>
+              <h3 class="card__title">Neighborhoods, condo pockets, and nearby areas this page lines up with.</h3>
+              <p class="card__text">${safeText(
+                areaPreviewText
+                  ? `This page is especially useful when the listing sits around ${areaPreviewText}${coverageAreas.length > areaPreview.length ? ", and nearby pockets." : "."}`
+                  : `This page is built to stay relevant to the parts of ${marketLabel} agents actually work in.`
+              )}</p>
+              <div class="card__meta">
+                ${coverageAreas.map((item) => `<span class="pill">${safeText(item)}</span>`).join("")}
+              </div>
+            </div>
+          </article>
+        `
+      : "",
+  ].filter(Boolean).join("");
+
+  return `
+    <section class="section location-page__coverage">
+      <div class="section__eyebrow">${safeText(`${locationLabel} area`)}</div>
+      <h2 class="section__title">${safeText(coverageTitle)}</h2>
+      ${coverageLead ? `<p class="section__lead">${safeText(coverageLead)}</p>` : ""}
+      ${coverageCardsMarkup ? `<div class="section-grid grid--cards location-page__fitGrid">${coverageCardsMarkup}</div>` : ""}
+    </section>
+  `;
+}
+
+function locationPlanningSectionMarkup(locationPage) {
+  const marketLabel = locationPage?.market || locationPage?.name || "this market";
+  const locationLabel = locationPage?.name || locationPage?.market || "this market";
+  const resources = [
+    {
+      eyebrow: "Book the listing",
+      title: `Start the ${locationLabel} inquiry.`,
+      text: `Send the property address, target timeline, and coverage details for the ${marketLabel} listing.`,
+      href: absoluteSiteUrl("contact.html"),
+    },
+    {
+      eyebrow: "Packages",
+      title: `Compare the package options for ${locationLabel} shoots.`,
+      text: "Review the photo, drone, and video packages before you decide what the listing needs.",
+      href: absoluteSiteUrl("services.html"),
+    },
+    {
+      eyebrow: "Quote calculator",
+      title: "Build a starting number before you reach out.",
+      text: `Use the quote calculator to price photos, drone coverage, and add-ons for a ${marketLabel} listing.`,
+      href: absoluteSiteUrl("quote.html"),
+    },
+    {
+      eyebrow: "Address check",
+      title: "Check whether the property sits inside the standard service area.",
+      text: "Jump to the map below and test the listing address before you book.",
+      href: "#service-area-form",
+    },
+  ];
+
+  return `
+    <section class="section">
+      <div class="section__eyebrow">Next steps</div>
+      <h2 class="section__title">${safeText(`Helpful links for ${marketLabel} listings.`)}</h2>
+      <p class="section__lead">${safeText(`If you are pricing, booking, or checking an address for a ${locationLabel} property, these are the pages agents usually open next.`)}</p>
+      <div class="section-grid grid--cards location-market-grid">
+        ${resources
+          .map(
+            (item) => `
+              <a class="card card--interactive location-market-card" href="${item.href}">
+                <div class="card__body">
+                  <div class="card__eyebrow">${safeText(item.eyebrow)}</div>
+                  <h3 class="card__title">${safeText(item.title)}</h3>
+                  <p class="card__text">${safeText(item.text)}</p>
+                </div>
+              </a>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function locationPageMarkup() {
   const locationPage = currentLocationPage();
   if (!locationPage) {
@@ -3387,6 +3595,7 @@ function locationPageMarkup() {
     <section class="section services-page__intro location-page__intro">
       <div class="section-grid grid--split location-page__introGrid">
         <div class="location-page__introCopy">
+          ${locationBreadcrumbMarkup(locationPage)}
           <div class="section__eyebrow">${safeText(locationPage.eyebrow || locationPage.market || locationPage.name || "Market")}</div>
           <h1 class="section__title">${safeText(locationPage.headline || `Real estate photography in ${locationPage.market || locationPage.name || "this market"}`)}</h1>
           <p class="section__lead">${safeText(locationPage.lead || "")}</p>
@@ -3427,6 +3636,8 @@ function locationPageMarkup() {
         : ""
     }
 
+    ${locationAreaSectionMarkup(locationPage)}
+
     ${gallerySectionMarkup}
 
     <section class="section services-page__packages">
@@ -3437,6 +3648,8 @@ function locationPageMarkup() {
         ${serviceCardsMarkup()}
       </div>
     </section>
+
+    ${locationPlanningSectionMarkup(locationPage)}
 
     ${locationMarketsSectionMarkup(nearbyMarkets, {
       eyebrow: "Nearby markets",
@@ -3461,8 +3674,10 @@ function locationPageMarkup() {
 function homePageMarkup() {
   return [
     heroMarkup(),
+    homeLocalSearchMarkup(),
     bestOfGalleryMarkup(),
     servicesMarkup(),
+    homeFeaturedMarketsMarkup(),
   ].join("");
 }
 
@@ -3801,6 +4016,40 @@ function applyStructuredData(seo) {
   }
 
   if (page === "location" && locationPage) {
+    graph.push({
+      "@type": "WebPage",
+      "@id": `${canonicalUrl}#page`,
+      url: canonicalUrl,
+      name: seo.title,
+      description: seo.description,
+      isPartOf: { "@id": `${absolutePageUrl("")}#website` },
+      about: { "@id": businessId },
+      breadcrumb: { "@id": `${canonicalUrl}#breadcrumb` },
+    });
+    graph.push({
+      "@type": "BreadcrumbList",
+      "@id": `${canonicalUrl}#breadcrumb`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: absolutePageUrl(""),
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Locations",
+          item: absolutePageUrl("locations.html"),
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: locationPage.name || locationPage.market || "Location",
+          item: canonicalUrl,
+        },
+      ],
+    });
     graph.push({
       "@type": "Service",
       serviceType: "Real estate photography",

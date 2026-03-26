@@ -198,6 +198,31 @@ function locationStructuredData({ title, description, locationPage }) {
         name: title,
         description,
         isPartOf: { "@id": `${siteOrigin}/#website` },
+        breadcrumb: { "@id": `${canonicalUrl}#breadcrumb` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${canonicalUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: `${siteOrigin}/`,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Locations",
+            item: absoluteSiteUrl("locations.html"),
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: locationPage.name || marketName,
+            item: canonicalUrl,
+          },
+        ],
       },
       {
         "@type": "Service",
@@ -219,9 +244,16 @@ function locationSeoFallbackMarkup(locationPage, allLocationPages) {
     : [];
   const faqItems = Array.isArray(locationPage.faq) ? locationPage.faq.slice(0, 3) : [];
   const coverageSummary = locationPage.coverageSummary || locationPage.cardLead || locationPage.lead || "";
+  const coverageLead = String(locationPage.coverageLead || "").trim();
+  const coverageAreas = Array.isArray(locationPage.coverageAreas)
+    ? locationPage.coverageAreas.map((item) => String(item || "").trim()).filter(Boolean)
+    : [];
+  const locationLabel = locationPage.name || locationPage.market || "Location";
+  const marketLabel = locationPage.market || locationPage.name || "this market";
 
   return `
     <section class="section">
+      <p><a href="../../">Home</a> / <a href="../../locations.html">Locations</a> / ${escapeHtml(locationLabel)}</p>
       <p>${escapeHtml(locationPage.eyebrow || `${locationPage.market || locationPage.name} Real Estate Photography`)}</p>
       <h1>${escapeHtml(locationPage.headline || `${locationPage.market || locationPage.name} real estate photography`)}</h1>
       <p>${escapeHtml(locationPage.lead || coverageSummary)}</p>
@@ -231,6 +263,31 @@ function locationSeoFallbackMarkup(locationPage, allLocationPages) {
         <a href="../../portfolio.html">View portfolio</a> |
         <a href="../../contact.html">Book a session</a>
       </p>
+    </section>
+    ${
+      coverageLead || coverageSummary || coverageAreas.length
+        ? `<section class="section">
+      <h2>${escapeHtml(locationPage.coverageTitle || `Where this page fits best around ${marketLabel}`)}</h2>
+      ${coverageLead ? `<p>${escapeHtml(coverageLead)}</p>` : ""}
+      ${coverageSummary ? `<p>${escapeHtml(coverageSummary)}</p>` : ""}
+      ${
+        coverageAreas.length
+          ? `<ul>
+        ${coverageAreas.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>`
+          : ""
+      }
+    </section>`
+        : ""
+    }
+    <section class="section">
+      <h2>Helpful links for ${escapeHtml(locationLabel)} listings</h2>
+      <ul>
+        <li><a href="../../contact.html">Start the inquiry for this listing</a></li>
+        <li><a href="../../services.html">Compare packages and add-ons</a></li>
+        <li><a href="../../quote.html">Use the quote calculator</a></li>
+        <li><a href="../../trust.html">See the booking and delivery process</a></li>
+      </ul>
     </section>
     ${
       faqItems.length
@@ -687,7 +744,8 @@ function pageEnhancementMarkup(relativePath, siteData, locationPages) {
     case "index.html":
       return `${serviceCardsSectionMarkup(siteData)}\n${locationMarketsSectionMarkup(featuredLocationPages(locationPages, 6), "./", {
         eyebrow: "Featured markets",
-        title: "Town-specific pages supporting local real estate photography searches.",
+        title: "City pages for the Gulf Coast markets agents ask about most.",
+        lead: "Open the matching city page when the listing sits in Pensacola, Navarre, Gulf Breeze, Pace, Destin, or Fort Walton Beach.",
       })}`;
     case "services.html":
       return `${serviceCardsSectionMarkup(siteData)}\n${locationMarketsSectionMarkup(featuredLocationPages(locationPages, 6), "./", {
@@ -832,7 +890,10 @@ ${urls
 </urlset>
 `;
 
-  await writeFile(path.join(distDir, "sitemap.xml"), sitemap);
+  await Promise.all([
+    writeFile(path.join(distDir, "sitemap.xml"), sitemap),
+    writeFile(path.join(projectRoot, "sitemap.xml"), sitemap),
+  ]);
 }
 
 async function writeRobots() {
