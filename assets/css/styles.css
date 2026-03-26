@@ -1172,9 +1172,9 @@ img {
 }
 
 .location-page__introGrid {
-  gap: 24px;
+  gap: 20px;
   align-items: start;
-  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  grid-template-columns: minmax(0, 1.34fr) minmax(280px, 0.72fr);
 }
 
 .location-page__coverageCard,
@@ -1198,8 +1198,12 @@ img {
 .location-page__heroCard {
   overflow: hidden;
   width: 100%;
-  max-width: none;
+  max-width: 430px;
   justify-self: end;
+}
+
+.location-page__heroCard .card__body {
+  padding: 18px 20px 20px;
 }
 
 .location-page__heroButton {
@@ -1213,7 +1217,7 @@ img {
 
 .location-page__heroImage {
   width: 100%;
-  aspect-ratio: 5 / 4;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
