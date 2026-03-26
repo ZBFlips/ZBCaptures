@@ -3268,7 +3268,6 @@ function locationPageMarkup() {
     `;
   }
 
-  const coverageAreas = Array.isArray(locationPage.coverageAreas) ? locationPage.coverageAreas.filter(Boolean) : [];
   const fitCards = Array.isArray(locationPage.fitCards) ? locationPage.fitCards.filter((item) => item?.title && item?.text) : [];
   const nearbyMarkets = Array.isArray(locationPage.nearbySlugs)
     ? locationPage.nearbySlugs.map((slug) => findLocationPage(slug)).filter(Boolean)
@@ -3302,7 +3301,6 @@ function locationPageMarkup() {
         <section class="section location-page__gallery">
           <div class="section__eyebrow">${safeText(locationPage.name || locationPage.market || "Market")} gallery</div>
           <h2 class="section__title">${safeText(`Photography selected for ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
-          <p class="section__lead">${safeText(`These are the images chosen specifically to support the ${locationPage.market || locationPage.name || "local"} page while still pulling from the same shared portfolio library.`)}</p>
           <div class="portfolio-grid gallery-grid location-page__galleryGrid">
             ${galleryRecords
               .map(
@@ -3341,26 +3339,6 @@ function locationPageMarkup() {
           </div>
         </div>
         ${heroCardMarkup}
-      </div>
-    </section>
-
-    <section class="section location-page__coverage">
-      <div class="section-grid grid--split">
-        <div class="location-page__copy">
-          <div class="section__eyebrow">Coverage in ${safeText(locationPage.name || locationPage.market || "this market")}</div>
-          <h2 class="section__title">${safeText(locationPage.coverageTitle || `Where this service fits in ${locationPage.market || locationPage.name || "this market"}.`)}</h2>
-          <p class="section__lead">${safeText(locationPage.coverageLead || "")}</p>
-        </div>
-        <aside class="card location-page__coverageCard">
-          <div class="card__body">
-            <div class="card__eyebrow">Common coverage areas</div>
-            <h3 class="card__title">${safeText(locationPage.market || locationPage.name || "Local coverage")}</h3>
-            <p class="card__text">${safeText(locationPage.coverageSummary || "This page is meant to capture real, nearby markets you actually want to book consistently.")}</p>
-            <div class="card__meta">
-              ${coverageAreas.map((item) => `<span class="pill">${safeText(item)}</span>`).join("")}
-            </div>
-          </div>
-        </aside>
       </div>
     </section>
 
