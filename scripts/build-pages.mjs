@@ -342,7 +342,7 @@ function headerNavItems() {
       type: "menu",
       label: "Explore",
       items: [
-        { href: "quote.html", label: "Quick Quote" },
+        { href: "quote.html", label: "Quote Calculator" },
         { href: "locations.html", label: "Locations" },
         { href: "faq.html", label: "FAQ" },
       ],
@@ -363,7 +363,7 @@ function footerNavItems() {
     { href: "index.html", label: "Home" },
     { href: "portfolio.html", label: "Portfolio" },
     { href: "services.html", label: "Services" },
-    { href: "quote.html", label: "Quick Quote" },
+    { href: "quote.html", label: "Quote Calculator" },
     { href: "locations.html", label: "Locations" },
     { href: "trust.html", label: "Trust & Process" },
     { href: "feedback.html", label: "Client Feedback" },

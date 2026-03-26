@@ -225,7 +225,7 @@ function headerNavItems() {
       type: "menu",
       label: "Explore",
       items: [
-        { href: absoluteSiteUrl("quote.html"), label: "Quick Quote" },
+        { href: absoluteSiteUrl("quote.html"), label: "Quote Calculator" },
         { href: absoluteSiteUrl("locations.html"), label: "Locations" },
         { href: absoluteSiteUrl("faq.html"), label: "FAQ" },
       ],
@@ -246,7 +246,7 @@ function footerNavItems() {
     { href: absoluteSiteUrl("index.html"), label: "Home" },
     { href: absoluteSiteUrl("portfolio.html"), label: "Portfolio" },
     { href: absoluteSiteUrl("services.html"), label: "Services" },
-    { href: absoluteSiteUrl("quote.html"), label: "Quick Quote" },
+    { href: absoluteSiteUrl("quote.html"), label: "Quote Calculator" },
     { href: absoluteSiteUrl("locations.html"), label: "Locations" },
     { href: absoluteSiteUrl("trust.html"), label: "Trust & Process" },
     { href: absoluteSiteUrl("feedback.html"), label: "Client Feedback" },
@@ -1845,7 +1845,7 @@ function pricingEstimatorSectionMarkup() {
 
   return `
     <section class="section pricing-estimator-section" id="pricing-estimator">
-      <div class="section__eyebrow">Quick quote</div>
+      <div class="section__eyebrow">Quote calculator</div>
       <div class="pricing-estimator__intro">
         <div>
           <h2 class="section__title">Build a working estimate before you book.</h2>
@@ -1957,16 +1957,6 @@ function quoteContactInfoMarkup() {
 
 function quotePageMarkup() {
   return `
-    <section class="section">
-      <div class="section__eyebrow">Quick quote</div>
-      <h1 class="section__title">Build a working estimate before you reach out.</h1>
-      <p class="section__lead">Use the estimator to get a starting point for the listing, then carry the details into your inquiry if you want a confirmed quote.</p>
-      <div class="section__actions">
-        <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Contact</a>
-        <a class="button" href="${absoluteSiteUrl("services.html")}">View services</a>
-      </div>
-    </section>
-
     ${pricingEstimatorSectionMarkup()}
 
     ${quoteContactInfoMarkup()}
@@ -3290,7 +3280,7 @@ function servicesPageMarkup() {
       ${serviceSignalsMarkup()}
       <div class="section__actions">
         <a class="button button--accent" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
-        <a class="button" href="${absoluteSiteUrl("quote.html")}">Quick quote</a>
+        <a class="button" href="${absoluteSiteUrl("quote.html")}">Quote calculator</a>
       </div>
     </section>
 
@@ -3613,9 +3603,9 @@ function pageSeoConfig() {
       };
     case "quote":
       return {
-        title: "Quick Quote | ZB Captures Real Estate Photography",
+        title: "Quote Calculator | ZB Captures Real Estate Photography",
         description:
-          "Use the ZB Captures quick quote estimator to build a starting price for Pensacola-area real estate photography, drone coverage, and listing media.",
+          "Use the ZB Captures quote calculator to build a starting price for Pensacola-area real estate photography, drone coverage, and listing media.",
         path: "quote.html",
       };
     case "portfolio":
