@@ -1882,7 +1882,7 @@ function homeLocalSearchMarkup() {
       <div class="section-grid grid--split">
         <div>
           <div class="section__eyebrow">Pensacola real estate photography</div>
-          <h2 class="section__title">Pensacola-based coverage for Gulf Coast listings that need to launch quickly.</h2>
+          <h2 class="section__title">Pensacola-based coverage for listings that need to launch quickly.</h2>
           <p class="section__lead">ZB Captures provides MLS-ready real estate photography, drone coverage, and video for Pensacola agents, brokerages, and listing teams, with quick turnaround and a clean delivery process across nearby Gulf Coast markets.</p>
           <div class="section__actions">
             <a class="button button--accent" href="${absoluteSiteUrl("services.html")}">View services</a>
