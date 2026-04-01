@@ -4097,7 +4097,7 @@ function applyStructuredData(seo) {
     graph.push(...reviewItems);
   }
 
-  if ((page === "faq" || page === "location") && faqSchemaItems.length) {
+  if (page === "location" && faqSchemaItems.length) {
     graph.push({
       "@type": "FAQPage",
       mainEntity: faqSchemaItems.map((item) => ({
