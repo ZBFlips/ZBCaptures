@@ -35,7 +35,6 @@ const mainEl = document.getElementById("site-main");
 const footerEl = document.getElementById("site-footer");
 const PUBLISH_CONFIG_KEY = "portfolio-site-publish-config-v1";
 const ADMIN_SESSION_KEY = "portfolio-admin-session-v1";
-const LOCAL_ADMIN_PASSWORD_HASH = "38093ac6c3cc62c23555e732c9f361f170f75995bca045e5625a3d11b1de66eb";
 
 let state = loadState();
 let media = [];
@@ -310,10 +309,19 @@ function setAdminUnlocked(value) {
   }
 }
 
-async function sha256Hex(value) {
-  const bytes = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+// True when the page is served from this computer (for example by serve.ps1).
+function isLocalPreviewHost() {
+  return ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+}
+
+// True when the sign-in backend (/api/admin/session) answers at all.
+async function adminBackendAvailable() {
+  try {
+    await getAdminSession();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function loadPublishedSiteData() {
@@ -1140,8 +1148,9 @@ function wireAdminUnlockForm() {
       setAdminUnlocked(true);
       await bootstrap();
     } catch (error) {
-      const digest = await sha256Hex(password);
-      if (window.location.hostname === "localhost" && digest === LOCAL_ADMIN_PASSWORD_HASH) {
+      // A local preview server has no sign-in backend, so there is nothing to
+      // check a password against. No password or password hash lives in this file.
+      if (isLocalPreviewHost() && !(await adminBackendAvailable())) {
         setAdminUnlocked(true);
         await bootstrap();
         return;
@@ -1307,9 +1316,10 @@ function adminMarkup() {
 
         <section class="admin-panel" id="services">
           <h2 class="admin-panel__title">Services</h2>
-          <p class="admin-panel__text">Edit the service cards that appear on the home page and services page.</p>
+          <p class="admin-panel__text">Edit the service cards that appear on the home page and services page. A card only shows on the public site once it has a title.</p>
           <div class="admin-toolbar">
             <button class="button button--accent" type="button" id="save-services">Save services</button>
+            <button class="button" type="button" id="add-service">Add service</button>
             <span class="admin-note" id="services-status">Your edits autosave in this browser, and this button gives you an explicit save action.</span>
           </div>
           <div class="admin-grid" id="services-list"></div>
@@ -1477,6 +1487,19 @@ async function refreshMedia() {
   media = await listMedia();
 }
 
+function createBlankService() {
+  const suffix = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return {
+    id: `service-${suffix}`,
+    title: "",
+    price: "",
+    featured: false,
+    description: "",
+    bestFit: "",
+    bullets: [],
+  };
+}
+
 function renderServicesEditor() {
   const target = document.getElementById("services-list");
   target.innerHTML = state.services
@@ -1507,7 +1530,10 @@ function renderServicesEditor() {
             </div>
             <div class="field">
               <label>Bullets, one per line</label>
-              <textarea data-service-field="bullets" data-service-index="${index}">${safeText(service.bullets.join("\n"))}</textarea>
+              <textarea data-service-field="bullets" data-service-index="${index}">${safeText((service.bullets || []).join("\n"))}</textarea>
+            </div>
+            <div class="section__actions">
+              <button class="button" type="button" data-service-remove="${index}">Remove service</button>
             </div>
           </div>
         </article>
@@ -3032,6 +3058,40 @@ function wireServicesEditor() {
     alert("Services saved.");
   });
 
+  document.getElementById("add-service").addEventListener("click", () => {
+    state.services.push(createBlankService());
+    persistServices("Service added. Give it a title so it shows on the site.");
+    renderServicesEditor();
+    renderFooter();
+    const newIndex = state.services.length - 1;
+    const titleInput = target.querySelector(`[data-service-field="title"][data-service-index="${newIndex}"]`);
+    titleInput?.scrollIntoView({ behavior: "smooth", block: "center" });
+    titleInput?.focus({ preventScroll: true });
+  });
+
+  target.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-service-remove]");
+    if (!button) {
+      return;
+    }
+
+    const index = Number(button.dataset.serviceRemove);
+    const service = state.services[index];
+    if (!service) {
+      return;
+    }
+
+    const label = String(service.title || "").trim() || `Service ${index + 1}`;
+    if (!confirm(`Remove "${label}" from your services?`)) {
+      return;
+    }
+
+    state.services.splice(index, 1);
+    persistServices("Service removed.");
+    renderServicesEditor();
+    renderFooter();
+  });
+
   target.addEventListener("input", (event) => {
     const field = event.target.closest("[data-service-field]");
     if (!field) {
@@ -4161,9 +4221,15 @@ async function bootstrap() {
         return;
       }
     } catch {
-      renderLockedAdmin();
-      wireAdminUnlockForm();
-      return;
+      // The sign-in backend did not answer. On a local preview server that is
+      // expected, so open the dashboard; anywhere else stay locked.
+      if (!isLocalPreviewHost()) {
+        renderLockedAdmin();
+        wireAdminUnlockForm();
+        return;
+      }
+
+      setAdminUnlocked(true);
     }
   }
 

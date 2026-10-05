@@ -1,6 +1,24 @@
 import { decryptPortalPayload } from "./portal-utils.js";
 import { DEFAULT_STATE } from "./storage.js";
 import { loadUnlockedCloudPortal, unlockCloudPortal } from "./client-delivery-api.js";
+import {
+  ADD_ONS,
+  SIZE_INCLUDED_MAX_SQFT,
+  SIZE_QUOTE_ABOVE_SQFT,
+  TRAVEL_ORIGIN_LABEL,
+  TRAVEL_QUOTE_ABOVE_MILES,
+  TRAVEL_QUOTE_TIER,
+  TRAVEL_TIERS,
+  addOnInlineLabel,
+  addOnPrice,
+  addOnsIncludedIn,
+  pricingRuleItems,
+  sizeAdjustmentFor,
+  travelNoteForMiles,
+  travelOptionLabel,
+  travelTierForMiles,
+  travelTierForValue,
+} from "./pricing-rules.js";
 
 const page = document.body.dataset.page;
 const pageBasePath = document.body.dataset.basePath || "./";
@@ -1279,8 +1297,8 @@ function servicesMarkup() {
           <a class="button" href="${absoluteSiteUrl("contact.html")}">Book a session</a>
           </div>
         </div>
-        <div class="section-grid grid--cards services-home__cards">
-          ${state.services
+        <div class="section-grid grid--cards services-home__cards ${visibleServices().length === 4 ? "services-home__cards--four" : ""}">
+          ${visibleServices()
             .map(
               (service, index) => `
                 <article class="card card--interactive pricing-card pricing-card--package services-home__package ${service.featured ? "card--featured" : ""}" data-tilt-card>
@@ -1432,7 +1450,7 @@ const faqItems = [
   {
     question: "Can I add-on extras to a package?",
     answer:
-      "Yes, any package can be modified to add or remove media assets (price may vary). For example, the 'Starter' package can have drone video added to it for $125.",
+      `Yes, any package can be modified to add or remove media assets (price may vary). Current add-ons: ${ADD_ONS.map((item) => `${item.label} $${item.price}`).join(", ")}. An add-on can't be added to a package that already includes it.`,
   },
   {
     question: "How do clients receive the finished files?",
@@ -1450,12 +1468,20 @@ const contactPropertyTypeOptions = [
   { value: "Other", label: "Other" },
 ];
 
-const contactPackageOptions = [
-  { value: "The Starter", label: "The Starter" },
-  { value: "The Standard", label: "The Standard" },
-  { value: "The Works", label: "The Works" },
-  { value: "Custom quote", label: "Custom quote" },
-];
+const CUSTOM_QUOTE_PACKAGE = "Custom quote";
+
+function visibleServices() {
+  return (Array.isArray(state.services) ? state.services : []).filter(
+    (service) => service && String(service.title || "").trim()
+  );
+}
+
+function contactPackageOptions() {
+  return [
+    ...visibleServices().map((service) => ({ value: service.title, label: service.title })),
+    { value: CUSTOM_QUOTE_PACKAGE, label: CUSTOM_QUOTE_PACKAGE },
+  ];
+}
 
 const contactTurnaroundOptions = [
   { value: "Same-day if available", label: "Same-day if available" },
@@ -1463,12 +1489,16 @@ const contactTurnaroundOptions = [
   { value: "Flexible timeline", label: "Flexible timeline" },
 ];
 
-const contactAddOnOptions = [
-  { value: "Drone photos", label: "Drone photos" },
-  { value: "Drone video", label: "Drone video" },
-  { value: "Social reel", label: "Social reel" },
-  { value: "Twilight images", label: "Twilight images" },
-];
+const contactAddOnOptions = ADD_ONS.map((item) => ({
+  value: item.value,
+  label: `${item.label} (+$${item.price})`,
+}));
+
+function travelDistanceOptionsMarkup() {
+  return [...TRAVEL_TIERS, TRAVEL_QUOTE_TIER]
+    .map((tier) => `<option value="${safeText(tier.value)}">${safeText(travelOptionLabel(tier))}</option>`)
+    .join("");
+}
 
 const pricingFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -1476,23 +1506,21 @@ const pricingFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-const ESTIMATOR_LARGE_PROPERTY_THRESHOLD = 3000;
-const ESTIMATOR_LARGE_PROPERTY_SURCHARGE = 50;
-const ESTIMATOR_LARGE_PROPERTY_REASON = "Properties exceeding 3000sqft include a $50 price increase to account for longer job times.";
+const ESTIMATOR_CUSTOM_QUOTE_HINT = "Used when the property, travel, or scope needs manual review.";
 
-const ESTIMATOR_ADD_ON_PRICES = {
-  "Drone photos": 100,
-  "Drone video": 125,
-  "Social reel": 150,
-  "Twilight images": 20,
-};
+function estimatorPackageHint(title = "") {
+  if (title === CUSTOM_QUOTE_PACKAGE) {
+    return ESTIMATOR_CUSTOM_QUOTE_HINT;
+  }
 
-const ESTIMATOR_PACKAGE_HINTS = {
-  "The Starter": "A lean package for smaller or budget-conscious listing launches.",
-  "The Standard": "A balanced package for most full-property listing presentations.",
-  "The Works": "The full media stack for listings that need the strongest presentation.",
-  "Custom quote": "Used when the property, travel, or scope needs manual review.",
-};
+  const service = quoteSummaryService(title);
+  if (!service) {
+    return "";
+  }
+
+  const bestFit = String(service.bestFit || "").trim();
+  return bestFit ? `Best fit: ${bestFit}.` : "";
+}
 
 const ESTIMATOR_TURNAROUND_NOTES = {
   "Same-day if available": "Same-day delivery is confirmed manually based on the live schedule.",
@@ -1512,27 +1540,61 @@ function normalizedSquareFeet(value) {
 }
 
 function quoteSummaryService(title = "") {
-  return state.services.find((service) => service.title === title) || null;
+  const wanted = String(title || "").trim().toLowerCase();
+  if (!wanted) {
+    return null;
+  }
+
+  const services = visibleServices();
+  return (
+    services.find((service) => service.title === title) ||
+    services.find((service) => String(service.title).trim().toLowerCase() === wanted) ||
+    null
+  );
+}
+
+// Suggestions follow the order of the service cards: the first card for small
+// homes, the featured card (or the second) for mid-size, the last card for large.
+function packageTitleForSlot(slot) {
+  const services = visibleServices();
+  if (!services.length) {
+    return CUSTOM_QUOTE_PACKAGE;
+  }
+
+  if (slot === "first") {
+    return services[0].title;
+  }
+
+  if (slot === "last") {
+    return services[services.length - 1].title;
+  }
+
+  const featured = services.find((item) => item.featured) || services[Math.min(1, services.length - 1)];
+  return featured.title;
+}
+
+function defaultEstimatePackage() {
+  return packageTitleForSlot("featured");
 }
 
 function recommendedPackageForInputs(squareFeet, propertyType = "") {
   if (propertyType === "Commercial property") {
-    return "Custom quote";
+    return CUSTOM_QUOTE_PACKAGE;
   }
 
   if (squareFeet && squareFeet <= 1999) {
-    return "The Starter";
+    return packageTitleForSlot("first");
   }
 
   if (squareFeet && squareFeet <= 3999) {
-    return "The Standard";
+    return packageTitleForSlot("featured");
   }
 
   if (squareFeet) {
-    return "The Works";
+    return packageTitleForSlot("last");
   }
 
-  return "The Standard";
+  return defaultEstimatePackage();
 }
 
 function sizeAdjustmentForSquareFeet(squareFeet) {
@@ -1541,14 +1603,26 @@ function sizeAdjustmentForSquareFeet(squareFeet) {
       amount: 0,
       label: "Add square footage for a tighter estimate",
       reason: "",
+      customQuote: false,
     };
   }
 
-  if (squareFeet > ESTIMATOR_LARGE_PROPERTY_THRESHOLD) {
+  const adjustment = sizeAdjustmentFor(squareFeet);
+  if (adjustment.customQuote) {
     return {
-      amount: ESTIMATOR_LARGE_PROPERTY_SURCHARGE,
-      label: "3,000+ sq ft adjustment",
-      reason: ESTIMATOR_LARGE_PROPERTY_REASON,
+      amount: 0,
+      label: adjustment.label,
+      reason: `Homes over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft are quoted individually.`,
+      customQuote: true,
+    };
+  }
+
+  if (adjustment.amount) {
+    return {
+      amount: adjustment.amount,
+      label: `${adjustment.label} adjustment`,
+      reason: `Package prices cover homes up to ${SIZE_INCLUDED_MAX_SQFT.toLocaleString("en-US")} sq ft. Homes of ${adjustment.label} add ${pricingFormatter.format(adjustment.amount)}.`,
+      customQuote: false,
     };
   }
 
@@ -1556,7 +1630,37 @@ function sizeAdjustmentForSquareFeet(squareFeet) {
     amount: 0,
     label: "Square footage included",
     reason: "",
+    customQuote: false,
   };
+}
+
+function includedAddOnsMessage(packageTitle, addOnValues = []) {
+  const names = addOnValues.map((value) => addOnInlineLabel(value));
+  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0] || "";
+  return `${packageTitle} already includes ${list}, so ${names.length > 1 ? "those can't be added as add-ons" : "it can't be added as an add-on"}.`;
+}
+
+// Disables add-on checkboxes the chosen package already includes and says why.
+function syncIncludedAddOns(form, estimate) {
+  const included = new Set(estimate?.includedAddOns || []);
+  const blocked = [];
+
+  form.querySelectorAll('input[name="addOns"]').forEach((input) => {
+    const isIncluded = included.has(input.value);
+    if (isIncluded) {
+      input.checked = false;
+      blocked.push(input.value);
+    }
+
+    input.disabled = isIncluded;
+    input.closest(".check-pill")?.classList.toggle("check-pill--disabled", isIncluded);
+  });
+
+  const note = form.querySelector("[data-addon-note]");
+  if (note) {
+    note.hidden = !blocked.length;
+    note.textContent = blocked.length ? includedAddOnsMessage(estimate.selectedPackage, blocked) : "";
+  }
 }
 
 function normalizeAddOnSelections(values = []) {
@@ -1567,25 +1671,35 @@ function buildPricingEstimate(input = {}) {
   const propertyAddress = String(input.propertyAddress || "").trim();
   const propertyType = String(input.propertyType || "").trim();
   const squareFeet = normalizedSquareFeet(input.squareFeet);
-  const addOns = normalizeAddOnSelections(input.addOns);
+  const requestedAddOns = normalizeAddOnSelections(input.addOns);
   const turnaround = String(input.turnaround || "").trim();
   const suggestedPackage = recommendedPackageForInputs(squareFeet, propertyType);
   const packageSelectedByUser = Boolean(String(input.packageInterest || "").trim());
   const selectedPackage = String(input.packageInterest || "").trim() || suggestedPackage;
   const service = quoteSummaryService(selectedPackage);
+  const includedAddOns = addOnsIncludedIn(service);
+  const addOns = requestedAddOns.filter((label) => !includedAddOns.includes(label));
+  const blockedAddOns = requestedAddOns.filter((label) => includedAddOns.includes(label));
   const basePrice = parseCurrencyAmount(service?.price);
   const sizeAdjustment = sizeAdjustmentForSquareFeet(squareFeet);
   const addOnLineItems = addOns.map((label) => ({
     label,
-    amount: ESTIMATOR_ADD_ON_PRICES[label] || 0,
+    amount: addOnPrice(label),
   }));
   const addOnTotal = addOnLineItems.reduce((total, item) => total + item.amount, 0);
   const outsideRadius = String(input.serviceAreaStatus || "").trim() === "outside";
   const outsideDistance = String(input.serviceAreaDistance || "").trim();
+  const travelTier = outsideRadius
+    ? TRAVEL_QUOTE_TIER
+    : travelTierForValue(input.travelDistance) || travelTierForMiles(parseFloat(outsideDistance));
+  const travelAmount = travelTier && travelTier.amount ? travelTier.amount : 0;
+  const travelNeedsQuote = Boolean(travelTier && travelTier.amount === null);
   const requiresCustomQuote =
     selectedPackage === "Custom quote" ||
     propertyType === "Commercial property" ||
     outsideRadius ||
+    travelNeedsQuote ||
+    sizeAdjustment.customQuote ||
     !basePrice;
 
   const notes = [];
@@ -1593,6 +1707,10 @@ function buildPricingEstimate(input = {}) {
 
   if (squareFeet) {
     metaPills.push(`${squareFeet.toLocaleString("en-US")} sq ft`);
+  }
+
+  if (travelAmount) {
+    metaPills.push(`Travel ${pricingFormatter.format(travelAmount)}`);
   }
 
   addOnLineItems.forEach((item) => {
@@ -1603,7 +1721,7 @@ function buildPricingEstimate(input = {}) {
     tone: "info",
     label: "Recommended package",
     title: suggestedPackage,
-    text: ESTIMATOR_PACKAGE_HINTS[suggestedPackage] || "A strong starting point based on the current property details.",
+    text: estimatorPackageHint(suggestedPackage) || "A strong starting point based on the current property details.",
   };
 
   if (!packageSelectedByUser) {
@@ -1613,15 +1731,19 @@ function buildPricingEstimate(input = {}) {
       tone: "success",
       label: "Package fit",
       title: `${selectedPackage} looks like the right starting point`,
-      text: ESTIMATOR_PACKAGE_HINTS[selectedPackage] || "The current property inputs line up well with this package.",
+      text: estimatorPackageHint(selectedPackage) || "The current property inputs line up well with this package.",
     };
   } else if (selectedPackage !== suggestedPackage && !requiresCustomQuote) {
     guidance = {
       tone: "info",
       label: "Recommended package",
       title: `${suggestedPackage} may fit this listing better`,
-      text: `${ESTIMATOR_PACKAGE_HINTS[suggestedPackage] || "This package is the closer match for the current property inputs."} You are still viewing ${selectedPackage} pricing right now.`,
+      text: `${estimatorPackageHint(suggestedPackage) || "This package is the closer match for the current property inputs."} You are still viewing ${selectedPackage} pricing right now.`,
     };
+  }
+
+  if (blockedAddOns.length) {
+    notes.push(includedAddOnsMessage(selectedPackage, blockedAddOns));
   }
 
   if (propertyType === "Luxury listing") {
@@ -1642,6 +1764,10 @@ function buildPricingEstimate(input = {}) {
         ? `This address is about ${outsideDistance} miles from Pensacola, so travel is quoted manually.`
         : "This address sits outside the standard radius, so travel is quoted manually."
     );
+  } else if (travelNeedsQuote) {
+    notes.push(`Travel beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles from ${TRAVEL_ORIGIN_LABEL} is quoted individually.`);
+  } else if (travelAmount) {
+    notes.push(`Travel of ${travelTier.label.toLowerCase()} from ${TRAVEL_ORIGIN_LABEL} adds ${pricingFormatter.format(travelAmount)}.`);
   }
 
   if (!squareFeet) {
@@ -1658,13 +1784,18 @@ function buildPricingEstimate(input = {}) {
           ? "Commercial shoots usually need a manual review before pricing so the coverage and timeline are quoted accurately."
           : outsideRadius
             ? "Travel sits outside the standard radius, so this one should be priced manually."
-            : "The current details point to a custom quote instead of a fixed package total.",
+            : travelNeedsQuote
+              ? `Travel beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles is quoted individually, so this one should be priced manually.`
+              : sizeAdjustment.customQuote
+                ? `Homes over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft are quoted individually so the time on site is priced accurately.`
+                : "The current details point to a custom quote instead of a fixed package total.",
     };
 
     return {
       customQuote: true,
       selectedPackage,
       suggestedPackage,
+      includedAddOns,
       propertyAddress,
       total: null,
       totalLabel: "Custom quote recommended",
@@ -1683,18 +1814,26 @@ function buildPricingEstimate(input = {}) {
               ? "Commercial scope requires manual review"
               : outsideRadius
                 ? "Outside standard service radius"
-                : "Manual review",
+                : travelNeedsQuote
+                  ? `Travel beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles`
+                  : sizeAdjustment.customQuote
+                    ? `Over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft`
+                    : "Manual review",
         },
       ],
       notes,
       summary:
         propertyAddress && outsideRadius
           ? `${propertyAddress} is outside the standard service radius and should be handled as a custom quote.`
-          : `A custom quote is recommended for this project.`,
+          : travelNeedsQuote
+            ? `Travel is beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles from ${TRAVEL_ORIGIN_LABEL}, so a custom quote is recommended for this project.`
+            : sizeAdjustment.customQuote
+              ? `The home is over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft, so a custom quote is recommended for this project.`
+              : `A custom quote is recommended for this project.`,
     };
   }
 
-  const total = basePrice + sizeAdjustment.amount + addOnTotal;
+  const total = basePrice + sizeAdjustment.amount + travelAmount + addOnTotal;
   const breakdown = [
     {
       label: selectedPackage,
@@ -1709,6 +1848,13 @@ function buildPricingEstimate(input = {}) {
     });
   }
 
+  if (travelAmount) {
+    breakdown.push({
+      label: `Travel (${travelTier.label.toLowerCase()})`,
+      value: pricingFormatter.format(travelAmount),
+    });
+  }
+
   addOnLineItems.forEach((item) => {
     breakdown.push({
       label: item.label,
@@ -1720,15 +1866,18 @@ function buildPricingEstimate(input = {}) {
     customQuote: false,
     selectedPackage,
     suggestedPackage,
+    includedAddOns,
     propertyAddress,
     total,
     totalLabel: "Estimated starting quote",
-    totalDetail: ESTIMATOR_PACKAGE_HINTS[selectedPackage] || "A quick working estimate based on the current package and selections.",
+    totalDetail: estimatorPackageHint(selectedPackage) || "A quick working estimate based on the current package and selections.",
     guidance,
     metaPills,
     breakdown,
     notes,
-    summary: `${selectedPackage} with the current selections comes to an estimated starting quote of ${pricingFormatter.format(total)}.`,
+    summary: `${selectedPackage} with the current selections comes to an estimated starting quote of ${pricingFormatter.format(total)}.${
+      travelAmount ? ` Includes ${pricingFormatter.format(travelAmount)} travel (${travelTier.label.toLowerCase()}).` : ""
+    }`,
   };
 }
 
@@ -1747,6 +1896,7 @@ function estimatorPrefillUrl(values = {}) {
   setValue("squareFeet", values.squareFeet);
   setValue("packageInterest", values.packageInterest);
   setValue("turnaround", values.turnaround);
+  setValue("travelDistance", values.travelDistance);
   setValue("serviceAreaStatus", values.serviceAreaStatus);
   setValue("serviceAreaDistance", values.serviceAreaDistance);
   setValue("estimateLabel", values.estimateLabel);
@@ -1765,6 +1915,7 @@ function contactPrefillFromLocation() {
     squareFeet: params.get("squareFeet") || "",
     packageInterest: params.get("packageInterest") || "",
     turnaround: params.get("turnaround") || "",
+    travelDistance: params.get("travelDistance") || "",
     addOns: params.getAll("addOns"),
     serviceAreaStatus: params.get("serviceAreaStatus") || "",
     serviceAreaDistance: params.get("serviceAreaDistance") || "",
@@ -1788,7 +1939,7 @@ function currentFaqItems() {
 }
 
 function serviceCardsMarkup() {
-  return state.services
+  return visibleServices()
     .map(
       (service, index) => `
         <article class="card card--interactive pricing-card pricing-card--package ${service.featured ? "card--featured" : ""}" data-tilt-card>
@@ -1927,7 +2078,7 @@ function homeFeaturedMarketsMarkup() {
 function pricingEstimatorSectionMarkup() {
   const packageOptions = [
     `<option value="">Let the estimator suggest a package</option>`,
-    ...contactPackageOptions.map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`),
+    ...contactPackageOptions().map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`),
   ].join("");
 
   return `
@@ -1938,7 +2089,7 @@ function pricingEstimatorSectionMarkup() {
           <h2 class="section__title">Build a working estimate before you book.</h2>
           <p class="section__lead">Choose the package, square footage, and add-ons you think the listing needs. The estimate updates instantly and can carry straight into the inquiry form.</p>
         </div>
-        <div class="helper">This is a starting quote. Travel, commercial scopes, and oversized properties still move to a custom review.</div>
+        <div class="helper">This is a starting quote. Commercial scopes, homes over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft, and travel beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles still move to a custom review.</div>
       </div>
       <div class="section-grid pricing-estimator__layout">
         <div class="contact-box">
@@ -1977,6 +2128,12 @@ function pricingEstimatorSectionMarkup() {
                 </select>
               </div>
               <div class="field field--wide">
+                <label for="estimate-travelDistance">Distance from ${safeText(TRAVEL_ORIGIN_LABEL)}</label>
+                <select id="estimate-travelDistance" name="travelDistance">
+                  ${travelDistanceOptionsMarkup()}
+                </select>
+              </div>
+              <div class="field field--wide">
                 <span class="field__label">Add-ons</span>
                 <div class="check-grid">
                   ${contactAddOnOptions
@@ -1990,6 +2147,7 @@ function pricingEstimatorSectionMarkup() {
                     )
                     .join("")}
                 </div>
+                <div class="helper helper--warn" data-addon-note role="status" hidden></div>
               </div>
             </div>
             <div class="pricing-estimator__actions">
@@ -1999,7 +2157,7 @@ function pricingEstimatorSectionMarkup() {
           </form>
         </div>
         <aside class="card pricing-card pricing-card--summary" data-pricing-output="services">
-          ${pricingEstimateOutputMarkup(buildPricingEstimate({ packageInterest: "The Standard" }))}
+          ${pricingEstimateOutputMarkup(buildPricingEstimate({ packageInterest: defaultEstimatePackage() }))}
         </aside>
       </div>
     </section>
@@ -2410,7 +2568,7 @@ function portfolioFinalCtaMarkup() {
 function contactEstimatePanelMarkup() {
   return `
     <div class="contact-box pricing-card pricing-card--summary pricing-card--summary-compact" data-pricing-output="contact" data-tilt-card>
-      ${pricingEstimateOutputMarkup(buildPricingEstimate({ packageInterest: "The Standard" }))}
+      ${pricingEstimateOutputMarkup(buildPricingEstimate({ packageInterest: defaultEstimatePackage() }))}
     </div>
   `;
 }
@@ -2500,7 +2658,7 @@ function contactMarkup(options = {}) {
                   <label for="packageInterest">Package</label>
                   <select id="packageInterest" name="packageInterest" required>
                     <option value="">Select a package</option>
-                    ${contactPackageOptions
+                    ${contactPackageOptions()
                       .map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`)
                       .join("")}
                   </select>
@@ -2512,6 +2670,12 @@ function contactMarkup(options = {}) {
                     ${contactTurnaroundOptions
                       .map((option) => `<option value="${safeText(option.value)}">${safeText(option.label)}</option>`)
                       .join("")}
+                  </select>
+                </div>
+                <div class="field field--wide">
+                  <label for="travelDistance">Distance from ${safeText(TRAVEL_ORIGIN_LABEL)}</label>
+                  <select id="travelDistance" name="travelDistance">
+                    ${travelDistanceOptionsMarkup()}
                   </select>
                 </div>
                 <div class="field field--wide">
@@ -2528,6 +2692,7 @@ function contactMarkup(options = {}) {
                       )
                       .join("")}
                   </div>
+                  <div class="helper helper--warn" data-addon-note role="status" hidden></div>
                 </div>
                 <div class="field field--wide">
                   <label for="message">Project details and access notes</label>
@@ -2950,6 +3115,7 @@ function estimateInputFromForm(form) {
     squareFeet: formData.get("squareFeet")?.toString().trim() || "",
     packageInterest: formData.get("packageInterest")?.toString().trim() || "",
     turnaround: formData.get("turnaround")?.toString().trim() || "",
+    travelDistance: formData.get("travelDistance")?.toString().trim() || "",
     addOns: formData.getAll("addOns").map((value) => value.toString().trim()).filter(Boolean),
     serviceAreaStatus: formData.get("serviceAreaStatus")?.toString().trim() || "",
     serviceAreaDistance: formData.get("serviceAreaDistance")?.toString().trim() || "",
@@ -2994,12 +3160,20 @@ function applyContactPrefill(form) {
     return prefill;
   }
 
-  const fields = ["propertyAddress", "propertyType", "squareFeet", "packageInterest", "turnaround", "serviceAreaStatus", "serviceAreaDistance"];
+  const fields = ["propertyAddress", "propertyType", "squareFeet", "packageInterest", "turnaround", "travelDistance", "serviceAreaStatus", "serviceAreaDistance"];
   fields.forEach((name) => {
     if (prefill[name]) {
       setFormFieldValue(form, name, prefill[name]);
     }
   });
+
+  if (!prefill.travelDistance && (prefill.serviceAreaStatus === "outside" || prefill.serviceAreaDistance)) {
+    const prefillTravelTier =
+      prefill.serviceAreaStatus === "outside" ? TRAVEL_QUOTE_TIER : travelTierForMiles(parseFloat(prefill.serviceAreaDistance));
+    if (prefillTravelTier) {
+      setFormFieldValue(form, "travelDistance", prefillTravelTier.value);
+    }
+  }
 
   setFormCheckboxValues(form, "addOns", prefill.addOns);
 
@@ -3052,10 +3226,12 @@ function wireStandalonePricingEstimator() {
     const values = estimateInputFromForm(form);
     const estimate = buildPricingEstimate(values);
     renderPricingEstimateOutput(output, estimate);
+    syncIncludedAddOns(form, estimate);
 
     if (cta) {
       cta.href = estimatorPrefillUrl({
         ...values,
+        addOns: values.addOns.filter((value) => !estimate.includedAddOns.includes(value)),
         packageInterest: estimate.selectedPackage,
         estimateLabel: estimate.totalLabel,
         estimateTotal: estimate.total ? String(estimate.total) : "",
@@ -3086,6 +3262,7 @@ function wireContactEstimatePanel(form) {
     const values = estimateInputFromForm(form);
     const estimate = buildPricingEstimate(values);
     renderPricingEstimateOutput(output, estimate);
+    syncIncludedAddOns(form, estimate);
     setHiddenEstimateFields(form, estimate, values);
   };
 
@@ -3328,7 +3505,7 @@ async function wireServiceAreaMap() {
 
         updateServiceAreaStatus(
           inside
-            ? `${match.label} is inside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola.`
+            ? `${match.label} is inside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola. ${travelNoteForMiles(distance)}`
             : `${match.label} is outside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola.`,
           inside ? "success" : "warn"
         );
@@ -3358,6 +3535,27 @@ async function wireServiceAreaMap() {
   }
 }
 
+function pricingRulesMarkup() {
+  return `
+    <section class="section services-page__rules" id="pricing-details">
+      <div class="section__eyebrow">Pricing details</div>
+      <h2 class="section__title">What the package prices cover.</h2>
+      <div class="pricing-rules">
+        ${pricingRuleItems()
+          .map(
+            (rule) => `
+              <div class="signal-card pricing-rule">
+                <span class="signal-card__label">${safeText(rule.label)}</span>
+                <p class="pricing-rule__text">${safeText(rule.text)}</p>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function servicesPageMarkup() {
   return `
     <section class="section services-page__intro">
@@ -3376,6 +3574,8 @@ function servicesPageMarkup() {
         ${serviceCardsMarkup()}
       </div>
     </section>
+
+    ${pricingRulesMarkup()}
 
     ${servicesSupportMarkup()}
 
@@ -4976,6 +5176,7 @@ function wireContactForm() {
     const shootDate = formData.get("shootDate")?.toString().trim() || "";
     const packageInterest = formData.get("packageInterest")?.toString().trim() || "";
     const turnaround = formData.get("turnaround")?.toString().trim() || "";
+    const travelDistance = travelTierForValue(formData.get("travelDistance")?.toString())?.label || "";
     const addOns = formData.getAll("addOns").map((value) => value.toString().trim()).filter(Boolean);
     const estimateLabel = formData.get("estimateLabel")?.toString().trim() || "";
     const estimateTotal = formData.get("estimateTotal")?.toString().trim() || "";
@@ -5015,6 +5216,7 @@ function wireContactForm() {
           shootDate,
           packageInterest,
           turnaround,
+          travelDistance,
           addOns,
           estimateLabel,
           estimateTotal,
@@ -5091,6 +5293,7 @@ function wireContactForm() {
         `Preferred shoot date: ${shootDate || "-"}`,
         `Package: ${packageInterest || "-"}`,
         `Turnaround: ${turnaround || "-"}`,
+        `Travel distance: ${travelDistance || "-"}`,
         `Add-ons: ${addOns.length ? addOns.join(", ") : "-"}`,
         `Estimate label: ${estimateLabel || "-"}`,
         `Estimate total: ${estimateTotal ? pricingFormatter.format(Number(estimateTotal)) : "-"}`,

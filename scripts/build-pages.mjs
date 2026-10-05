@@ -1,5 +1,6 @@
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pricingRuleItems } from "../assets/js/pricing-rules.js";
 
 const projectRoot = process.cwd();
 const distDir = path.join(projectRoot, "dist");
@@ -578,9 +579,32 @@ function serviceSummary(service = {}, index = 0) {
   return bullets[0] || `Package 0${index + 1}`;
 }
 
+function pricingRulesSectionMarkup() {
+  return `
+    <section class="section services-page__rules" id="pricing-details">
+      <div class="section__eyebrow">Pricing details</div>
+      <h2 class="section__title">What the package prices cover.</h2>
+      <div class="pricing-rules">
+        ${pricingRuleItems()
+          .map(
+            (rule) => `
+              <div class="signal-card pricing-rule">
+                <span class="signal-card__label">${escapeHtml(rule.label)}</span>
+                <p class="pricing-rule__text">${escapeHtml(rule.text)}</p>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function serviceCardsSectionMarkup(siteData) {
   const settings = siteData?.settings || {};
-  const services = Array.isArray(siteData?.services) ? siteData.services : [];
+  const services = (Array.isArray(siteData?.services) ? siteData.services : []).filter(
+    (service) => service && String(service.title || "").trim()
+  );
   if (!services.length) {
     return "";
   }
@@ -748,7 +772,7 @@ function pageEnhancementMarkup(relativePath, siteData, locationPages) {
         lead: "Open the matching city page when the listing sits in Pensacola, Navarre, Gulf Breeze, Pace, Destin, or Fort Walton Beach.",
       })}`;
     case "services.html":
-      return `${serviceCardsSectionMarkup(siteData)}\n${locationMarketsSectionMarkup(featuredLocationPages(locationPages, 6), "./", {
+      return `${serviceCardsSectionMarkup(siteData)}\n${pricingRulesSectionMarkup()}\n${locationMarketsSectionMarkup(featuredLocationPages(locationPages, 6), "./", {
         eyebrow: "Popular markets",
         title: "Supportive city pages for the towns agents search most often.",
       })}`;

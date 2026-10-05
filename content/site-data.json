@@ -121,47 +121,55 @@
   "services": [
     {
       "id": "service-listing",
-      "title": "The Starter",
+      "title": "Essentials",
       "description": "This package provides high-quality HDR essentials designed to get smaller or budget-conscious listings onto the market quickly with a professional look.",
       "bestFit": "Smaller listings",
       "bullets": [
-        "30 HDR Images",
-        "No Drone Images",
-        "No Videos",
-        "Delivered in 24 hours or Less"
+        "Up to 25 HDR Images",
+        "24-Hour Delivery"
       ],
-      "price": "$150",
+      "price": "$175",
       "featured": false
     },
     {
       "id": "service-luxury",
-      "title": "The Standard",
+      "title": "Standard",
       "bestFit": "Most residential listings",
       "description": "By adding dedicated drone photos to the interior set, this tier gives buyers a better sense of the property’s exterior layout and surrounding curb appeal.",
       "bullets": [
-        "35 HDR Images",
-        "5 Drone Images",
-        "No Videos",
-        "Delivered in 24 hours or Less"
+        "Up to 35 HDR Images",
+        "10 Drone Images",
+        "24-Hour Delivery"
       ],
       "price": "$250",
       "featured": true
     },
     {
       "id": "service-media",
-      "title": "The Works",
+      "title": "Tour",
       "bestFit": "Luxury launches",
-      "description": "The heavy hitter. High-end photos paired with drone and social video—basically everything you need to make a listing impossible to ignore.",
+      "description": "Bring your clients into the home virtually with a Zillow 3D Home Tour.",
       "bullets": [
-        "45 HDR Images",
-        "10 Drone Images",
-        "30s Drone Video",
-        "60s Social Video",
-        "Photos Delivered in 24 hours or Less",
-        "Videos Delivered in 48 hours or Less"
+        "Zillow 3D Home Tour",
+        "Up to 35 HDR Images",
+        "10 Drone Images"
       ],
-      "price": "$450",
+      "price": "$395",
       "featured": false
+    },
+    {
+      "id": "service-7a34e5d4-cc86-4151-b2e4-6c75ddc3bb3f",
+      "title": "The Works",
+      "price": "$595",
+      "featured": false,
+      "description": "The heavy hitter. High-end photos paired with drone and social video—basically everything you need to make a listing impossible to ignore.",
+      "bestFit": "",
+      "bullets": [
+        "Up to 45 HDR Images",
+        "20 Drone Images",
+        "60s Drone VIdeo",
+        "Zillow 3D Home Tour"
+      ]
     }
   ],
   "clientPortals": [],
@@ -1498,5 +1506,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-03-26T19:42:30.056Z"
+  "savedAt": "2026-10-05T15:16:18.177Z"
 }
