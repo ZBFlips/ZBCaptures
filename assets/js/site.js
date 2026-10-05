@@ -75,7 +75,7 @@ const SEO_SERVICE_AREAS = [
   "Mobile, AL",
 ];
 const SEO_PLATFORMS = ["MLS", "Zillow", "Homes.com", "Redfin", "Airbnb", "VRBO"];
-const SEO_DELIVERABLES = ["MLS-ready photos", "Zillow-ready images", "HDR photography", "drone photos", "social video"];
+const SEO_DELIVERABLES = ["MLS-ready photos", "Zillow-ready images", "HDR photography", "drone photos", "drone video"];
 const BUSINESS_HOURS = {
   opens: "08:00",
   closes: "18:00",
@@ -1257,7 +1257,7 @@ function videoMarkup() {
       <section class="section">
         <div class="section__eyebrow">Motion</div>
         <h2 class="section__title">Add a video embed or upload a compressed clip.</h2>
-        <p class="section__lead">If you want a reel on the homepage, place its URL in the admin panel. You can also store a lightweight video file in the media library.</p>
+        <p class="section__lead">If you want a video on the homepage, place its URL in the admin panel. You can also store a lightweight video file in the media library.</p>
       </section>
     `;
   }
@@ -1445,7 +1445,7 @@ const faqItems = [
   },
   {
     question: "Do you offer drone photos and video?",
-    answer: "Yes. Depending on the package, coverage can include HDR photography, drone photos, social video, and larger listing marketing deliverables.",
+    answer: "Yes. Depending on the package, coverage can include HDR photography, drone photos, drone video, and larger listing marketing deliverables.",
   },
   {
     question: "Can I add-on extras to a package?",
@@ -4018,7 +4018,7 @@ function pageSeoConfig() {
       return {
         title: "Real Estate Photography Services in Pensacola, FL | ZB Captures",
         description:
-          "Real estate photography services in Pensacola, Florida with MLS-ready photos, HDR photography, drone coverage, twilight add-ons, and social video for Gulf Coast listings.",
+          "Real estate photography services in Pensacola, Florida with MLS-ready photos, HDR photography, drone coverage, and twilight add-ons for Gulf Coast listings.",
         path: "services.html",
       };
     case "quote":
@@ -4196,7 +4196,7 @@ function applyStructuredData(seo) {
     graph.push({
       "@type": "Service",
       serviceType: "Real estate photography",
-      name: "Real estate photography, drone photography, and social video",
+      name: "Real estate photography, drone photography, and video",
       provider: { "@id": businessId },
       areaServed: SEO_SERVICE_AREAS,
       url: canonicalUrl,

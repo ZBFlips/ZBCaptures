@@ -147,8 +147,8 @@
     {
       "id": "service-media",
       "title": "Tour",
-      "bestFit": "Luxury launches",
-      "description": "Bring your clients into the home virtually with a Zillow 3D Home Tour.",
+      "bestFit": "Spacious properties",
+      "description": "Bring your clients into the home virtually with a Zillow 3D Home Tour, plus everything included in the Standard package.",
       "bullets": [
         "Zillow 3D Home Tour",
         "Up to 35 HDR Images",
@@ -162,8 +162,8 @@
       "title": "The Works",
       "price": "$595",
       "featured": false,
-      "description": "The heavy hitter. High-end photos paired with drone and social video—basically everything you need to make a listing impossible to ignore.",
-      "bestFit": "",
+      "description": "The heavy hitter. High-end photos paired with drone video—basically everything you need to make a listing impossible to ignore.",
+      "bestFit": "Luxury launches",
       "bullets": [
         "Up to 45 HDR Images",
         "20 Drone Images",
@@ -1506,5 +1506,5 @@
       "originalType": "image/jpeg"
     }
   ],
-  "savedAt": "2026-10-05T15:16:18.177Z"
+  "savedAt": "2026-10-05T15:34:32.512Z"
 }
