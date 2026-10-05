@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { pricingRuleItems } from "../assets/js/pricing-rules.js";
+import { createHash } from "node:crypto";
+import { createPricingRules } from "../assets/js/pricing-rules.js";
 
 const projectRoot = process.cwd();
 const distDir = path.join(projectRoot, "dist");
@@ -579,13 +580,14 @@ function serviceSummary(service = {}, index = 0) {
   return bullets[0] || `Package 0${index + 1}`;
 }
 
-function pricingRulesSectionMarkup() {
+function pricingRulesSectionMarkup(siteData) {
   return `
     <section class="section services-page__rules" id="pricing-details">
       <div class="section__eyebrow">Pricing details</div>
       <h2 class="section__title">What the package prices cover.</h2>
       <div class="pricing-rules">
-        ${pricingRuleItems()
+        ${createPricingRules(siteData?.settings?.pricing)
+          .pricingRuleItems()
           .map(
             (rule) => `
               <div class="signal-card pricing-rule">
@@ -772,7 +774,7 @@ function pageEnhancementMarkup(relativePath, siteData, locationPages) {
         lead: "Open the matching city page when the listing sits in Pensacola, Navarre, Gulf Breeze, Pace, Destin, or Fort Walton Beach.",
       })}`;
     case "services.html":
-      return `${serviceCardsSectionMarkup(siteData)}\n${pricingRulesSectionMarkup()}\n${locationMarketsSectionMarkup(featuredLocationPages(locationPages, 6), "./", {
+      return `${serviceCardsSectionMarkup(siteData)}\n${pricingRulesSectionMarkup(siteData)}\n${locationMarketsSectionMarkup(featuredLocationPages(locationPages, 6), "./", {
         eyebrow: "Popular markets",
         title: "Supportive city pages for the towns agents search most often.",
       })}`;
@@ -1019,6 +1021,69 @@ async function referencedAssetFiles() {
   return Array.from(files);
 }
 
+async function listBuiltFiles(directory, extension) {
+  const found = [];
+  let entries = [];
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch {
+    return found;
+  }
+
+  for (const entry of entries) {
+    const fullPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      found.push(...(await listBuiltFiles(fullPath, extension)));
+    } else if (entry.name.endsWith(extension)) {
+      found.push(fullPath);
+    }
+  }
+
+  return found;
+}
+
+// Browsers hold on to scripts and stylesheets for hours. Every built page and
+// script import gets a "?v=..." stamp that changes whenever any script or
+// stylesheet changes, so a new deploy shows up on the next page load.
+async function stampAssetVersions() {
+  const scripts = (await listBuiltFiles(path.join(distDir, "assets/js"), ".js")).sort();
+  const styles = (await listBuiltFiles(path.join(distDir, "assets/css"), ".css")).sort();
+  const hash = createHash("sha256");
+
+  for (const file of [...scripts, ...styles]) {
+    hash.update(path.relative(distDir, file).split(path.sep).join("/"));
+    hash.update(await readFile(file));
+  }
+
+  const version = hash.digest("hex").slice(0, 10);
+
+  for (const file of scripts) {
+    const source = await readFile(file, "utf8");
+    const stamped = source.replace(
+      /(\bfrom\s+|\bimport\s+)(["'])(\.\/[^"'?]+\.js)\2/g,
+      (match, lead, quote, specifier) => `${lead}${quote}${specifier}?v=${version}${quote}`
+    );
+
+    if (stamped !== source) {
+      await writeFile(file, stamped);
+    }
+  }
+
+  for (const file of await listBuiltFiles(distDir, ".html")) {
+    const source = await readFile(file, "utf8");
+    const stamped = source.replace(
+      /((?:href|src)=")([^"?#]*assets\/(?:css|js)\/[^"?#]+\.(?:css|js))(?:\?[^"#]*)?(")/g,
+      `$1$2?v=${version}$3`
+    );
+
+    if (stamped !== source) {
+      await writeFile(file, stamped);
+    }
+  }
+
+  return version;
+}
+
 async function build() {
   await rm(distDir, { recursive: true, force: true });
   await mkdir(distDir, { recursive: true });
@@ -1047,10 +1112,11 @@ async function build() {
   await writeLocationPages(locationPages, siteData);
   await writeSitemap(locationPages);
   await writeRobots();
+  const assetVersion = await stampAssetVersions();
 
   await writeFile(path.join(distDir, "_routes.json"), `${JSON.stringify(routesManifest, null, 2)}\n`);
 
-  console.log(`Built Cloudflare Pages output in ${distDir}`);
+  console.log(`Built Cloudflare Pages output in ${distDir} (asset version ${assetVersion})`);
 }
 
 build().catch((error) => {

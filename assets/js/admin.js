@@ -17,6 +17,7 @@ import {
   createPortalId,
   ensureUniqueSlug,
 } from "./portal-utils.js";
+import { DEFAULT_PRICING, createPricingRules } from "./pricing-rules.js";
 import {
   adminLogin,
   adminLogout,
@@ -1173,6 +1174,7 @@ function adminMarkup() {
         <button type="button" data-jump="#locations">Location pages</button>
         <button type="button" data-jump="#client-delivery">Client delivery</button>
         <button type="button" data-jump="#services">Services</button>
+        <button type="button" data-jump="#quote-calculator">Quote calculator</button>
         <button type="button" data-jump="#settings">Settings</button>
       </aside>
 
@@ -1323,6 +1325,46 @@ function adminMarkup() {
             <span class="admin-note" id="services-status">Your edits autosave in this browser, and this button gives you an explicit save action.</span>
           </div>
           <div class="admin-grid" id="services-list"></div>
+        </section>
+
+        <section class="admin-panel" id="quote-calculator">
+          <h2 class="admin-panel__title">Quote calculator</h2>
+          <p class="admin-panel__text">Set the add-ons and fees used by the quote calculator, the contact form estimate, and the pricing details on the services page. Package prices come from the Services cards above.</p>
+          <div class="admin-toolbar">
+            <button class="button button--accent" type="button" id="save-pricing">Save quote settings</button>
+            <button class="button ghost" type="button" id="reset-pricing">Restore default fees</button>
+            <span class="admin-note" id="pricing-status">Your edits autosave in this browser. Use Save changes at the top to write them to the site files.</span>
+          </div>
+
+          <h3 class="pricing-editor__heading">Add-ons</h3>
+          <p class="admin-note">An add-on is blocked automatically on any package whose bullet list already mentions it. A row only shows on the site once it has a name.</p>
+          <div class="pricing-editor__rows" id="pricing-addons"></div>
+          <button class="button" type="button" data-pricing-add="addOns">Add add-on</button>
+
+          <h3 class="pricing-editor__heading">Home size</h3>
+          <div class="pricing-editor__rows">
+            <div class="field pricing-editor__single">
+              <label for="pricing-sizeIncludedMax">Package prices cover homes up to (sq ft)</label>
+              <input id="pricing-sizeIncludedMax" type="number" min="0" step="1" inputmode="numeric" data-pricing-field="sizeIncludedMax" />
+            </div>
+          </div>
+          <div class="pricing-editor__rows" id="pricing-size-tiers"></div>
+          <button class="button" type="button" data-pricing-add="sizeTiers">Add size tier</button>
+          <p class="admin-note">Homes larger than the last tier are sent to a custom quote.</p>
+
+          <h3 class="pricing-editor__heading">Travel</h3>
+          <div class="pricing-editor__rows">
+            <div class="field pricing-editor__single">
+              <label for="pricing-travelFreeMiles">Free within (miles of Pensacola)</label>
+              <input id="pricing-travelFreeMiles" type="number" min="0" step="1" inputmode="numeric" data-pricing-field="travelFreeMiles" />
+            </div>
+          </div>
+          <div class="pricing-editor__rows" id="pricing-travel-tiers"></div>
+          <button class="button" type="button" data-pricing-add="travelTiers">Add travel tier</button>
+          <p class="admin-note">Anything farther than the last tier is sent to a custom quote.</p>
+
+          <h3 class="pricing-editor__heading">What customers will see</h3>
+          <div class="pricing-rules" id="pricing-preview"></div>
         </section>
 
         <section class="admin-panel" id="settings">
@@ -1485,6 +1527,178 @@ function setSiteCopyFromForm(form) {
 
 async function refreshMedia() {
   media = await listMedia();
+}
+
+// ---- Quote calculator settings (add-ons, home-size fees, travel fees) ----
+
+function clonePricing(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+// What the editor shows: the saved settings, with defaults for anything missing.
+function currentPricingDraft() {
+  const saved = state.settings?.pricing;
+  const draft = clonePricing(DEFAULT_PRICING);
+  if (saved && typeof saved === "object") {
+    ["sizeIncludedMax", "travelFreeMiles"].forEach((key) => {
+      if (saved[key] !== undefined && saved[key] !== null) {
+        draft[key] = saved[key];
+      }
+    });
+    ["sizeTiers", "travelTiers", "addOns"].forEach((key) => {
+      if (Array.isArray(saved[key])) {
+        draft[key] = clonePricing(saved[key]);
+      }
+    });
+  }
+
+  return draft;
+}
+
+// Makes sure state.settings.pricing exists before an edit is written into it.
+function ensurePricingDraft() {
+  state.settings = { ...state.settings, pricing: currentPricingDraft() };
+  return state.settings.pricing;
+}
+
+function pricingRowMarkup(list, index, firstKey, firstLabel, firstValue, secondLabel, secondValue, firstIsText = false) {
+  return `
+    <div class="pricing-editor__row">
+      <div class="field">
+        <label>${safeText(firstLabel)}</label>
+        <input ${firstIsText ? 'type="text"' : 'type="number" min="0" step="1" inputmode="numeric"'} data-pricing-list="${list}" data-pricing-index="${index}" data-pricing-key="${firstKey}" value="${safeText(firstValue ?? "")}" />
+      </div>
+      <div class="field">
+        <label>${safeText(secondLabel)}</label>
+        <input type="number" min="0" step="1" inputmode="numeric" data-pricing-list="${list}" data-pricing-index="${index}" data-pricing-key="${list === "addOns" ? "price" : "amount"}" value="${safeText(secondValue ?? "")}" />
+      </div>
+      <button class="button" type="button" data-pricing-remove="${list}" data-pricing-index="${index}">Remove</button>
+    </div>
+  `;
+}
+
+function renderPricingPreview() {
+  const target = document.getElementById("pricing-preview");
+  if (!target) {
+    return;
+  }
+
+  target.innerHTML = createPricingRules(currentPricingDraft())
+    .pricingRuleItems()
+    .map(
+      (rule) => `
+        <div class="signal-card pricing-rule">
+          <span class="signal-card__label">${safeText(rule.label)}</span>
+          <p class="pricing-rule__text">${safeText(rule.text)}</p>
+        </div>
+      `
+    )
+    .join("");
+}
+
+function renderPricingEditor() {
+  const addOnsTarget = document.getElementById("pricing-addons");
+  if (!addOnsTarget) {
+    return;
+  }
+
+  const draft = currentPricingDraft();
+  addOnsTarget.innerHTML = draft.addOns
+    .map((item, index) => pricingRowMarkup("addOns", index, "label", "Add-on name", item?.label, "Price ($)", item?.price, true))
+    .join("");
+  document.getElementById("pricing-size-tiers").innerHTML = draft.sizeTiers
+    .map((tier, index) => pricingRowMarkup("sizeTiers", index, "max", "Up to (sq ft)", tier?.max, "Add ($)", tier?.amount))
+    .join("");
+  document.getElementById("pricing-travel-tiers").innerHTML = draft.travelTiers
+    .map((tier, index) => pricingRowMarkup("travelTiers", index, "max", "Up to (miles)", tier?.max, "Add ($)", tier?.amount))
+    .join("");
+  document.getElementById("pricing-sizeIncludedMax").value = draft.sizeIncludedMax ?? "";
+  document.getElementById("pricing-travelFreeMiles").value = draft.travelFreeMiles ?? "";
+  renderPricingPreview();
+}
+
+function wirePricingEditor() {
+  const section = document.getElementById("quote-calculator");
+  const status = document.getElementById("pricing-status");
+  if (!section) {
+    return;
+  }
+
+  function persistPricing(message) {
+    saveState(state);
+    if (status) {
+      status.textContent = message;
+    }
+    renderPricingPreview();
+  }
+
+  const numberOrBlank = (value) => (String(value).trim() === "" ? "" : Number(value));
+
+  section.addEventListener("input", (event) => {
+    const field = event.target;
+    if (!(field instanceof HTMLInputElement)) {
+      return;
+    }
+
+    if (field.dataset.pricingField) {
+      ensurePricingDraft()[field.dataset.pricingField] = numberOrBlank(field.value);
+      persistPricing("Quote settings autosaved.");
+      return;
+    }
+
+    const list = field.dataset.pricingList;
+    if (!list) {
+      return;
+    }
+
+    const row = ensurePricingDraft()[list][Number(field.dataset.pricingIndex)];
+    if (!row) {
+      return;
+    }
+
+    row[field.dataset.pricingKey] = field.dataset.pricingKey === "label" ? field.value : numberOrBlank(field.value);
+    persistPricing("Quote settings autosaved.");
+  });
+
+  section.addEventListener("click", (event) => {
+    const addButton = event.target.closest("[data-pricing-add]");
+    if (addButton) {
+      const list = addButton.dataset.pricingAdd;
+      const draft = ensurePricingDraft();
+      draft[list].push(list === "addOns" ? { label: "", price: "" } : { max: "", amount: "" });
+      persistPricing(list === "addOns" ? "Add-on row added. Give it a name and a price." : "Tier added. Fill in the limit and the fee.");
+      renderPricingEditor();
+      const rows = section.querySelectorAll(`[data-pricing-list="${list}"][data-pricing-index="${draft[list].length - 1}"]`);
+      rows[0]?.focus();
+      return;
+    }
+
+    const removeButton = event.target.closest("[data-pricing-remove]");
+    if (removeButton) {
+      const list = removeButton.dataset.pricingRemove;
+      ensurePricingDraft()[list].splice(Number(removeButton.dataset.pricingIndex), 1);
+      persistPricing("Removed.");
+      renderPricingEditor();
+    }
+  });
+
+  document.getElementById("save-pricing").addEventListener("click", () => {
+    ensurePricingDraft();
+    persistPricing("Quote settings saved.");
+    alert("Quote settings saved in this browser. Use Save changes at the top to write them to the site files.");
+  });
+
+  document.getElementById("reset-pricing").addEventListener("click", () => {
+    if (!confirm("Restore the default add-ons, home-size fees and travel fees?")) {
+      return;
+    }
+
+    const nextSettings = { ...state.settings };
+    delete nextSettings.pricing;
+    state.settings = nextSettings;
+    persistPricing("Default fees restored.");
+    renderPricingEditor();
+  });
 }
 
 function createBlankService() {
@@ -4078,6 +4292,7 @@ async function syncAndRender() {
   renderLocationPagesEditor();
   renderClientPortalsEditor();
   renderServicesEditor();
+  renderPricingEditor();
   await renderMediaList();
 }
 
@@ -4264,6 +4479,7 @@ async function bootstrap() {
   wireHeroUploads();
   wireUploadForm();
   wireServicesEditor();
+  wirePricingEditor();
   wireHomeBestOfEditor();
   wireLocationPagesEditor();
   wireClientPortalsEditor();

@@ -1,24 +1,7 @@
 import { decryptPortalPayload } from "./portal-utils.js";
 import { DEFAULT_STATE } from "./storage.js";
 import { loadUnlockedCloudPortal, unlockCloudPortal } from "./client-delivery-api.js";
-import {
-  ADD_ONS,
-  SIZE_INCLUDED_MAX_SQFT,
-  SIZE_QUOTE_ABOVE_SQFT,
-  TRAVEL_ORIGIN_LABEL,
-  TRAVEL_QUOTE_ABOVE_MILES,
-  TRAVEL_QUOTE_TIER,
-  TRAVEL_TIERS,
-  addOnInlineLabel,
-  addOnPrice,
-  addOnsIncludedIn,
-  pricingRuleItems,
-  sizeAdjustmentFor,
-  travelNoteForMiles,
-  travelOptionLabel,
-  travelTierForMiles,
-  travelTierForValue,
-} from "./pricing-rules.js";
+import { createPricingRules } from "./pricing-rules.js";
 
 const page = document.body.dataset.page;
 const pageBasePath = document.body.dataset.basePath || "./";
@@ -91,6 +74,21 @@ const LEAFLET_CSS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 const LEAFLET_JS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 
 let state = mergePublishedState(DEFAULT_STATE);
+
+// Quote calculator rules (add-ons, home-size fees, travel fees). They come from
+// the admin's "Quote calculator" section when saved, otherwise the defaults.
+let pricingRulesCache = null;
+let pricingRulesSource;
+
+function pricing() {
+  const source = state.settings?.pricing;
+  if (!pricingRulesCache || pricingRulesSource !== source) {
+    pricingRulesCache = createPricingRules(source);
+    pricingRulesSource = source;
+  }
+
+  return pricingRulesCache;
+}
 let mediaCache = [];
 let objectUrls = [];
 let activePortalData = null;
@@ -1449,8 +1447,12 @@ const faqItems = [
   },
   {
     question: "Can I add-on extras to a package?",
-    answer:
-      `Yes, any package can be modified to add or remove media assets (price may vary). Current add-ons: ${ADD_ONS.map((item) => `${item.label} $${item.price}`).join(", ")}. An add-on can't be added to a package that already includes it.`,
+    get answer() {
+      const addOns = pricing().addOns;
+      return addOns.length
+        ? `Yes, any package can be modified to add or remove media assets (price may vary). Current add-ons: ${addOns.map((item) => `${item.label} $${item.price}`).join(", ")}. An add-on can't be added to a package that already includes it.`
+        : "Yes, any package can be modified to add or remove media assets (price may vary).";
+    },
   },
   {
     question: "How do clients receive the finished files?",
@@ -1489,14 +1491,43 @@ const contactTurnaroundOptions = [
   { value: "Flexible timeline", label: "Flexible timeline" },
 ];
 
-const contactAddOnOptions = ADD_ONS.map((item) => ({
-  value: item.value,
-  label: `${item.label} (+$${item.price})`,
-}));
+function contactAddOnOptions() {
+  return pricing().addOns.map((item) => ({
+    value: item.value,
+    label: `${item.label} (+$${item.price})`,
+  }));
+}
+
+// The add-on checkboxes shared by the quote calculator and the contact form.
+function addOnsFieldMarkup() {
+  const options = contactAddOnOptions();
+  if (!options.length) {
+    return "";
+  }
+
+  return `
+    <div class="field field--wide">
+      <span class="field__label">Add-ons</span>
+      <div class="check-grid">
+        ${options
+          .map(
+            (option) => `
+              <label class="check-pill">
+                <input type="checkbox" name="addOns" value="${safeText(option.value)}" />
+                <span>${safeText(option.label)}</span>
+              </label>
+            `
+          )
+          .join("")}
+      </div>
+      <div class="helper helper--warn" data-addon-note role="status" hidden></div>
+    </div>
+  `;
+}
 
 function travelDistanceOptionsMarkup() {
-  return [...TRAVEL_TIERS, TRAVEL_QUOTE_TIER]
-    .map((tier) => `<option value="${safeText(tier.value)}">${safeText(travelOptionLabel(tier))}</option>`)
+  return [...pricing().travelTiers, pricing().travelQuoteTier]
+    .map((tier) => `<option value="${safeText(tier.value)}">${safeText(pricing().travelOptionLabel(tier))}</option>`)
     .join("");
 }
 
@@ -1607,12 +1638,12 @@ function sizeAdjustmentForSquareFeet(squareFeet) {
     };
   }
 
-  const adjustment = sizeAdjustmentFor(squareFeet);
+  const adjustment = pricing().sizeAdjustmentFor(squareFeet);
   if (adjustment.customQuote) {
     return {
       amount: 0,
       label: adjustment.label,
-      reason: `Homes over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft are quoted individually.`,
+      reason: `Homes over ${pricing().sizeQuoteAbove.toLocaleString("en-US")} sq ft are quoted individually.`,
       customQuote: true,
     };
   }
@@ -1621,7 +1652,7 @@ function sizeAdjustmentForSquareFeet(squareFeet) {
     return {
       amount: adjustment.amount,
       label: `${adjustment.label} adjustment`,
-      reason: `Package prices cover homes up to ${SIZE_INCLUDED_MAX_SQFT.toLocaleString("en-US")} sq ft. Homes of ${adjustment.label} add ${pricingFormatter.format(adjustment.amount)}.`,
+      reason: `Package prices cover homes up to ${pricing().sizeIncludedMax.toLocaleString("en-US")} sq ft. Homes of ${adjustment.label} add ${pricingFormatter.format(adjustment.amount)}.`,
       customQuote: false,
     };
   }
@@ -1635,9 +1666,11 @@ function sizeAdjustmentForSquareFeet(squareFeet) {
 }
 
 function includedAddOnsMessage(packageTitle, addOnValues = []) {
-  const names = addOnValues.map((value) => addOnInlineLabel(value));
+  const names = addOnValues.map((value) => String(value || ""));
   const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0] || "";
-  return `${packageTitle} already includes ${list}, so ${names.length > 1 ? "those can't be added as add-ons" : "it can't be added as an add-on"}.`;
+  return names.length > 1
+    ? `${packageTitle} already includes the ${list} add-ons, so they can't be added again.`
+    : `${packageTitle} already includes the ${list} add-on, so it can't be added again.`;
 }
 
 // Disables add-on checkboxes the chosen package already includes and says why.
@@ -1671,27 +1704,28 @@ function buildPricingEstimate(input = {}) {
   const propertyAddress = String(input.propertyAddress || "").trim();
   const propertyType = String(input.propertyType || "").trim();
   const squareFeet = normalizedSquareFeet(input.squareFeet);
-  const requestedAddOns = normalizeAddOnSelections(input.addOns);
+  const offeredAddOns = new Set(pricing().addOns.map((item) => item.value));
+  const requestedAddOns = normalizeAddOnSelections(input.addOns).filter((label) => offeredAddOns.has(label));
   const turnaround = String(input.turnaround || "").trim();
   const suggestedPackage = recommendedPackageForInputs(squareFeet, propertyType);
   const packageSelectedByUser = Boolean(String(input.packageInterest || "").trim());
   const selectedPackage = String(input.packageInterest || "").trim() || suggestedPackage;
   const service = quoteSummaryService(selectedPackage);
-  const includedAddOns = addOnsIncludedIn(service);
+  const includedAddOns = pricing().addOnsIncludedIn(service);
   const addOns = requestedAddOns.filter((label) => !includedAddOns.includes(label));
   const blockedAddOns = requestedAddOns.filter((label) => includedAddOns.includes(label));
   const basePrice = parseCurrencyAmount(service?.price);
   const sizeAdjustment = sizeAdjustmentForSquareFeet(squareFeet);
   const addOnLineItems = addOns.map((label) => ({
     label,
-    amount: addOnPrice(label),
+    amount: pricing().addOnPrice(label),
   }));
   const addOnTotal = addOnLineItems.reduce((total, item) => total + item.amount, 0);
   const outsideRadius = String(input.serviceAreaStatus || "").trim() === "outside";
   const outsideDistance = String(input.serviceAreaDistance || "").trim();
   const travelTier = outsideRadius
-    ? TRAVEL_QUOTE_TIER
-    : travelTierForValue(input.travelDistance) || travelTierForMiles(parseFloat(outsideDistance));
+    ? pricing().travelQuoteTier
+    : pricing().travelTierForValue(input.travelDistance) || pricing().travelTierForMiles(parseFloat(outsideDistance));
   const travelAmount = travelTier && travelTier.amount ? travelTier.amount : 0;
   const travelNeedsQuote = Boolean(travelTier && travelTier.amount === null);
   const requiresCustomQuote =
@@ -1765,9 +1799,9 @@ function buildPricingEstimate(input = {}) {
         : "This address sits outside the standard radius, so travel is quoted manually."
     );
   } else if (travelNeedsQuote) {
-    notes.push(`Travel beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles from ${TRAVEL_ORIGIN_LABEL} is quoted individually.`);
+    notes.push(`Travel beyond ${pricing().travelQuoteAbove} miles from ${pricing().travelOriginLabel} is quoted individually.`);
   } else if (travelAmount) {
-    notes.push(`Travel of ${travelTier.label.toLowerCase()} from ${TRAVEL_ORIGIN_LABEL} adds ${pricingFormatter.format(travelAmount)}.`);
+    notes.push(`Travel of ${travelTier.label.toLowerCase()} from ${pricing().travelOriginLabel} adds ${pricingFormatter.format(travelAmount)}.`);
   }
 
   if (!squareFeet) {
@@ -1785,9 +1819,9 @@ function buildPricingEstimate(input = {}) {
           : outsideRadius
             ? "Travel sits outside the standard radius, so this one should be priced manually."
             : travelNeedsQuote
-              ? `Travel beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles is quoted individually, so this one should be priced manually.`
+              ? `Travel beyond ${pricing().travelQuoteAbove} miles is quoted individually, so this one should be priced manually.`
               : sizeAdjustment.customQuote
-                ? `Homes over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft are quoted individually so the time on site is priced accurately.`
+                ? `Homes over ${pricing().sizeQuoteAbove.toLocaleString("en-US")} sq ft are quoted individually so the time on site is priced accurately.`
                 : "The current details point to a custom quote instead of a fixed package total.",
     };
 
@@ -1815,9 +1849,9 @@ function buildPricingEstimate(input = {}) {
               : outsideRadius
                 ? "Outside standard service radius"
                 : travelNeedsQuote
-                  ? `Travel beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles`
+                  ? `Travel beyond ${pricing().travelQuoteAbove} miles`
                   : sizeAdjustment.customQuote
-                    ? `Over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft`
+                    ? `Over ${pricing().sizeQuoteAbove.toLocaleString("en-US")} sq ft`
                     : "Manual review",
         },
       ],
@@ -1826,9 +1860,9 @@ function buildPricingEstimate(input = {}) {
         propertyAddress && outsideRadius
           ? `${propertyAddress} is outside the standard service radius and should be handled as a custom quote.`
           : travelNeedsQuote
-            ? `Travel is beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles from ${TRAVEL_ORIGIN_LABEL}, so a custom quote is recommended for this project.`
+            ? `Travel is beyond ${pricing().travelQuoteAbove} miles from ${pricing().travelOriginLabel}, so a custom quote is recommended for this project.`
             : sizeAdjustment.customQuote
-              ? `The home is over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft, so a custom quote is recommended for this project.`
+              ? `The home is over ${pricing().sizeQuoteAbove.toLocaleString("en-US")} sq ft, so a custom quote is recommended for this project.`
               : `A custom quote is recommended for this project.`,
     };
   }
@@ -2089,7 +2123,7 @@ function pricingEstimatorSectionMarkup() {
           <h2 class="section__title">Build a working estimate before you book.</h2>
           <p class="section__lead">Choose the package, square footage, and add-ons you think the listing needs. The estimate updates instantly and can carry straight into the inquiry form.</p>
         </div>
-        <div class="helper">This is a starting quote. Commercial scopes, homes over ${SIZE_QUOTE_ABOVE_SQFT.toLocaleString("en-US")} sq ft, and travel beyond ${TRAVEL_QUOTE_ABOVE_MILES} miles still move to a custom review.</div>
+        <div class="helper">This is a starting quote. Commercial scopes, homes over ${pricing().sizeQuoteAbove.toLocaleString("en-US")} sq ft, and travel beyond ${pricing().travelQuoteAbove} miles still move to a custom review.</div>
       </div>
       <div class="section-grid pricing-estimator__layout">
         <div class="contact-box">
@@ -2128,27 +2162,12 @@ function pricingEstimatorSectionMarkup() {
                 </select>
               </div>
               <div class="field field--wide">
-                <label for="estimate-travelDistance">Distance from ${safeText(TRAVEL_ORIGIN_LABEL)}</label>
+                <label for="estimate-travelDistance">Distance from ${safeText(pricing().travelOriginLabel)}</label>
                 <select id="estimate-travelDistance" name="travelDistance">
                   ${travelDistanceOptionsMarkup()}
                 </select>
               </div>
-              <div class="field field--wide">
-                <span class="field__label">Add-ons</span>
-                <div class="check-grid">
-                  ${contactAddOnOptions
-                    .map(
-                      (option) => `
-                        <label class="check-pill">
-                          <input type="checkbox" name="addOns" value="${safeText(option.value)}" />
-                          <span>${safeText(option.label)}</span>
-                        </label>
-                      `
-                    )
-                    .join("")}
-                </div>
-                <div class="helper helper--warn" data-addon-note role="status" hidden></div>
-              </div>
+              ${addOnsFieldMarkup()}
             </div>
             <div class="pricing-estimator__actions">
               <a class="button button--accent button--magnetic" href="${absoluteSiteUrl("contact.html")}" data-estimator-cta data-magnetic>Use this estimate in an inquiry</a>
@@ -2673,27 +2692,12 @@ function contactMarkup(options = {}) {
                   </select>
                 </div>
                 <div class="field field--wide">
-                  <label for="travelDistance">Distance from ${safeText(TRAVEL_ORIGIN_LABEL)}</label>
+                  <label for="travelDistance">Distance from ${safeText(pricing().travelOriginLabel)}</label>
                   <select id="travelDistance" name="travelDistance">
                     ${travelDistanceOptionsMarkup()}
                   </select>
                 </div>
-                <div class="field field--wide">
-                  <span class="field__label">Add-ons</span>
-                  <div class="check-grid">
-                    ${contactAddOnOptions
-                      .map(
-                        (option) => `
-                          <label class="check-pill">
-                            <input type="checkbox" name="addOns" value="${safeText(option.value)}" />
-                            <span>${safeText(option.label)}</span>
-                          </label>
-                        `
-                      )
-                      .join("")}
-                  </div>
-                  <div class="helper helper--warn" data-addon-note role="status" hidden></div>
-                </div>
+                ${addOnsFieldMarkup()}
                 <div class="field field--wide">
                   <label for="message">Project details and access notes</label>
                   <textarea id="message" name="message" placeholder="Anything helpful before the shoot: gate codes, occupancy, room count, special angles, listing deadline, or anything else." required></textarea>
@@ -3169,7 +3173,7 @@ function applyContactPrefill(form) {
 
   if (!prefill.travelDistance && (prefill.serviceAreaStatus === "outside" || prefill.serviceAreaDistance)) {
     const prefillTravelTier =
-      prefill.serviceAreaStatus === "outside" ? TRAVEL_QUOTE_TIER : travelTierForMiles(parseFloat(prefill.serviceAreaDistance));
+      prefill.serviceAreaStatus === "outside" ? pricing().travelQuoteTier : pricing().travelTierForMiles(parseFloat(prefill.serviceAreaDistance));
     if (prefillTravelTier) {
       setFormFieldValue(form, "travelDistance", prefillTravelTier.value);
     }
@@ -3505,7 +3509,7 @@ async function wireServiceAreaMap() {
 
         updateServiceAreaStatus(
           inside
-            ? `${match.label} is inside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola. ${travelNoteForMiles(distance)}`
+            ? `${match.label} is inside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola. ${pricing().travelNoteForMiles(distance)}`
             : `${match.label} is outside the ${SERVICE_RADIUS_MILES}-mile service radius at about ${distance.toFixed(1)} miles from Pensacola.`,
           inside ? "success" : "warn"
         );
@@ -3541,7 +3545,7 @@ function pricingRulesMarkup() {
       <div class="section__eyebrow">Pricing details</div>
       <h2 class="section__title">What the package prices cover.</h2>
       <div class="pricing-rules">
-        ${pricingRuleItems()
+        ${pricing().pricingRuleItems()
           .map(
             (rule) => `
               <div class="signal-card pricing-rule">
@@ -5176,7 +5180,7 @@ function wireContactForm() {
     const shootDate = formData.get("shootDate")?.toString().trim() || "";
     const packageInterest = formData.get("packageInterest")?.toString().trim() || "";
     const turnaround = formData.get("turnaround")?.toString().trim() || "";
-    const travelDistance = travelTierForValue(formData.get("travelDistance")?.toString())?.label || "";
+    const travelDistance = pricing().travelTierForValue(formData.get("travelDistance")?.toString())?.label || "";
     const addOns = formData.getAll("addOns").map((value) => value.toString().trim()).filter(Boolean);
     const estimateLabel = formData.get("estimateLabel")?.toString().trim() || "";
     const estimateTotal = formData.get("estimateTotal")?.toString().trim() || "";
